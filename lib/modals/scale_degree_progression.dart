@@ -17,6 +17,48 @@ class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
           chords.map((Chord chord) => ScaleDegreeChord(scale, chord)).toList(),
         );
 
+
+  List<List<int>> getFittingMatchLocations(ScaleDegreeProgression base) {
+    // Explanation to why this is done is below...
+    // if we (as a saved progression) can't fit in the base progression...
+    if (length > base.length) return const [];
+
+    // List containing lists of match locations (first element is location in
+    // base and second is location here).
+    final List<List<int>> matchLocations = [];
+
+    // TODO: Check if it's the way this needs to be
+    // Each progression is treated differently. By that I mean that if a user
+    // has a [1, 2, 3, 4] saved, as well as a [1, 2] and a [3, 4] for example,
+    // they will all be treated as different progressions. This is why we're
+    // doing things this way.
+    // If we don't have enough chord spaces to finish the progression,
+    // i.e. if we are [1, 2, 3, 4] comparing against  [5, 2, 3], we'll match
+    // on 2 but we won't have enough to complete, so we stop.
+    // This is also true if we are a [1, 2, 3] comparing against a [2, 3, 4].
+    // This is also true if we are a [1, 2, 3] comparing against a [4, 5, 6, 1].
+    // We'll match on 2 but won't have enough spaces backwards to continue
+    // moving.
+    for (var chordPos = 0; chordPos < length; chordPos++) {
+      for (var baseChordPos = 0; baseChordPos < base.length; baseChordPos++) {
+        // If the two chords are equal.
+        if (this[chordPos] == base[baseChordPos]) {
+          // If there's enough space for this progression to substitute in
+          // place for the current chord.
+          if (baseChordPos >= chordPos ||
+              base.length - baseChordPos >= length - chordPos) {
+            // Add the location to the list of match locations and continue
+            // searching.
+            // The first element is the location in base and the second is the
+            // location here...
+            matchLocations.add([baseChordPos, chordPos]);
+          }
+        }
+      }
+    }
+    return matchLocations;
+  }
+
   /// Get a comparing score of this [ScaleDegreeProgression] against a base
   /// one ([base]), which we're meant to substitute.
   /* TODO: There isn't really a perception of rhythm in this function, beyond
@@ -26,7 +68,7 @@ class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
    */
   double percentMatchedWith(ScaleDegreeProgression base) {
     // Explanation to why this is done is below...
-    // if we (as a saved progression) can't
+    // if we (as a saved progression) can't fit in the base progression...
     if (length > base.length) return 0.0;
     int baseChord = 0;
     int chord = 0;
@@ -73,53 +115,48 @@ class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
     return points / length;
   }
 
+  /// Returns a substituted [base] from the current progression if possible.
+  /// If not, returns [base].
   /* TODO: Don't just copy the code, also it's inefficient to calculate these
       things twice.
   */
+  List<ScaleDegreeProgression> getPossibleSubstitutions(
+      ScaleDegreeProgression base) {
+    final List<List<int>> matchLocations = getFittingMatchLocations(base);
+    final List<ScaleDegreeProgression> substitutions = [];
 
-  /// Returns a substituted [base] from the current progression if possible.
-  /// If not, returns [base].
-  ScaleDegreeProgression substitute(ScaleDegreeProgression base) {
-    // Explanation to why this is done is below...
-    // if we (as a saved progression) can't
-    if (length > base.length) return base;
-    int baseChord = 0;
-    int chord = 0;
-    bool found = false;
-    for (; !found && baseChord < base.length;) {
-      for (chord = 0; !found && chord < length;) {
-        found = base[baseChord] == this[chord];
-        if (!found) chord++;
+    for (List<int> location in matchLocations) {
+      int baseChord = location[0];
+      int chord = location[1];
+      ScaleDegreeProgression substitution =
+          ScaleDegreeProgression(base.sublist(0, baseChord - chord));
+      for (var i = 0; i < length; i++) {
+        final ScaleDegreeChord chordToSubstitute = this[i];
+        final ScaleDegreeChord existingChord = base[baseChord - chord + i];
+        if (chordToSubstitute != existingChord) {
+          substitution.add(chordToSubstitute);
+        } else {
+          substitution.add(existingChord);
+        }
       }
-      if (!found) baseChord++;
+      substitution.addAll(base.sublist(baseChord - chord + length));
+      substitutions.add(substitution);
     }
-    if (!found) return base;
-    // TODO: Check if it's the way this needs to be
-    // Each progression is treated differently. By that I mean that if a user
-    // has a [1, 2, 3, 4] saved, as well as a [1, 2] and a [3, 4] for example,
-    // they will all be treated as different progressions. This is why we're
-    // doing things this way.
-    // If we don't have enough chord spaces to finish the progression,
-    // i.e. if we are [1, 2, 3, 4] comparing against  [5, 2, 3], we'll match
-    // on 2 but we won't have enough to complete, so we stop.
-    // This is also true if we are a [1, 2, 3] comparing against a [2, 3, 4].
-    // This is also true if we are a [1, 2, 3] comparing against a [4, 5, 6, 1].
-    // We'll match on 2 but won't have enough spaces backwards to continue
-    // moving.
-    if (baseChord < chord || base.length - baseChord < length - chord) {
-      return base;
-    }
-
-    ScaleDegreeProgression substitution =
-        ScaleDegreeProgression(base.sublist(0, baseChord - chord));
-    for (var i = 0; i + chord < length; i++) {
-      if (this[chord + i] != base[baseChord + i]) {
-        substitution.add(this[chord + i]);
-      } else {
-        substitution.add(base[baseChord + i]);
-      }
-    }
-    // substitution.addAll(base.sublist(baseChord + length - 1));
-    return substitution;
+    // TODO: This makes sure the results will be unique, make it more efficient.
+    return substitutions.toSet().toList();
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! ScaleDegreeProgression || length != other.length) {
+      return false;
+    }
+    for (int i = 0; i < length; i++) {
+      if (this[i] != other[i]) return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode => Object.hashAll(this);
 }

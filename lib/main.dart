@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:tonic/tonic.dart';
@@ -37,22 +35,27 @@ void main() {
   // Convert the base progression to roman numerals, we used the most probable
   // scale that was detected (which would be the first in the list).
   final ScaleDegreeProgression _baseProgression =
-      ScaleDegreeProgression.fromChords(
-          _possibleScales[0], _baseChordProgression);
+  ScaleDegreeProgression.fromChords(
+      _possibleScales[0], _baseChordProgression);
   print(_baseProgression);
   print('');
 
   // Sort the saved progressions based on initial match scores
   _savedProgressions.sort(
-      (ScaleDegreeProgression a, ScaleDegreeProgression b) =>
-          -1 *
+          (ScaleDegreeProgression a, ScaleDegreeProgression b) =>
+      -1 *
           a
               .percentMatchedWith(_baseProgression)
               .compareTo(b.percentMatchedWith(_baseProgression)));
 
+  // Remove the progressions with a score of 1.0 (since they exist in the
+  // base progression...).
+  _savedProgressions.removeWhere((ScaleDegreeProgression prog) =>
+  prog.percentMatchedWith(_baseProgression) == 1.0);
+
   for (ScaleDegreeProgression progression in _savedProgressions) {
     print('$progression: ${progression.percentMatchedWith(_baseProgression)}'
-        ' -> ${progression.substitute(_baseProgression)}');
+        ' -> ${progression.getPossibleSubstitutions(_baseProgression)}');
   }
 }
 
@@ -64,7 +67,7 @@ _test() {
   ];
 
   final List<String> _chordNames =
-      chords.map<String>((chord) => chord.getCommonName()).toList();
+  chords.map<String>((chord) => chord.getCommonName()).toList();
 
   print(_chordNames.toString() + '\n');
 
@@ -94,7 +97,9 @@ List<Scale> matchChordNamesWithKey(List<String> chords) {
     final String key = entries.key;
     final List<String> keyChords = entries.value;
     Set<String> keyChordsSet = keyChords.toSet();
-    counts[key] = keyChordsSet.intersection(chordsSet).length;
+    counts[key] = keyChordsSet
+        .intersection(chordsSet)
+        .length;
   }
 
   // results is now a Hash of Key => count pairs, e.g. {'A Major': 0,
@@ -108,14 +113,18 @@ List<Scale> matchChordNamesWithKey(List<String> chords) {
     counts.remove(max.key);
     // Count the times the chords have the root chord of the scale found.
     Set<String> maxSet = {getRootChord(max.key)};
-    results[max.key] = chordsSet.intersection(maxSet).length;
+    results[max.key] = chordsSet
+        .intersection(maxSet)
+        .length;
 
     // Add the name of the key if its count is = to the max
     for (MapEntry<String, int> entry in counts.entries) {
       if (entry.value == max.value) {
         // Count the times the chords have the root chord of the scale found.
         maxSet = {getRootChord(entry.key)};
-        results[entry.key] = chordsSet.intersection(maxSet).length;
+        results[entry.key] = chordsSet
+            .intersection(maxSet)
+            .length;
       }
     }
   }
@@ -626,7 +635,7 @@ extension ToStringExtension on Scale {
   String getCommonName() {
     final String scaleTonic = tonic.toString();
     final String scalePattern =
-        pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
+    pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
     return scaleTonic + ' ' + scalePattern;
   }
 }
