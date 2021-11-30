@@ -23,6 +23,16 @@ class ChordList extends DelegatingList<Chord> {
 
   @override
   int get hashCode => Object.hashAll(this);
+
+  @override
+  String toString() {
+    String output = '[';
+    for (Chord chord in this) {
+      output += '${chord.getCommonName()}, ';
+    }
+    return output.substring(0, output.length - 2) + ']';
+  }
+
 }
 
 const Map<String, List<String>> keys = {
