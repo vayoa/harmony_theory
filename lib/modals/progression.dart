@@ -2,14 +2,14 @@ import 'package:thoery_test/extensions/chord_extension.dart';
 import 'package:tonic/tonic.dart';
 
 class Progression<T> {
-  late final List<T> _base;
+  late final List<T> _values;
 
-  List<T> get base => _base;
+  List<T> get values => _values;
   late final List<double> _durations;
 
   List<double> get durations => _durations;
 
-  /// The time signature of the [Progression]. 4/4 by defaults.
+  /// The time signature of the [Progression], 4/4 by defaults.
   /// A 4/4 time signature is represented as a whole of 1. This means a 4/4
   /// time signature and a 8/8 time signatures will be the same...
   // TODO: Maybe change this ^.
@@ -35,8 +35,8 @@ class Progression<T> {
 
   double get measureCount => rhythmSum / _timeSignature;
 
-  Progression(this._base, this._durations, {double timeSignature = 4 / 4})
-      : assert(_base.length == _durations.length) {
+  Progression(this._values, this._durations, {double timeSignature = 4 / 4})
+      : assert(_values.length == _durations.length) {
     _timeSignature = timeSignature;
     updateFull();
   }
@@ -44,12 +44,11 @@ class Progression<T> {
   Progression.empty({double timeSignature = 4 / 4})
       : this([], [], timeSignature: timeSignature);
 
-  Progression.evenTime(List<T> base, {double timeSignature = 4 / 4})
-      : this(base, List.generate(base.length, (index) => 1 / 4),
-            timeSignature: timeSignature);
+  Progression.evenTime(List<T> base)
+      : this(base, List.generate(base.length, (index) => 1 / 4));
 
   bool updateFull() {
-    if (_base.isEmpty) return false;
+    if (_values.isEmpty) return false;
     _rhythmSum = _durations.reduce((value, element) => value + element);
     _full = rhythmSum % _timeSignature == 0;
     return _full;
@@ -69,15 +68,28 @@ class Progression<T> {
         currentMeasure = Progression.empty(timeSignature: timeSignature);
       }
       currentRhythmSum += _durations[i];
-      currentMeasure.add(_base[i], _durations[i]);
+      currentMeasure.add(_values[i], _durations[i]);
     }
     if (currentMeasure.isNotEmpty) measures.add(currentMeasure);
     return measures;
   }
 
   void add(T value, [double duration = 1 / 4]) {
-    _base.add(value);
+    _values.add(value);
     _durations.add(duration);
+    updateFull();
+  }
+
+  void addAll(Progression<T> progression) {
+    _values.addAll(progression._values);
+    _durations.addAll(progression._durations);
+    updateFull();
+  }
+
+  void addAllElements(
+      Iterable<T> valuesIterable, Iterable<double> durationsIterable) {
+    _values.addAll(valuesIterable);
+    _durations.addAll(durationsIterable);
     updateFull();
   }
 
@@ -96,7 +108,7 @@ class Progression<T> {
 
   @override
   // TODO: Check if this is correct
-  int get hashCode => Object.hash(_base, _durations);
+  int get hashCode => Object.hash(_values, _durations);
 
   // TODO: Find a better way to do this...
   String _format(T object) =>
@@ -108,7 +120,7 @@ class Progression<T> {
     if (measureCount <= 1.0) {
       output = '| ';
       for (var i = 0; i < length; i++) {
-        output += '${_format(_base[i])}, ';
+        output += '${_format(_values[i])}, ';
       }
       if (!full) {
         output += '-, ';
@@ -123,22 +135,26 @@ class Progression<T> {
     }
   }
 
-  int get length => _base.length;
+  int get length => _values.length;
 
   set length(int newLength) {
-    _base.length = newLength;
+    _values.length = newLength;
     _durations.length = newLength;
   }
 
-  T operator [](int index) => _base[index];
+  T operator [](int index) => _values[index];
 
   void operator []=(int index, T value) {
-    _base[index] = value;
+    _values[index] = value;
   }
 
-  bool get isEmpty => _base.isEmpty;
+  bool get isEmpty => _values.isEmpty;
 
-  bool get isNotEmpty => _base.isNotEmpty;
+  bool get isNotEmpty => _values.isNotEmpty;
 
-  Iterable<E> map<E>(E Function(T e) toElement) => _base.map(toElement);
+  Progression<T> sublist(int start, [int? end]) =>
+      Progression(_values.sublist(start, end), _durations.sublist(start, end),
+          timeSignature: _timeSignature);
+
+  Iterable<E> map<E>(E Function(T e) toElement) => _values.map(toElement);
 }

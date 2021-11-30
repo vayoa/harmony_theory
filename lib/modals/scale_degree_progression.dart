@@ -2,24 +2,26 @@ import 'package:collection/collection.dart';
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
-
 import 'chord_list.dart';
 
-class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
-  ScaleDegreeProgression(List<ScaleDegreeChord> base) : super(base);
+// TODO: Support uneven time signatures, in constructors and in the enter class.
+class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
+  ScaleDegreeProgression(List<ScaleDegreeChord> base, List<double> durations,
+      {double timeSignature = 4 / 4})
+      : super(base, durations, timeSignature: timeSignature);
+
+  ScaleDegreeProgression.evenTime(List<ScaleDegreeChord> base)
+      : super.evenTime(base);
 
   /// Gets a list of [String] each representing a ScaleDegreeChord and returns
   /// a new [ScaleDegreeProgression].
   ScaleDegreeProgression.fromList(List<String> base)
-      : super(
-          base.map((String chord) => ScaleDegreeChord.parse(chord)).toList(),
-        );
+      : super.evenTime(
+            base.map((String chord) => ScaleDegreeChord.parse(chord)).toList());
 
   ScaleDegreeProgression.fromChords(Scale scale, ChordProgression chords)
-      : super(
-          chords
-              .map((Chord chord) => ScaleDegreeChord(scale, chord))
-              .toList(),
+      : super.evenTime(
+          chords.map((Chord chord) => ScaleDegreeChord(scale, chord)).toList(),
         );
 
   /// Returns a list containing lists of match locations (first element is
@@ -161,8 +163,8 @@ class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
     for (List<int> location in matchLocations) {
       int baseChord = location[0];
       int chord = location[1];
-      ScaleDegreeProgression substitution =
-          ScaleDegreeProgression(base.sublist(0, baseChord - chord));
+      ScaleDegreeProgression substitution = ScaleDegreeProgression.evenTime(
+          base.sublist(0, baseChord - chord).values);
       for (var i = 0; i < length; i++) {
         final ScaleDegreeChord chordToSubstitute = this[i];
         final ScaleDegreeChord existingChord = base[baseChord - chord + i];
@@ -181,7 +183,7 @@ class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
 
   ChordProgression inScale(Scale scale) {
     ChordProgression _chords = ChordProgression.evenTime([]);
-    for (ScaleDegreeChord scaleDegreeChord in this) {
+    for (ScaleDegreeChord scaleDegreeChord in values) {
       _chords.add(Chord(
         pattern: scaleDegreeChord.pattern,
         root: scaleDegreeChord.rootDegree.inScale(scale).toPitch(),
@@ -189,18 +191,4 @@ class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
     }
     return _chords;
   }
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! ScaleDegreeProgression || length != other.length) {
-      return false;
-    }
-    for (int i = 0; i < length; i++) {
-      if (this[i] != other[i]) return false;
-    }
-    return true;
-  }
-
-  @override
-  int get hashCode => Object.hashAll(this);
 }

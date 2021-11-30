@@ -26,13 +26,11 @@ void main() {
     Chord.parse('F'),
     Chord.parse('G'),
     Chord.parse('C'),
-    Chord.parse('C'),
   ];
 
   final ChordProgression _baseChordProgression =
       ChordProgression.evenTime(_chords);
   print('Your Progression:\n$_baseChordProgression.');
-  print(_baseChordProgression.splitToMeasures());
 
   // Detect the base progressions' scale
   final List<Scale> _possibleScales = _baseChordProgression.matchWithKeys();
