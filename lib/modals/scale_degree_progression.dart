@@ -17,6 +17,8 @@ class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
           chords.map((Chord chord) => ScaleDegreeChord(scale, chord)).toList(),
         );
 
+  /// Returns a list containing lists of match locations (first element is
+  /// the location in [base] and second is location "here"...).
   List<List<int>> getFittingMatchLocations(ScaleDegreeProgression base) {
     // Explanation to why this is done is below...
     // if we (as a saved progression) can't fit in the base progression...
@@ -44,7 +46,7 @@ class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
         if (this[chordPos] == base[baseChordPos]) {
           // If there's enough space for this progression to substitute in
           // place for the current chord.
-          if (baseChordPos >= chordPos ||
+          if (baseChordPos >= chordPos &&
               base.length - baseChordPos >= length - chordPos) {
             // Add the location to the list of match locations and continue
             // searching.
@@ -143,6 +145,9 @@ class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
   /* TODO: Don't just copy the code, also it's inefficient to calculate these
       things twice.
   */
+  /* TODO: If the base is a IVmaj7 V7 Imaj7 and we're a ii V I we should still
+          match, and suggest a ii7 V7 Imaj7.
+   */
   List<ScaleDegreeProgression> getPossibleSubstitutions(
       ScaleDegreeProgression base) {
     final List<List<int>> matchLocations = getFittingMatchLocations(base);
