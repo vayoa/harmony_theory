@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
 
@@ -14,9 +15,11 @@ class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
           base.map((String chord) => ScaleDegreeChord.parse(chord)).toList(),
         );
 
-  ScaleDegreeProgression.fromChords(Scale scale, List<Chord> chords)
+  ScaleDegreeProgression.fromChords(Scale scale, ChordProgression chords)
       : super(
-          chords.map((Chord chord) => ScaleDegreeChord(scale, chord)).toList(),
+          chords
+              .map((Chord chord) => ScaleDegreeChord(scale, chord))
+              .toList(),
         );
 
   /// Returns a list containing lists of match locations (first element is
@@ -176,8 +179,8 @@ class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
     return substitutions.toSet().toList();
   }
 
-  ChordList inScale(Scale scale) {
-    ChordList _chords = ChordList([]);
+  ChordProgression inScale(Scale scale) {
+    ChordProgression _chords = ChordProgression.evenTime([]);
     for (ScaleDegreeChord scaleDegreeChord in this) {
       _chords.add(Chord(
         pattern: scaleDegreeChord.pattern,

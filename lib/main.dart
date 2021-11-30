@@ -1,39 +1,38 @@
-import 'dart:io';
-
 import 'package:thoery_test/extensions/scale_extensions.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:tonic/tonic.dart';
 import 'package:thoery_test/extensions/chord_extension.dart';
-
 import 'modals/chord_list.dart';
-import 'modals/scale_degree.dart';
 
 void main() {
   // Example use-case:
   // Base chord progression based on which we suggests chords.
   print("Please enter your chords (enter '-' to stop):");
   List<Chord> _chords = [];
-  String? input;
-  do {
-    input = stdin.readLineSync() ?? '';
-    Chord _chord;
-    try {
-      _chord = Chord.parse(input);
-      _chords.add(_chord);
-    } on FormatException catch (e) {
-      print(e);
-    }
-  } while (input != '-');
+  // String? input;
+  // do {
+  //   input = stdin.readLineSync() ?? '';
+  //   Chord _chord;
+  //   try {
+  //     _chord = Chord.parse(input);
+  //     _chords.add(_chord);
+  //   } on FormatException catch (e) {
+  //     print(e);
+  //   }
+  // } while (input != '-');
 
-  // _chords = [
-  //   Chord.parse('F'),
-  //   Chord.parse('G'),
-  //   Chord.parse('C'),
-  // ];
+  _chords = [
+    Chord.parse('F'),
+    Chord.parse('G'),
+    Chord.parse('C'),
+    Chord.parse('C'),
+  ];
 
-  final ChordList _baseChordProgression = ChordList(_chords);
+  final ChordProgression _baseChordProgression =
+      ChordProgression.evenTime(_chords);
   print('Your Progression:\n$_baseChordProgression.');
+  print(_baseChordProgression.splitToMeasures());
 
   // Detect the base progressions' scale
   final List<Scale> _possibleScales = _baseChordProgression.matchWithKeys();
@@ -42,8 +41,8 @@ void main() {
   // Convert the base progression to roman numerals, we used the most probable
   // scale that was detected (which would be the first in the list).
   final ScaleDegreeProgression _baseProgression =
-  ScaleDegreeProgression.fromChords(
-      _possibleScales[0], _baseChordProgression);
+      ScaleDegreeProgression.fromChords(
+          _possibleScales[0], _baseChordProgression);
   print('In Roman Numerals: $_baseProgression.\n');
 
   // The user's saved chord progressions. These are already converted to
@@ -109,7 +108,7 @@ void main() {
 }
 
 _test() {
-  ChordList chords = ChordList([
+  ChordProgression chords = ChordProgression.evenTime([
     Chord.parse('Dm'),
     Chord.parse('G'),
     Chord.parse('C'),

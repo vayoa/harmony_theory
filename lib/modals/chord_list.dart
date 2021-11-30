@@ -1,36 +1,17 @@
 import 'package:collection/collection.dart';
 import 'package:thoery_test/extensions/chord_extension.dart';
+import 'package:thoery_test/modals/progression.dart';
 import 'package:tonic/tonic.dart';
 
-class ChordList extends DelegatingList<Chord> {
-  ChordList(List<Chord> base) : super(base);
+class ChordProgression extends Progression<Chord> {
+  /// Returns a new [ChordProgression] where all the chords are of 1/4 duration.
+  ChordProgression.evenTime(List<Chord> base) : super.evenTime(base);
+
+  ChordProgression(List<Chord> base, List<double> durations) : super(base, durations);
 
   List<Scale> matchWithKeys() {
     return matchChordNamesWithKey(
         map<String>((Chord chord) => chord.getCommonName()).toList());
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! ChordList || length != other.length) {
-      return false;
-    }
-    for (int i = 0; i < length; i++) {
-      if (this[i] != other[i]) return false;
-    }
-    return true;
-  }
-
-  @override
-  int get hashCode => Object.hashAll(this);
-
-  @override
-  String toString() {
-    String output = '[';
-    for (Chord chord in this) {
-      output += '${chord.getCommonName()}, ';
-    }
-    return output.substring(0, output.length - 2) + ']';
   }
 
 }
