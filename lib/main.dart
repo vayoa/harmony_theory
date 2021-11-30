@@ -39,25 +39,47 @@ void main() {
   final ScaleDegreeProgression _baseProgression =
       ScaleDegreeProgression.fromChords(
           _possibleScales[0], _baseChordProgression);
-  print(_baseProgression);
-  print('');
+  print(_baseProgression.toString() + '\n');
 
-  // Sort the saved progressions based on initial match scores
-  _savedProgressions.sort(
-      (ScaleDegreeProgression a, ScaleDegreeProgression b) =>
-          -1 *
-          a
-              .percentMatchedWith(_baseProgression)
-              .compareTo(b.percentMatchedWith(_baseProgression)));
+  // Calculate all of the possible substitutions based on the library and
+  // save each one's similarity rating.
+  Map<ScaleDegreeProgression, List<RatedSubstitution>> _ratedSubstitutions = {
+    for (var e in _savedProgressions) e: []
+  };
+  for (ScaleDegreeProgression progression in _savedProgressions) {
+    progression.getPossibleSubstitutions(_baseProgression).forEach(
+        (ScaleDegreeProgression sub) => _ratedSubstitutions[progression]!.add(
+            RatedSubstitution(sub, sub.getSimilarityRating(_baseProgression))));
+  }
+
+  // Sort the rated progressions based on their ratings, descending order...
+  _ratedSubstitutions.forEach((_, value) => value.sort(
+      (RatedSubstitution a, RatedSubstitution b) =>
+          -1 * a.rating.compareTo(b.rating)));
 
   // Remove the progressions with a score of 1.0 (since they exist in the
   // base progression...).
-  _savedProgressions.removeWhere((ScaleDegreeProgression prog) =>
-      prog.percentMatchedWith(_baseProgression) == 1.0);
+  _ratedSubstitutions.forEach((_, value) =>
+      value.removeWhere((RatedSubstitution rSub) => rSub.rating == 1.0));
 
-  for (ScaleDegreeProgression progression in _savedProgressions) {
-    print('$progression: ${progression.percentMatchedWith(_baseProgression)}'
-        ' -> ${progression.getPossibleSubstitutions(_baseProgression)}');
+  // We can also sort based on the progressions with the highest rated
+  // substitutions.
+  final List<MapEntry<ScaleDegreeProgression, List<RatedSubstitution>>>
+      _sorted = _ratedSubstitutions.entries.toList();
+  _sorted.sort((a, b) =>
+      -1 *
+      a.value
+          .fold<double>(
+              0.0, (previousValue, element) => previousValue + element.rating)
+          .compareTo(b.value.fold<double>(0.0,
+              (previousValue, element) => previousValue + element.rating)));
+
+  for (MapEntry<ScaleDegreeProgression, List<RatedSubstitution>> e in _sorted) {
+    String subs = '';
+    for (RatedSubstitution rS in e.value) {
+      subs += '${rS.substitution}: ${rS.rating}, ';
+    }
+    print('${e.key} -> $subs');
   }
 }
 
@@ -90,4 +112,20 @@ extension ToStringExtension on Scale {
         pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
     return scaleTonic + ' ' + scalePattern;
   }
+}
+
+class RatedSubstitution {
+  final ScaleDegreeProgression substitution;
+  final double rating;
+
+  const RatedSubstitution(this.substitution, this.rating);
+
+  @override
+  bool operator ==(Object other) =>
+      other is RatedSubstitution &&
+      substitution == other.substitution &&
+      rating == other.rating;
+
+  @override
+  int get hashCode => Object.hash(substitution, rating);
 }

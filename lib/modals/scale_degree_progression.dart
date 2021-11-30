@@ -17,7 +17,6 @@ class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
           chords.map((Chord chord) => ScaleDegreeChord(scale, chord)).toList(),
         );
 
-
   List<List<int>> getFittingMatchLocations(ScaleDegreeProgression base) {
     // Explanation to why this is done is below...
     // if we (as a saved progression) can't fit in the base progression...
@@ -59,13 +58,37 @@ class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
     return matchLocations;
   }
 
+  /// Get a comparing rating of this [ScaleDegreeProgression] against a base
+  /// one of matching length ([base]). The higher the rating the more similar
+  /// the progressions are, where 0.0 means they are completely different and
+  /// 1.0 means they are the same progression.
+  double getSimilarityRating(ScaleDegreeProgression base) {
+    if (length != base.length) return 0.0;
+    int count = 0;
+    for (int i = 0; i < length; i++) {
+      if (this[i] == base[i]) count++;
+    }
+    return count / length;
+  }
+
   /// Get a comparing score of this [ScaleDegreeProgression] against a base
   /// one ([base]), which we're meant to substitute.
+  /* TODO: This doesn't really make sense as a progression has to possibility
+      to substitute multiple times in one progression, so which one are we
+      calculating against?
+      for example, if we are a [1, 2] matching against a [1, 2, 7, 2], we can
+      rate ourself 1.0 ([|1, 2|,7, 2]), but also 0.5 ([1, 2,|7, 2|])...
+      I know we need a flag to quickly calculate and determine whether we
+      should calculate the substitutions for a progression, but this can't be
+      it. Think of a better solution.
+   */
   /* TODO: There isn't really a perception of rhythm in this function, beyond
             one list cell = one bar. You should implement an actual rhythm
             system... (of course the ScaleDegreeProgression has to support
             a way to represent a chord's duration...).
    */
+  @Deprecated("This function doesn't make much sense, see the TODOS above it"
+      "to learn more.")
   double percentMatchedWith(ScaleDegreeProgression base) {
     // Explanation to why this is done is below...
     // if we (as a saved progression) can't fit in the base progression...
