@@ -14,23 +14,23 @@ void main() {
   // Base chord progression based on which we suggests chords.
   print("Please enter your chords (enter '-' to stop):");
   List<Chord> _chords = [];
-  // String? input;
-  // do {
-  //   input = stdin.readLineSync() ?? '';
-  //   Chord _chord;
-  //   try {
-  //     _chord = Chord.parse(input);
-  //     _chords.add(_chord);
-  //   } on FormatException catch (e) {
-  //     print(e);
-  //   }
-  // } while (input != '-');
+  String? input;
+  do {
+    input = stdin.readLineSync() ?? '';
+    Chord _chord;
+    try {
+      _chord = Chord.parse(input);
+      _chords.add(_chord);
+    } on FormatException catch (e) {
+      print(e);
+    }
+  } while (input != '-');
 
-  _chords = [
-    Chord.parse('F'),
-    Chord.parse('G'),
-    Chord.parse('C'),
-  ];
+  // _chords = [
+  //   Chord.parse('F'),
+  //   Chord.parse('G'),
+  //   Chord.parse('C'),
+  // ];
 
   final ChordList _baseChordProgression = ChordList(_chords);
   print('Your Progression:\n$_baseChordProgression.');

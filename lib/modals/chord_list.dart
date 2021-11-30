@@ -35,6 +35,66 @@ class ChordList extends DelegatingList<Chord> {
 
 }
 
+List<Scale> matchChordNamesWithKey(List<String> chords) {
+  Map<String, int> counts = {};
+  Map<String, int> results = {};
+
+  // for each key, count how many chords of the key match the chords the
+  // user chose
+  Set<String> chordsSet = chords.toSet();
+  for (MapEntry entries in keys.entries) {
+    final String key = entries.key;
+    final List<String> keyChords = entries.value;
+    Set<String> keyChordsSet = keyChords.toSet();
+    counts[key] = keyChordsSet.intersection(chordsSet).length;
+  }
+
+  // results is now a Hash of Key => count pairs, e.g. {'A Major': 0,
+  // 'Bb Major': 5, ...}
+  // get the highest count
+  if (counts.isNotEmpty) {
+    var max = counts.entries.reduce((e1, e2) {
+      if (e1.value > e2.value) return e1;
+      return e2;
+    });
+    counts.remove(max.key);
+    // Count the times the chords have the root chord of the scale found.
+    Set<String> maxSet = {getRootChord(max.key)};
+    results[max.key] = chordsSet.intersection(maxSet).length;
+
+    // Add the name of the key if its count is = to the max
+    for (MapEntry<String, int> entry in counts.entries) {
+      if (entry.value == max.value) {
+        // Count the times the chords have the root chord of the scale found.
+        maxSet = {getRootChord(entry.key)};
+        results[entry.key] = chordsSet.intersection(maxSet).length;
+      }
+    }
+  }
+
+  List<String> stringScales = results.keys.toList();
+  stringScales.sort((a, b) => results[a]!.compareTo(results[b]!) * -1);
+
+  /*FIXME: We should cast as soon as we add. This is a prototype anyways so
+           it doesn't matter. */
+  List<Scale> scales = [];
+  for (String scale in stringScales) {
+    final List<String> parts = scale.split(' ');
+    parts[1] = parts[1] == 'Major' ? 'Diatonic Major' : 'Natural Minor';
+    scales.add(Scale(
+      pattern: ScalePattern.findByName(parts[1]),
+      tonic: PitchClass.parse(parts[0]),
+    ));
+  }
+  return scales;
+}
+
+String getRootChord(String scale) {
+  List<String> sep = scale.split(' ');
+  final String type = sep[1] == "Major" ? '' : 'm';
+  return sep[0] + type;
+}
+
 const Map<String, List<String>> keys = {
   'C Major': [
     'C',
@@ -513,63 +573,3 @@ const Map<String, List<String>> keys = {
     'Gdim'
   ]
 };
-
-List<Scale> matchChordNamesWithKey(List<String> chords) {
-  Map<String, int> counts = {};
-  Map<String, int> results = {};
-
-  // for each key, count how many chords of the key match the chords the
-  // user chose
-  Set<String> chordsSet = chords.toSet();
-  for (MapEntry entries in keys.entries) {
-    final String key = entries.key;
-    final List<String> keyChords = entries.value;
-    Set<String> keyChordsSet = keyChords.toSet();
-    counts[key] = keyChordsSet.intersection(chordsSet).length;
-  }
-
-  // results is now a Hash of Key => count pairs, e.g. {'A Major': 0,
-  // 'Bb Major': 5, ...}
-  // get the highest count
-  if (counts.isNotEmpty) {
-    var max = counts.entries.reduce((e1, e2) {
-      if (e1.value > e2.value) return e1;
-      return e2;
-    });
-    counts.remove(max.key);
-    // Count the times the chords have the root chord of the scale found.
-    Set<String> maxSet = {getRootChord(max.key)};
-    results[max.key] = chordsSet.intersection(maxSet).length;
-
-    // Add the name of the key if its count is = to the max
-    for (MapEntry<String, int> entry in counts.entries) {
-      if (entry.value == max.value) {
-        // Count the times the chords have the root chord of the scale found.
-        maxSet = {getRootChord(entry.key)};
-        results[entry.key] = chordsSet.intersection(maxSet).length;
-      }
-    }
-  }
-
-  List<String> stringScales = results.keys.toList();
-  stringScales.sort((a, b) => results[a]!.compareTo(results[b]!) * -1);
-
-  /*FIXME: We should cast as soon as we add. This is a prototype anyways so
-           it doesn't matter. */
-  List<Scale> scales = [];
-  for (String scale in stringScales) {
-    final List<String> parts = scale.split(' ');
-    parts[1] = parts[1] == 'Major' ? 'Diatonic Major' : 'Natural Minor';
-    scales.add(Scale(
-      pattern: ScalePattern.findByName(parts[1]),
-      tonic: PitchClass.parse(parts[0]),
-    ));
-  }
-  return scales;
-}
-
-String getRootChord(String scale) {
-  List<String> sep = scale.split(' ');
-  final String type = sep[1] == "Major" ? '' : 'm';
-  return sep[0] + type;
-}
