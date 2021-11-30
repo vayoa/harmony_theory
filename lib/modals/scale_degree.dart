@@ -57,6 +57,9 @@ class ScaleDegree {
     }
   }
 
+  PitchClass inScale(Scale scale) => PitchClass.fromSemitones(
+      scale.pitchClasses[_degree - 1].integer + _offset);
+
   @override
   String toString() =>
       ((_offset.isNegative ? 'b' : '#') * _offset.abs()) + degrees[_degree - 1];
@@ -65,8 +68,8 @@ class ScaleDegree {
   bool operator ==(Object other) =>
       other is ScaleDegree &&
       (other._degree == _degree && other._offset == _offset);
-  
+
   @override
   // TODO: implement hashCode
-  int get hashCode =>Object.hash(_degree, _offset);
+  int get hashCode => Object.hash(_degree, _offset);
 }

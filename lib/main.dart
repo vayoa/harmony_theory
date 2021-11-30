@@ -1,18 +1,50 @@
+import 'dart:io';
+
+import 'package:thoery_test/extensions/scale_extensions.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:tonic/tonic.dart';
 import 'package:thoery_test/extensions/chord_extension.dart';
 
 import 'modals/chord_list.dart';
+import 'modals/scale_degree.dart';
 
 void main() {
   // Example use-case:
   // Base chord progression based on which we suggests chords.
-  final ChordList _baseChordProgression = ChordList([
+  print("Please enter your chords (enter '-' to stop):");
+  List<Chord> _chords = [];
+  // String? input;
+  // do {
+  //   input = stdin.readLineSync() ?? '';
+  //   Chord _chord;
+  //   try {
+  //     _chord = Chord.parse(input);
+  //     _chords.add(_chord);
+  //   } on FormatException catch (e) {
+  //     print(e);
+  //   }
+  // } while (input != '-');
+
+  _chords = [
     Chord.parse('F'),
     Chord.parse('G'),
     Chord.parse('C'),
-  ]);
+  ];
+
+  final ChordList _baseChordProgression = ChordList(_chords);
+  print('Your Progression:\n$_baseChordProgression.');
+
+  // Detect the base progressions' scale
+  final List<Scale> _possibleScales = _baseChordProgression.matchWithKeys();
+  print('Scale Found: ${_possibleScales[0].getCommonName()}.');
+
+  // Convert the base progression to roman numerals, we used the most probable
+  // scale that was detected (which would be the first in the list).
+  final ScaleDegreeProgression _baseProgression =
+  ScaleDegreeProgression.fromChords(
+      _possibleScales[0], _baseChordProgression);
+  print('In Roman Numerals: $_baseProgression.\n');
 
   // The user's saved chord progressions. These are already converted to
   // ScaleDegreeChord.
@@ -29,17 +61,7 @@ void main() {
   final List<ScaleDegreeProgression> _savedProgressions = _drySavedProgressions
       .map((List<String> prog) => ScaleDegreeProgression.fromList(prog))
       .toList();
-  print(_savedProgressions);
-
-  // Detect the base progressions' scale
-  final List<Scale> _possibleScales = _baseChordProgression.matchWithKeys();
-
-  // Convert the base progression to roman numerals, we used the most probable
-  // scale that was detected (which would be the first in the list).
-  final ScaleDegreeProgression _baseProgression =
-      ScaleDegreeProgression.fromChords(
-          _possibleScales[0], _baseChordProgression);
-  print(_baseProgression.toString() + '\n');
+  print('Saved Progressions:\n$_savedProgressions.\n');
 
   // Calculate all of the possible substitutions based on the library and
   // save each one's similarity rating.
@@ -74,12 +96,15 @@ void main() {
           .compareTo(b.value.fold<double>(0.0,
               (previousValue, element) => previousValue + element.rating)));
 
+  print('Suggestions:');
   for (MapEntry<ScaleDegreeProgression, List<RatedSubstitution>> e in _sorted) {
     String subs = '';
     for (RatedSubstitution rS in e.value) {
-      subs += '${rS.substitution}: ${rS.rating}, ';
+      subs +=
+          '${rS.substitution} -> ${rS.substitution.inScale(_possibleScales[0])}:'
+          ' ${rS.rating.toStringAsFixed(3)},\n';
     }
-    print('${e.key} -> $subs');
+    print('-- ${e.key} --\n$subs');
   }
 }
 
@@ -102,15 +127,6 @@ _test() {
         .map<ScaleDegreeChord>((chord) => ScaleDegreeChord(scale, chord))
         .toList();
     print(_scaleDegreeChords.toString() + '\n');
-  }
-}
-
-extension ToStringExtension on Scale {
-  String getCommonName() {
-    final String scaleTonic = tonic.toString();
-    final String scalePattern =
-        pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
-    return scaleTonic + ' ' + scalePattern;
   }
 }
 

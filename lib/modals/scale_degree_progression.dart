@@ -2,6 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
 
+import 'chord_list.dart';
+
 class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
   ScaleDegreeProgression(List<ScaleDegreeChord> base) : super(base);
 
@@ -172,6 +174,17 @@ class ScaleDegreeProgression extends DelegatingList<ScaleDegreeChord> {
     }
     // TODO: This makes sure the results will be unique, make it more efficient.
     return substitutions.toSet().toList();
+  }
+
+  ChordList inScale(Scale scale) {
+    ChordList _chords = ChordList([]);
+    for (ScaleDegreeChord scaleDegreeChord in this) {
+      _chords.add(Chord(
+        pattern: scaleDegreeChord.pattern,
+        root: scaleDegreeChord.rootDegree.inScale(scale).toPitch(),
+      ));
+    }
+    return _chords;
   }
 
   @override
