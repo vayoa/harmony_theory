@@ -1,14 +1,19 @@
-import 'package:collection/collection.dart';
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
+import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
 import 'chord_list.dart';
 
 // TODO: Support uneven time signatures, in constructors and in the enter class.
 class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   ScaleDegreeProgression(List<ScaleDegreeChord> base, List<double> durations,
-      {double timeSignature = 4 / 4})
+      {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : super(base, durations, timeSignature: timeSignature);
+
+  ScaleDegreeProgression.fromProgression(
+      Progression<ScaleDegreeChord> progression)
+      : super(progression.values, progression.durations,
+            timeSignature: progression.timeSignature);
 
   ScaleDegreeProgression.evenTime(List<ScaleDegreeChord> base)
       : super.evenTime(base);
@@ -20,9 +25,11 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             base.map((String chord) => ScaleDegreeChord.parse(chord)).toList());
 
   ScaleDegreeProgression.fromChords(Scale scale, ChordProgression chords)
-      : super.evenTime(
-          chords.map((Chord chord) => ScaleDegreeChord(scale, chord)).toList(),
-        );
+      : super(
+            chords
+                .map((Chord chord) => ScaleDegreeChord(scale, chord))
+                .toList(),
+            chords.durations);
 
   /// Returns a list containing lists of match locations (first element is
   /// the location in [base] and second is location "here"...).
@@ -163,8 +170,9 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     for (List<int> location in matchLocations) {
       int baseChord = location[0];
       int chord = location[1];
-      ScaleDegreeProgression substitution = ScaleDegreeProgression.evenTime(
-          base.sublist(0, baseChord - chord).values);
+      ScaleDegreeProgression substitution =
+          ScaleDegreeProgression.fromProgression(
+              base.sublist(0, baseChord - chord));
       for (var i = 0; i < length; i++) {
         final ScaleDegreeChord chordToSubstitute = this[i];
         final ScaleDegreeChord existingChord = base[baseChord - chord + i];
@@ -182,7 +190,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   }
 
   ChordProgression inScale(Scale scale) {
-    ChordProgression _chords = ChordProgression.evenTime([]);
+    ChordProgression _chords =
+        ChordProgression.empty(timeSignature: timeSignature);
     for (ScaleDegreeChord scaleDegreeChord in values) {
       _chords.add(Chord(
         pattern: scaleDegreeChord.pattern,

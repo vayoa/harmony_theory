@@ -1,4 +1,5 @@
 import 'package:thoery_test/extensions/chord_extension.dart';
+import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
 
 class Progression<T> {
@@ -9,11 +10,9 @@ class Progression<T> {
 
   List<double> get durations => _durations;
 
-  /// The time signature of the [Progression], 4/4 by defaults.
-  /// A 4/4 time signature is represented as a whole of 1. This means a 4/4
-  /// time signature and a 8/8 time signatures will be the same...
-  // TODO: Maybe change this ^.
-  late final double _timeSignature;
+  TimeSignature _timeSignature;
+
+  TimeSignature get timeSignature => _timeSignature;
 
   /// The sum of the [Progression]'s [_durations].
   /* TODO: This is done like this because a lot of functions that I don't want
@@ -27,21 +26,23 @@ class Progression<T> {
   /// its [_timeSignature].
   bool _full = false;
 
-  bool get full => rhythmSum % _timeSignature == 0;
+  bool get full => rhythmSum % _timeSignature.decimal == 0;
 
   double _rhythmSum = 0.0;
 
   double get rhythmSum => _rhythmSum;
 
-  double get measureCount => rhythmSum / _timeSignature;
+  double get measureCount => rhythmSum / _timeSignature.decimal;
 
-  Progression(this._values, this._durations, {double timeSignature = 4 / 4})
-      : assert(_values.length == _durations.length) {
-    _timeSignature = timeSignature;
+  Progression(this._values, this._durations,
+      {TimeSignature timeSignature = const TimeSignature.evenTime()})
+      : assert(_values.length == _durations.length),
+        _timeSignature = timeSignature {
     updateFull();
   }
 
-  Progression.empty({double timeSignature = 4 / 4})
+  Progression.empty(
+      {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this([], [], timeSignature: timeSignature);
 
   Progression.evenTime(List<T> base)
@@ -50,19 +51,19 @@ class Progression<T> {
   bool updateFull() {
     if (_values.isEmpty) return false;
     _rhythmSum = _durations.reduce((value, element) => value + element);
-    _full = rhythmSum % _timeSignature == 0;
+    _full = rhythmSum % _timeSignature.decimal == 0;
     return _full;
   }
 
-  List<Progression<T>> splitToMeasures({double? timeSignature}) {
+  List<Progression<T>> splitToMeasures({TimeSignature? timeSignature}) {
     timeSignature ??= _timeSignature;
-    if (rhythmSum < timeSignature) return [this];
+    if (rhythmSum < timeSignature.decimal) return [this];
     final List<Progression<T>> measures = [];
     Progression<T> currentMeasure =
         Progression.empty(timeSignature: timeSignature);
     double currentRhythmSum = 0.0;
     for (var i = 0; i < length; i++) {
-      if (currentRhythmSum + _durations[i] > timeSignature) {
+      if (currentRhythmSum + _durations[i] > timeSignature.decimal) {
         currentRhythmSum = 0.0;
         measures.add(currentMeasure);
         currentMeasure = Progression.empty(timeSignature: timeSignature);
@@ -114,16 +115,36 @@ class Progression<T> {
   String _format(T object) =>
       object is Chord ? object.getCommonName() : object.toString();
 
+  /* FIXME: Currently we're not supporting chords that move between measures,
+            which could cause problems.
+   */
   @override
   String toString() {
     String output = '';
     if (measureCount <= 1.0) {
       output = '| ';
+      final double step = 1 / _timeSignature.denominator;
+      double stepSum = 0.0;
       for (var i = 0; i < length; i++) {
-        output += '${_format(_values[i])}, ';
+        final String formatted = _format(_values[i]);
+        if (_durations[i] + stepSum >= step) {
+          stepSum = 0.0;
+          output += '$formatted, ';
+        } else {
+          stepSum += _durations[i];
+          output += '$formatted ';
+        }
       }
-      if (!full) {
-        output += '-, ';
+      if (!_full) {
+        final double rhythmLeft = timeSignature.decimal - _rhythmSum;
+        if (rhythmLeft <= step) {
+          output += '-, ';
+        } else {
+          final int left = (rhythmLeft / step).ceil();
+          for (var i = 0; i < left; i++) {
+            output += '-, ';
+          }
+        }
       }
       return output.substring(0, output.length - 2) + ' |';
     } else {
