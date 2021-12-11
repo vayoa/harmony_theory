@@ -55,6 +55,47 @@ class Progression<T> {
     return _full;
   }
 
+  /// Sums [durations] from [start] to [end], not including [end].
+  double sumDurations([int start = 0, int? end]) {
+    if (start == 0 && end == null) return _rhythmSum;
+    end ??= length;
+    return _durations.sublist(start, end).fold(0, (prev, e) => prev + e);
+  }
+
+  /// Returns a list index such that the duration from that index to [from] is
+  /// [duration]. Negative [durations] also work.
+  /// If no such index exits, returns -1.
+  int getIndexFromDuration(double duration, {int from = 0}) {
+    if (duration == 0) return from;
+    double sum = 0;
+    if (duration.isNegative) {
+      duration = -1 * duration;
+      for (var i = from - 1; i >= 0; i--) {
+        sum += _durations[i];
+        if (sum >= duration) return i;
+      }
+    } else {
+      for (var i = from; i < length; i++) {
+        if (sum >= duration) return i;
+        sum += _durations[i];
+      }
+    }
+    return -1;
+  }
+
+  /// Returns a new [Progression] with the same values where all durations
+  /// have been multiplied by [ratio].
+  /// Example:
+  /// [Progression] p.durations => [1/4, 1/4, 1/4, 1/4].
+  /// p.relativeTo(0.5).durations => [1/8, 1/8, 1/8, 1/8].
+  Progression<T> relativeTo(double ratio) {
+    return Progression(
+      _values,
+      _durations.map((double duration) => duration * ratio).toList(),
+      timeSignature: _timeSignature,
+    );
+  }
+
   List<Progression<T>> splitToMeasures({TimeSignature? timeSignature}) {
     timeSignature ??= _timeSignature;
     if (rhythmSum < timeSignature.decimal) return [this];
@@ -108,16 +149,16 @@ class Progression<T> {
   }
 
   @override
-  // TODO: Check if this is correct
-  int get hashCode => Object.hash(_values, _durations);
+  int get hashCode =>
+      Object.hash(Object.hashAll(_values), Object.hashAll(_durations));
 
   // TODO: Find a better way to do this...
   String _format(T object) =>
       object is Chord ? object.getCommonName() : object.toString();
 
-  /* FIXME: Currently we're not supporting chords that move between measures,
-            which could cause problems.
-   */
+  /* TODO: Support chords with duration bigger than a step (like a 1/2 in a 1/4
+      step, which would just not display the second 1/4 of it currently) and
+      chords that move between measures. */
   @override
   String toString() {
     String output = '';
