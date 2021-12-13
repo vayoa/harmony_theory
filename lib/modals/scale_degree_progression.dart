@@ -12,6 +12,10 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : super(base, durations, timeSignature: timeSignature);
 
+  ScaleDegreeProgression.empty(
+      {TimeSignature timeSignature = const TimeSignature.evenTime()})
+      : this([], [], timeSignature: timeSignature);
+
   ScaleDegreeProgression.fromProgression(
       Progression<ScaleDegreeChord> progression)
       : super(progression.values, progression.durations,
@@ -230,29 +234,21 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           relativeMatch.sumDurations(chord) - relativeMatch.durations[chord];
       // Last index to change...
       int right = base.getIndexFromDuration(d2, from: baseChord);
-      print('relative: $relativeMatch');
-      print('locations: $location');
-      print('d1: $d1, d2: $d2');
-      print('left: $left, right: $right');
       ScaleDegreeProgression substitution =
           ScaleDegreeProgression.fromProgression(base.sublist(0, left));
-      print(substitution);
-      for (var i = 0; i < relativeMatch.length; i++) {
-        /* TDC: Actully substitute the chords while accounting for chord
-                cutting (e.g. when a chord substitution steps over the existing
-                chord but is not enough in duration to cover it so they
-                split... can happen with multiple chords...) */
-        final ScaleDegreeChord chordToSubstitute = relativeMatch[i];
-        final ScaleDegreeChord existingChord = base[baseChord - chord + i];
-        if (chordToSubstitute != existingChord) {
-          substitution.add(chordToSubstitute);
-        } else {
-          substitution.add(existingChord);
-        }
+      // TDC: This won't support empty chord spaces...
+      double bd1 = -1 * base.sumDurations(left, baseChord);
+      double bd2 =
+          base.sumDurations(baseChord, right + 1) - base.durations[baseChord];
+      if (bd1 - d1 != 0) {
+        substitution.add(base[left], -1 * (bd1 - d1));
+      }
+      substitution.addAll(relativeMatch);
+      if (bd2 - d2 != 0) {
+        substitution.add(base[right], bd2 - d2);
       }
       if (right + 1 != base.length) {
         substitution.addAll(base.sublist(right + 1));
-        print(substitution);
       }
       substitutions.add(substitution);
     }
@@ -263,11 +259,14 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   ChordProgression inScale(Scale scale) {
     ChordProgression _chords =
         ChordProgression.empty(timeSignature: timeSignature);
-    for (ScaleDegreeChord scaleDegreeChord in values) {
-      _chords.add(Chord(
-        pattern: scaleDegreeChord.pattern,
-        root: scaleDegreeChord.rootDegree.inScale(scale).toPitch(),
-      ));
+    for (var i = 0; i < length; i++) {
+      final ScaleDegreeChord scaleDegreeChord = values[i];
+      _chords.add(
+          Chord(
+            pattern: scaleDegreeChord.pattern,
+            root: scaleDegreeChord.rootDegree.inScale(scale).toPitch(),
+          ),
+          durations[i]);
     }
     return _chords;
   }

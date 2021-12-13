@@ -10,13 +10,18 @@ class ChordProgression extends Progression<Chord> {
   /// Returns a new [ChordProgression] where all the chords are of 1/4 duration.
   ChordProgression.evenTime(List<Chord> base) : super.evenTime(base);
 
-  ChordProgression.empty({TimeSignature timeSignature = const TimeSignature.evenTime()})
+  ChordProgression.empty(
+      {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : super.empty(timeSignature: timeSignature);
 
   List<Scale> matchWithKeys() {
     return matchChordNamesWithKey(
         map<String>((Chord chord) => chord.getCommonName()).toList());
   }
+
+  @override
+  String toString() =>
+      format((Chord chord) => chord.getCommonName(), (double d) => '');
 }
 
 List<Scale> matchChordNamesWithKey(List<String> chords) {

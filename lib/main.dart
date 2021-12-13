@@ -44,82 +44,84 @@ void main() {
           _possibleScales[0], _baseChordProgression);
   print('In Roman Numerals: $_baseProgression.\n');
 
-  ScaleDegreeProgression prog =
-      ScaleDegreeProgression.fromList(['ii', 'V', 'I'], [1 / 4, 1 / 4, 1 / 2]);
-  print(prog);
-  print(prog.getPossibleSubstitutions(_baseProgression));
+  // ScaleDegreeProgression prog = ScaleDegreeProgression.fromList(
+  //     ['II', 'ii', 'V', 'I'], [1 / 8, 1 / 8, 1 / 8, 1 / 2]);
+  // print(prog);
+  // prog.getPossibleSubstitutions(_baseProgression).forEach((element) {
+  //   print(element.format((p0) => p0.toString(), (p0) => p0.toString()));
+  // });
 
-  // // The user's saved chord progressions. These are already converted to
-  // // ScaleDegreeChord.
-  // const List<List<String>> _drySavedProgressions = [
-  //   ['ii', 'V', 'I'],
-  //   ['IV', 'V', 'I'],
-  //   ['V', 'I'],
-  //   ['IV', 'iv', 'I'],
-  //   ['IV', 'I'],
-  //   ['iv', 'I'],
-  // ];
-  //
-  // // The conversion (happens now for ease of use but as stated earlier these
-  // // will be saved like this already).
-  // final List<ScaleDegreeProgression> _savedProgressions = _drySavedProgressions
-  //     .map((List<String> prog) => ScaleDegreeProgression.fromList(prog))
-  //     .toList();
-  //
-  // /* TDC: I'm not sure if, for instance, a ii V I in a different rhythm than
-  //         the user saved should only be suggested if he saved that one too, or
-  //         if we suggest all variants. How can this even be done? Think about
-  //         this and decide how to approach it... */
-  // // To demonstrate duration matching we'll add another ii V I progression but
-  // // with a different rhythm...
-  // _savedProgressions.add(
-  //     ScaleDegreeProgression.fromList(['ii', 'V', 'I'], [1 / 4, 1 / 4, 1 / 2]));
-  //
-  // print('Saved Progressions:\n$_savedProgressions.\n');
-  //
-  // // Calculate all of the possible substitutions based on the library and
-  // // save each one's similarity rating.
-  // Map<ScaleDegreeProgression, List<RatedSubstitution>> _ratedSubstitutions = {
-  //   for (var e in _savedProgressions) e: []
-  // };
-  // for (ScaleDegreeProgression progression in _savedProgressions) {
-  //   progression.getPossibleSubstitutions(_baseProgression).forEach(
-  //       (ScaleDegreeProgression sub) => _ratedSubstitutions[progression]!.add(
-  //           RatedSubstitution(sub, sub.getSimilarityRating(_baseProgression))));
-  // }
-  //
-  // // Sort the rated progressions based on their ratings, descending order...
-  // _ratedSubstitutions.forEach((_, value) => value.sort(
-  //     (RatedSubstitution a, RatedSubstitution b) =>
-  //         -1 * a.rating.compareTo(b.rating)));
-  //
-  // // Remove the progressions with a score of 1.0 (since they exist in the
-  // // base progression...).
-  // _ratedSubstitutions.forEach((_, value) =>
-  //     value.removeWhere((RatedSubstitution rSub) => rSub.rating == 1.0));
-  //
-  // // We can also sort based on the progressions with the highest rated
-  // // substitutions.
-  // final List<MapEntry<ScaleDegreeProgression, List<RatedSubstitution>>>
-  //     _sorted = _ratedSubstitutions.entries.toList();
-  // _sorted.sort((a, b) =>
-  //     -1 *
-  //     a.value
-  //         .fold<double>(
-  //             0.0, (previousValue, element) => previousValue + element.rating)
-  //         .compareTo(b.value.fold<double>(0.0,
-  //             (previousValue, element) => previousValue + element.rating)));
-  //
-  // print('Suggestions:');
-  // for (MapEntry<ScaleDegreeProgression, List<RatedSubstitution>> e in _sorted) {
-  //   String subs = '';
-  //   for (RatedSubstitution rS in e.value) {
-  //     subs +=
-  //         '${rS.substitution} -> ${rS.substitution.inScale(_possibleScales[0])}:'
-  //         ' ${rS.rating.toStringAsFixed(3)},\n';
-  //   }
-  //   print('-- ${e.key} --\n$subs');
-  // }
+  // The user's saved chord progressions. These are already converted to
+  // ScaleDegreeChord.
+  const List<List<String>> _drySavedProgressions = [
+    ['ii', 'V', 'I'],
+    ['IV', 'V', 'I'],
+    ['V', 'I'],
+    ['IV', 'iv', 'I'],
+    ['IV', 'I'],
+    ['iv', 'I'],
+  ];
+
+  // The conversion (happens now for ease of use but as stated earlier these
+  // will be saved like this already).
+  final List<ScaleDegreeProgression> _savedProgressions = _drySavedProgressions
+      .map((List<String> prog) => ScaleDegreeProgression.fromList(prog))
+      .toList();
+
+  /* TDC: I'm not sure if, for instance, a ii V I in a different rhythm than
+          the user saved should only be suggested if he saved that one too, or
+          if we suggest all variants. How can this even be done? Think about
+          this and decide how to approach it... */
+  // To demonstrate duration matching we'll add another ii V I progression but
+  // with a different rhythm...
+  _savedProgressions.add(
+      ScaleDegreeProgression.fromList(['ii', 'V', 'I'], [1 / 4, 1 / 4, 1 / 2]));
+
+  print('Saved Progressions:\n$_savedProgressions.\n');
+
+  // Calculate all of the possible substitutions based on the library and
+  // save each one's similarity rating.
+  Map<ScaleDegreeProgression, List<RatedSubstitution>> _ratedSubstitutions = {
+    for (var e in _savedProgressions) e: []
+  };
+  for (ScaleDegreeProgression progression in _savedProgressions) {
+    progression.getPossibleSubstitutions(_baseProgression).forEach(
+        (ScaleDegreeProgression sub) => _ratedSubstitutions[progression]!.add(
+            RatedSubstitution(sub, sub.getSimilarityRating(_baseProgression))));
+  }
+
+  // Sort the rated progressions based on their ratings, descending order...
+  _ratedSubstitutions.forEach((_, value) => value.sort(
+      (RatedSubstitution a, RatedSubstitution b) =>
+          -1 * a.rating.compareTo(b.rating)));
+
+  // Remove the progressions with a score of 1.0 (since they exist in the
+  // base progression...).
+  _ratedSubstitutions.forEach((_, value) =>
+      value.removeWhere((RatedSubstitution rSub) => rSub.rating == 1.0));
+
+  // We can also sort based on the progressions with the highest rated
+  // substitutions.
+  final List<MapEntry<ScaleDegreeProgression, List<RatedSubstitution>>>
+      _sorted = _ratedSubstitutions.entries.toList();
+  _sorted.sort((a, b) =>
+      -1 *
+      a.value
+          .fold<double>(
+              0.0, (previousValue, element) => previousValue + element.rating)
+          .compareTo(b.value.fold<double>(0.0,
+              (previousValue, element) => previousValue + element.rating)));
+
+  print('Suggestions:');
+  for (MapEntry<ScaleDegreeProgression, List<RatedSubstitution>> e in _sorted) {
+    String subs = '';
+    for (RatedSubstitution rS in e.value) {
+      subs +=
+          '${rS.substitution} -> ${rS.substitution.inScale(_possibleScales[0])}:'
+          ' ${rS.rating.toStringAsFixed(3)},\n';
+    }
+    print('-- ${e.key} --\n$subs');
+  }
 }
 
 _test() {

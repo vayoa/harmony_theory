@@ -14,6 +14,10 @@ class Progression<T> {
 
   TimeSignature get timeSignature => _timeSignature;
 
+  Progression<T> get reversed =>
+      Progression(_values.reversed.toList(), _durations.reversed.toList(),
+          timeSignature: timeSignature);
+
   /// The sum of the [Progression]'s [_durations].
   /* TODO: This is done like this because a lot of functions that I don't want
         to override can affect the members of the progression, but this can
@@ -116,7 +120,7 @@ class Progression<T> {
     return measures;
   }
 
-  void add(T value, [double duration = 1 / 4]) {
+  void add(T value, double duration) {
     _values.add(value);
     _durations.add(duration);
     updateFull();
@@ -152,22 +156,20 @@ class Progression<T> {
   int get hashCode =>
       Object.hash(Object.hashAll(_values), Object.hashAll(_durations));
 
-  // TODO: Find a better way to do this...
-  String _format(T object) =>
-      object is Chord ? object.getCommonName() : object.toString();
-
   /* TODO: Support chords with duration bigger than a step (like a 1/2 in a 1/4
       step, which would just not display the second 1/4 of it currently) and
       chords that move between measures. */
-  @override
-  String toString() {
+  String format(
+      String Function(T) valueFormat, String Function(double) durationFormat) {
     String output = '';
     if (measureCount <= 1.0) {
       output = '| ';
       final double step = 1 / _timeSignature.denominator;
       double stepSum = 0.0;
       for (var i = 0; i < length; i++) {
-        final String formatted = _format(_values[i]);
+        String durationFormatted = durationFormat(_durations[i]);
+        final String formatted = valueFormat(_values[i]) +
+            (durationFormatted.isEmpty ? '' : '($durationFormatted)');
         if (_durations[i] + stepSum >= step) {
           stepSum = 0.0;
           output += '$formatted, ';
@@ -196,6 +198,9 @@ class Progression<T> {
       return output;
     }
   }
+
+  @override
+  String toString() => format((T v) => v.toString(), (double d) => '');
 
   int get length => _values.length;
 
