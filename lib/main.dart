@@ -87,7 +87,7 @@ void main() {
   for (ScaleDegreeProgression progression in _savedProgressions) {
     progression.getPossibleSubstitutions(_baseProgression).forEach(
         (ScaleDegreeProgression sub) => _ratedSubstitutions[progression]!.add(
-            RatedSubstitution(sub, sub.getSimilarityRating(_baseProgression))));
+            RatedSubstitution(sub, sub.percentMatchedTo(_baseProgression))));
   }
 
   // Sort the rated progressions based on their ratings, descending order...

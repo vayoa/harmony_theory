@@ -18,25 +18,19 @@ class Progression<T> {
       Progression(_values.reversed.toList(), _durations.reversed.toList(),
           timeSignature: timeSignature);
 
-  /// The sum of the [Progression]'s [_durations].
-  /* TODO: This is done like this because a lot of functions that I don't want
-        to override can affect the members of the progression, but this can
-        calculate the sum multiple times even if nothing changed, so think of
-        a better way to do all of this (it probably requires a completely new
-        class instead of extending DelegatingList.
-   */
+  bool _full = false;
 
   /// Whether the [Progression] leaves no empty spaces in a measure, based on
   /// its [_timeSignature].
-  bool _full = false;
+  bool get full => duration % _timeSignature.decimal == 0;
 
-  bool get full => rhythmSum % _timeSignature.decimal == 0;
+  double _duration = 0.0;
 
-  double _rhythmSum = 0.0;
+  /// The overall duration of the [Progression].
+  double get duration => _duration;
 
-  double get rhythmSum => _rhythmSum;
-
-  double get measureCount => rhythmSum / _timeSignature.decimal;
+  /// The number of measures the [Progression] takes.
+  double get measureCount => duration / _timeSignature.decimal;
 
   Progression(this._values, this._durations,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
@@ -54,14 +48,14 @@ class Progression<T> {
 
   bool updateFull() {
     if (_values.isEmpty) return false;
-    _rhythmSum = _durations.reduce((value, element) => value + element);
-    _full = rhythmSum % _timeSignature.decimal == 0;
+    _duration = _durations.reduce((value, element) => value + element);
+    _full = duration % _timeSignature.decimal == 0;
     return _full;
   }
 
   /// Sums [durations] from [start] to [end], not including [end].
   double sumDurations([int start = 0, int? end]) {
-    if (start == 0 && end == null) return _rhythmSum;
+    if (start == 0 && end == null) return _duration;
     end ??= length;
     return _durations.sublist(start, end).fold(0, (prev, e) => prev + e);
   }
@@ -102,7 +96,7 @@ class Progression<T> {
 
   List<Progression<T>> splitToMeasures({TimeSignature? timeSignature}) {
     timeSignature ??= _timeSignature;
-    if (rhythmSum < timeSignature.decimal) return [this];
+    if (duration < timeSignature.decimal) return [this];
     final List<Progression<T>> measures = [];
     Progression<T> currentMeasure =
         Progression.empty(timeSignature: timeSignature);
@@ -179,7 +173,7 @@ class Progression<T> {
         }
       }
       if (!_full) {
-        final double rhythmLeft = timeSignature.decimal - _rhythmSum;
+        final double rhythmLeft = timeSignature.decimal - _duration;
         if (rhythmLeft <= step) {
           output += '-, ';
         } else {

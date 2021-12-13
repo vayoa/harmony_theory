@@ -40,14 +40,15 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
 
   /// Returns a list containing lists of match locations (first element is
   /// the location in [base] and second is location "here"...).
-  List<List<int>> getFittingMatchLocations(ScaleDegreeProgression base) {
+  List<SubstitutionMatch> getFittingMatchLocations(
+      ScaleDegreeProgression base) {
     // Explanation to why this is done is below...
     // if we (as a saved progression) can't fit in the base progression...
-    if (rhythmSum > base.rhythmSum) return const [];
+    if (duration > base.duration) return const [];
 
     // List containing lists of match locations (first element is location in
     // base and second is location here).
-    final List<List<int>> matchLocations = [];
+    final List<SubstitutionMatch> matchLocations = [];
 
     // TODO: Check if it's the way this needs to be
     // TDC: Update this explanation with the new durations...
@@ -116,7 +117,10 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
               // searching.
               // The first element is the location in base and the second is the
               // location here...
-              matchLocations.add([baseChordPos, chordPos]);
+              matchLocations.add(SubstitutionMatch.fromProg(
+                  baseIndex: baseChordPos,
+                  subIndex: chordPos,
+                  relativeMatch: relativeMatch));
             }
           }
         }
@@ -125,18 +129,35 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     return matchLocations;
   }
 
-  /// Get a comparing rating of this [ScaleDegreeProgression] against a base
-  /// one of matching length ([base]). The higher the rating the more similar
-  /// the progressions are, where 0.0 means they are completely different and
-  /// 1.0 means they are the same progression.
-  // TDC: Update to support duration!!!
-  double getSimilarityRating(ScaleDegreeProgression base) {
-    if (length != base.length) return 0.0;
-    int count = 0;
-    for (int i = 0; i < length; i++) {
-      if (this[i] == base[i]) count++;
+  /// Get a comparing rating of this [ScaleDegreeProgression] against another
+  /// one of matching length ([other]). The higher the result the more similar
+  /// the progressions are (the more chords they have in common in the same
+  /// duration from their start), where 0.0 means they are completely different
+  /// and 1.0 means they are the same progression.
+  // TODO: Check that this is how it's intended to be...
+  double percentMatchedTo(ScaleDegreeProgression other) {
+    if (duration != other.duration) return 0.0;
+    double durationSum = 0, otherSum = 0, sum = 0;
+    var i = 0, j = 0;
+    while (i < length && j < length) {
+      // If both chords are at the same duration away from the beginning of
+      // the progression and are both the same in chord and in duration,
+      // we add they're duration to the durationSum.
+      if (sum == otherSum) {
+        if (this[i] == other[j] && durations[i] == other.durations[j]) {
+          durationSum += durations[i];
+        }
+        i++;
+        j++;
+      } else if (sum < otherSum) {
+        i++;
+      } else {
+        j++;
+      }
+      otherSum += other.durations[j - 1];
+      sum += durations[i - 1];
     }
-    return count / length;
+    return durationSum / duration;
   }
 
   /// Get a comparing score of this [ScaleDegreeProgression] against a base
@@ -216,17 +237,16 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
    */
   List<ScaleDegreeProgression> getPossibleSubstitutions(
       ScaleDegreeProgression base) {
-    final List<List<int>> matchLocations = getFittingMatchLocations(base);
+    final List<SubstitutionMatch> matchLocations =
+        getFittingMatchLocations(base);
     final List<ScaleDegreeProgression> substitutions = [];
 
-    for (List<int> location in matchLocations) {
-      int baseChord = location[0];
-      int chord = location[1];
+    for (SubstitutionMatch match in matchLocations) {
+      int baseChord = match.baseIndex;
+      int chord = match.subIndex;
       /* TODO: This is already computed at getFittingMatchLocations(),
               try to somehow use that one instead of computing it again...*/
-      final ScaleDegreeProgression relativeMatch =
-          ScaleDegreeProgression.fromProgression(
-              relativeTo(base.durations[baseChord] / durations[chord]));
+      final ScaleDegreeProgression relativeMatch = match.relativeMatch;
       double d1 = -1 * relativeMatch.sumDurations(0, chord);
       // First index that could be changed
       int left = base.getIndexFromDuration(d1, from: baseChord);
@@ -270,4 +290,25 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     }
     return _chords;
   }
+}
+
+class SubstitutionMatch {
+  final int baseIndex;
+  final int subIndex;
+  final ScaleDegreeProgression relativeMatch;
+
+  const SubstitutionMatch(
+      {required this.baseIndex,
+      required this.subIndex,
+      required this.relativeMatch});
+
+  SubstitutionMatch.fromProg(
+      {required int baseIndex,
+      required int subIndex,
+      required Progression<ScaleDegreeChord> relativeMatch})
+      : this(
+            subIndex: subIndex,
+            baseIndex: baseIndex,
+            relativeMatch:
+                ScaleDegreeProgression.fromProgression(relativeMatch));
 }
