@@ -44,13 +44,6 @@ void main() {
           _possibleScales[0], _baseChordProgression);
   print('In Roman Numerals: $_baseProgression.\n');
 
-  // ScaleDegreeProgression prog = ScaleDegreeProgression.fromList(
-  //     ['II', 'ii', 'V', 'I'], [1 / 8, 1 / 8, 1 / 8, 1 / 2]);
-  // print(prog);
-  // prog.getPossibleSubstitutions(_baseProgression).forEach((element) {
-  //   print(element.format((p0) => p0.toString(), (p0) => p0.toString()));
-  // });
-
   // The user's saved chord progressions. These are already converted to
   // ScaleDegreeChord.
   const List<List<String>> _drySavedProgressions = [
@@ -74,8 +67,12 @@ void main() {
           this and decide how to approach it... */
   // To demonstrate duration matching we'll add another ii V I progression but
   // with a different rhythm...
-  _savedProgressions.add(
-      ScaleDegreeProgression.fromList(['ii', 'V', 'I'], [1 / 4, 1 / 4, 1 / 2]));
+  _savedProgressions.addAll([
+    ScaleDegreeProgression.fromList(['ii', 'V', 'I'], [1 / 4, 1 / 4, 1 / 2]),
+    ScaleDegreeProgression.fromList(['V', 'I'], [1 / 4, 1 / 2]),
+    ScaleDegreeProgression.fromList(
+        ['ii', 'v', 'V', 'I'], [1 / 8, 1 / 8, 1 / 8, 1 / 2]),
+  ]);
 
   print('Saved Progressions:\n$_savedProgressions.\n');
 
@@ -100,17 +97,18 @@ void main() {
   _ratedSubstitutions.forEach((_, value) =>
       value.removeWhere((RatedSubstitution rSub) => rSub.rating == 1.0));
 
-  // We can also sort based on the progressions with the highest rated
-  // substitutions.
+  // We can also sort based on the progressions with the averagely highest
+  // rated substitutions.
   final List<MapEntry<ScaleDegreeProgression, List<RatedSubstitution>>>
       _sorted = _ratedSubstitutions.entries.toList();
   _sorted.sort((a, b) =>
       -1 *
-      a.value
-          .fold<double>(
-              0.0, (previousValue, element) => previousValue + element.rating)
+      (a.value.fold<double>(0.0,
+                  (previousValue, element) => previousValue + element.rating) /
+              a.value.length)
           .compareTo(b.value.fold<double>(0.0,
-              (previousValue, element) => previousValue + element.rating)));
+                  (previousValue, element) => previousValue + element.rating) /
+              b.value.length));
 
   print('Suggestions:');
   for (MapEntry<ScaleDegreeProgression, List<RatedSubstitution>> e in _sorted) {
