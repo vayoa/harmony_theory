@@ -40,15 +40,14 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
 
   /// Returns a list containing lists of match locations (first element is
   /// the location in [base] and second is location "here"...).
-  List<SubstitutionMatch> getFittingMatchLocations(
-      ScaleDegreeProgression base) {
+  List<List<int>> getFittingMatchLocations(ScaleDegreeProgression base) {
     // Explanation to why this is done is below...
     // if we (as a saved progression) can't fit in the base progression...
     if (duration > base.duration) return const [];
 
     // List containing lists of match locations (first element is location in
     // base and second is location here).
-    final List<SubstitutionMatch> matchLocations = [];
+    final List<List<int>> matchLocations = [];
 
     // TODO: Check if it's the way this needs to be
     // TDC: Update this explanation with the new durations...
@@ -78,12 +77,12 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           // substitute in place for the current chord.
           // For this to be true there needs to be enough duration to cover the
           // rest of the progression.
-          final Progression<ScaleDegreeChord> relativeMatch =
-              relativeTo(base.durations[baseChordPos] / durations[chordPos]);
+          final double ratio =
+              base.durations[baseChordPos] / durations[chordPos];
           double neededDurationLeft = 0, neededDurationRight = 0;
           double baseDurationLeft = 0, baseDurationRight = 0;
           bool enoughInLeft = false, enoughInRight = false;
-          neededDurationLeft = relativeMatch.sumDurations(0, chordPos);
+          neededDurationLeft = sumDurations(0, chordPos) * ratio;
           // If this is 0 than there's no point on checking the sum since it's
           // 0... (also there'll be an error with base[baseChordPos - 1] if we
           // don't check this...)
@@ -98,7 +97,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           // left side of base from baseChordPose...
           if (enoughInLeft) {
             if (chordPos != length - 1) {
-              neededDurationRight = relativeMatch.sumDurations(chordPos + 1);
+              neededDurationRight = sumDurations(chordPos + 1) * ratio;
               for (var i = baseChordPos + 1;
                   !enoughInRight && i < base.length;
                   i++) {
@@ -117,10 +116,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
               // searching.
               // The first element is the location in base and the second is the
               // location here...
-              matchLocations.add(SubstitutionMatch.fromProg(
-                  baseIndex: baseChordPos,
-                  subIndex: chordPos,
-                  relativeMatch: relativeMatch));
+              matchLocations.add([baseChordPos, chordPos]);
             }
           }
         }
@@ -237,16 +233,18 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
    */
   List<ScaleDegreeProgression> getPossibleSubstitutions(
       ScaleDegreeProgression base) {
-    final List<SubstitutionMatch> matchLocations =
-        getFittingMatchLocations(base);
+    final List<List<int>> matchLocations = getFittingMatchLocations(base);
     final List<ScaleDegreeProgression> substitutions = [];
 
-    for (SubstitutionMatch match in matchLocations) {
-      int baseChord = match.baseIndex;
-      int chord = match.subIndex;
-      /* TODO: This is already computed at getFittingMatchLocations(),
-              try to somehow use that one instead of computing it again...*/
-      final ScaleDegreeProgression relativeMatch = match.relativeMatch;
+    for (List<int> match in matchLocations) {
+      int baseChord = match[0];
+      int chord = match[1];
+      /* TODO: We don't have to compute the relative straight away (we can just
+                multiply the sum by the ratio like we do in
+                getFittingMatchLocations()...), convert it. */
+      final ScaleDegreeProgression relativeMatch =
+          ScaleDegreeProgression.fromProgression(
+              relativeTo(base.durations[baseChord] / durations[chord]));
       double d1 = -1 * relativeMatch.sumDurations(0, chord);
       // First index that could be changed
       int left = base.getIndexFromDuration(d1, from: baseChord);
@@ -290,25 +288,4 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     }
     return _chords;
   }
-}
-
-class SubstitutionMatch {
-  final int baseIndex;
-  final int subIndex;
-  final ScaleDegreeProgression relativeMatch;
-
-  const SubstitutionMatch(
-      {required this.baseIndex,
-      required this.subIndex,
-      required this.relativeMatch});
-
-  SubstitutionMatch.fromProg(
-      {required int baseIndex,
-      required int subIndex,
-      required Progression<ScaleDegreeChord> relativeMatch})
-      : this(
-            subIndex: subIndex,
-            baseIndex: baseIndex,
-            relativeMatch:
-                ScaleDegreeProgression.fromProgression(relativeMatch));
 }
