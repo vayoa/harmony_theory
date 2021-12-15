@@ -1,14 +1,34 @@
 import 'package:thoery_test/extensions/scale_extensions.dart';
+import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
+import 'package:thoery_test/modals/weights/in_scale_weight.dart';
 import 'package:tonic/tonic.dart';
 import 'package:thoery_test/extensions/chord_extension.dart';
 import 'modals/chord_progression.dart';
 
 void main() {
+  ScaleDegreeProgression progression =
+      ScaleDegreeProgression.fromList(['ii', 'V', 'I']);
+  const InScaleWeight weight = InScaleWeight();
+  print(weight.score(progression));
+  progression = ScaleDegreeProgression.fromList(['II', 'V', 'I']);
+  print(weight.score(progression));
+  progression = ScaleDegreeProgression.fromList(['V', 'I']);
+  progression.add(
+      ScaleDegreeChord(
+          Scale(
+              tonic: PitchClass.parse('C'),
+              pattern: ScalePattern.findByName('Diatonic Major')),
+          Chord.parse('Cmaj7')),
+      1 / 4);
+  print(weight.score(progression));
+}
+
+_basicMatchingTest() {
   // Example use-case:
   // Base chord progression based on which we suggests chords.
-  print("Please enter your chords (enter '-' to stop):");
+  // print("Please enter your chords (enter '-' to stop):");
   List<Chord> _chords = [];
   // String? input;
   // do {

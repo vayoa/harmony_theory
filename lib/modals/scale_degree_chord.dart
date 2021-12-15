@@ -16,7 +16,7 @@ class ScaleDegreeChord {
   */
   String inversion = '';
 
-  static final Pattern cordNamePattern = RegExp(
+  static final Pattern chordNamePattern = RegExp(
       r"^([#b♯♭𝄪𝄫]*(?:III|II|IV|I|VII|VI|V)(?:\d*))\s*(.*)$",
       caseSensitive: false);
 
@@ -27,7 +27,7 @@ class ScaleDegreeChord {
 
   ScaleDegreeChord.parse(String chord) {
     //TODO: Handle minor chords (meaning lowercase letters).
-    final match = cordNamePattern.matchAsPrefix(chord);
+    final match = chordNamePattern.matchAsPrefix(chord);
     if (match == null) {
       throw FormatException("invalid ScaleDegreeChord name: $chord");
     }
@@ -47,6 +47,10 @@ class ScaleDegreeChord {
     pattern = _pattern;
     rootDegree = ScaleDegree.parse(match[1]!);
   }
+
+  // TODO: This only works in major key, fix this if needed.
+  List<ScaleDegree> get degrees =>
+      pattern.intervals.map((i) => rootDegree.addInMajor(i)).toList();
 
   @override
   String toString() {
