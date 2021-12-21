@@ -71,3 +71,10 @@ class ScaleDegreeChord {
   @override
   int get hashCode => Object.hash(pattern.fullName, rootDegree);
 }
+
+enum HarmonicFunction {
+  tonic,
+  subDominant,
+  dominant,
+  undefined,
+}

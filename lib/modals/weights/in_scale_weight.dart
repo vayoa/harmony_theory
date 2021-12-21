@@ -7,8 +7,12 @@ import '../scale_degree.dart';
 
 class InScaleWeight extends Weight {
   const InScaleWeight()
-      : super(2, ScoringStage.beforeSubstitution,
-            const [WeightDescription.diatonic]);
+      : super(
+          importance: 2,
+          requiresScale: false,
+          scoringStage: ScoringStage.beforeSubstitution,
+          description: const [WeightDescription.diatonic],
+        );
 
   static final List<ScaleDegree> degreesInScale = ScaleDegree.degrees
       .map((e) => ScaleDegree.parse(e))
@@ -27,7 +31,7 @@ class InScaleWeight extends Weight {
   /* TODO: Currently works only with minor and major scales, should update this
             if necessary. */
   @override
-  double score(ScaleDegreeProgression progression) {
+  double score(ScaleDegreeProgression progression, [Scale? scale]) {
     // check if the degree is in degreesInScale
     // if it is, check if it's pattern (in the same index) is in
     // patternsInScale.

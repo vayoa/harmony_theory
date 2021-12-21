@@ -20,8 +20,7 @@ class ChordProgression extends Progression<Chord> {
   }
 
   @override
-  String toString() =>
-      format((Chord chord) => chord.getCommonName(), (double d) => '');
+  String valueFormat(Chord value) => value.getCommonName();
 }
 
 List<Scale> matchChordNamesWithKey(List<String> chords) {

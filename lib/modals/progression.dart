@@ -36,7 +36,26 @@ class Progression<T> {
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : assert(_values.length == _durations.length),
         _timeSignature = timeSignature {
-    updateFull();
+    if (isNotEmpty) {
+      // Join all the adjacent equal values.
+      int i = 0;
+      while (i < length - 1) {
+        // We do this because Chord doesn't have an equals implementation...
+        var val = values[i];
+        var val2 = values[i + 1];
+        /* FIXME: Dart is really dumb sometimes (it won't let me do this
+                otherwise...) */
+        if (val == val2 ||
+            (val is Chord && val2 is Chord && val.equals(val2))) {
+          _durations[i] += _durations[i + 1];
+          _durations.removeAt(i + 1);
+          _values.removeAt(i + 1);
+        } else {
+          i++;
+        }
+      }
+      updateFull();
+    }
   }
 
   Progression.empty(
@@ -47,14 +66,15 @@ class Progression<T> {
       : this(base, List.generate(base.length, (index) => 1 / 4));
 
   bool updateFull() {
-    if (_values.isEmpty) return false;
+    if (isEmpty) return false;
     _duration = _durations.reduce((value, element) => value + element);
-    _full = duration % _timeSignature.decimal == 0;
+    _full = _duration % _timeSignature.decimal == 0;
     return _full;
   }
 
   /// Sums [durations] from [start] to [end], not including [end].
   double sumDurations([int start = 0, int? end]) {
+    // assert(end == null || start < end);
     if (start == 0 && end == null) return _duration;
     end ??= length;
     return _durations.sublist(start, end).fold(0, (prev, e) => prev + e);
@@ -77,6 +97,9 @@ class Progression<T> {
         if (sum >= duration) return i;
         sum += _durations[i];
       }
+      /* FIXME: Write this better (we check this afterwards but there's
+                probably a way to do it in the loop...)*/
+      if (sum >= duration) return length - 1;
     }
     return -1;
   }
@@ -94,43 +117,58 @@ class Progression<T> {
     );
   }
 
+  /// Use this only for printing purposes as it can split a chord that goes
+  /// over one measures into two chords (thus ruining the original progression).
   List<Progression<T>> splitToMeasures({TimeSignature? timeSignature}) {
     timeSignature ??= _timeSignature;
-    if (duration < timeSignature.decimal) return [this];
+    if (_duration < _timeSignature.decimal) return [this];
     final List<Progression<T>> measures = [];
     Progression<T> currentMeasure =
         Progression.empty(timeSignature: timeSignature);
     double currentRhythmSum = 0.0;
     for (var i = 0; i < length; i++) {
-      if (currentRhythmSum + _durations[i] > timeSignature.decimal) {
+      double newDur = _durations[i];
+      if (currentRhythmSum + newDur > timeSignature.decimal) {
+        double left = timeSignature.decimal - currentRhythmSum;
+        if (left != 0) {
+          currentMeasure.add(_values[i], left);
+          newDur -= currentMeasure._durations.last;
+        }
         currentRhythmSum = 0.0;
         measures.add(currentMeasure);
         currentMeasure = Progression.empty(timeSignature: timeSignature);
       }
-      currentRhythmSum += _durations[i];
-      currentMeasure.add(_values[i], _durations[i]);
+      currentRhythmSum += newDur;
+      currentMeasure.add(_values[i], newDur);
     }
     if (currentMeasure.isNotEmpty) measures.add(currentMeasure);
     return measures;
   }
 
   void add(T value, double duration) {
-    _values.add(value);
-    _durations.add(duration);
+    if (_values.isNotEmpty && value == _values.last) {
+      _durations.last += duration;
+    } else {
+      _values.add(value);
+      _durations.add(duration);
+    }
     updateFull();
   }
 
   void addAll(Progression<T> progression) {
+    if (_values.isNotEmpty && progression.values.first == _values.last) {
+      double dur = progression.removeAt(0).value;
+      _durations.last += dur;
+    }
     _values.addAll(progression._values);
     _durations.addAll(progression._durations);
     updateFull();
   }
 
-  void addAllElements(
-      Iterable<T> valuesIterable, Iterable<double> durationsIterable) {
-    _values.addAll(valuesIterable);
-    _durations.addAll(durationsIterable);
-    updateFull();
+  MapEntry<T, double> removeAt(int index) {
+    T val = _values.removeAt(index);
+    double dur = _durations.removeAt(index);
+    return MapEntry(val, dur);
   }
 
   @override
@@ -150,11 +188,15 @@ class Progression<T> {
   int get hashCode =>
       Object.hash(Object.hashAll(_values), Object.hashAll(_durations));
 
+  String valueFormat(T value) => value.toString();
+
+  String durationFormat(double duration) => '';
+
   /* TODO: Support chords with duration bigger than a step (like a 1/2 in a 1/4
       step, which would just not display the second 1/4 of it currently) and
       chords that move between measures. */
-  String format(
-      String Function(T) valueFormat, String Function(double) durationFormat) {
+  @override
+  String toString() {
     String output = '';
     if (measureCount <= 1.0) {
       output = '| ';
@@ -162,7 +204,12 @@ class Progression<T> {
       double stepSum = 0.0;
       for (var i = 0; i < length; i++) {
         String durationFormatted = durationFormat(_durations[i]);
-        final String formatted = valueFormat(_values[i]) +
+        final val = _values[i];
+        /* FIXME: This is written badly but I can't think of another way to
+                  make it work */
+        final String valueFormatted =
+            val is Chord ? val.getCommonName() : valueFormat(_values[i]);
+        final String formatted = valueFormatted +
             (durationFormatted.isEmpty ? '' : '($durationFormatted)');
         if (_durations[i] + stepSum >= step) {
           stepSum = 0.0;
@@ -192,9 +239,6 @@ class Progression<T> {
       return output;
     }
   }
-
-  @override
-  String toString() => format((T v) => v.toString(), (double d) => '');
 
   int get length => _values.length;
 

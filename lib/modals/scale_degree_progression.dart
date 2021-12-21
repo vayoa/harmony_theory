@@ -256,6 +256,15 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           ScaleDegreeProgression.fromProgression(base.sublist(0, left));
       // TDC: This won't support empty chord spaces...
       double bd1 = -1 * base.sumDurations(left, baseChord);
+      try {
+        base.sumDurations(baseChord, right + 1) - base.durations[baseChord];
+      } catch (e) {
+        print(relativeMatch);
+        print(relativeMatch.values[chord]);
+        print(baseChord);
+        print("$d2");
+        print("${base.durations.length}, $baseChord, ${right + 1}");
+      }
       double bd2 =
           base.sumDurations(baseChord, right + 1) - base.durations[baseChord];
       if (bd1 - d1 != 0) {
@@ -272,6 +281,16 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     }
     // TODO: This makes sure the results will be unique, make it more efficient.
     return substitutions.toSet().toList();
+  }
+
+  List<ScaleDegreeProgression> getFailed() {
+    /* TODO: implement getFailed.
+             This will get called when a substitution was failed to pass
+             (when there was no place for it). The substitution will be scored
+             and if it'll be deemed good enough it will be changed to be able
+             to fit, and suggested to the user.
+     */
+    throw UnimplementedError();
   }
 
   ChordProgression inScale(Scale scale) {
