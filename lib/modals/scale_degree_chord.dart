@@ -1,4 +1,5 @@
 import 'package:thoery_test/modals/scale_degree.dart';
+import 'package:thoery_test/extensions/interval_extension.dart';
 import 'package:tonic/tonic.dart';
 
 class ScaleDegreeChord {
@@ -25,7 +26,7 @@ class ScaleDegreeChord {
     rootDegree = ScaleDegree(scale.pattern, chord.root - scale.tonic.toPitch());
   }
 
-  ScaleDegreeChord.parse(String chord) {
+  ScaleDegreeChord.parse(ScalePattern scalePattern, String chord) {
     //TODO: Handle minor chords (meaning lowercase letters).
     final match = chordNamePattern.matchAsPrefix(chord);
     if (match == null) {
@@ -49,8 +50,19 @@ class ScaleDegreeChord {
   }
 
   // TODO: This only works in major key, fix this if needed.
-  List<ScaleDegree> get degrees =>
+  List<ScaleDegree> get degreesInMajor =>
       pattern.intervals.map((i) => rootDegree.addInMajor(i)).toList();
+
+  List<ScaleDegree> degrees(ScalePattern scalePattern) =>
+      pattern.intervals.map((i) => rootDegree.add(scalePattern, i)).toList();
+
+  // FIXME: Optimize this!
+  bool isDiatonic(ScalePattern scalePattern) =>
+      degrees(scalePattern).every((degree) => degree.isDiatonic);
+
+  // ScaleDegreeChord add7() {
+  //   if (pattern.intervals.length < 4 || pattern.intervals[3].)
+  // }
 
   @override
   String toString() {
@@ -70,6 +82,55 @@ class ScaleDegreeChord {
 
   @override
   int get hashCode => Object.hash(pattern.fullName, rootDegree);
+
+  // TDC: Check if this works correctly!!
+  /// Returns true if the chord is equal to [other], such that their triads + 7
+  /// are equal. Tensions aren't taken into consideration.
+  /// If there's no 7 in only one of the chords we treat it as if it had the
+  /// relevant diatonic 7, base on [scalePattern]. Meaning that in a major key
+  /// a ii would be weakly equal to a ii7 but not a iimaj7.
+  bool weakEqual(ScalePattern scalePattern, ScaleDegreeChord other) {
+    if (rootDegree != other.rootDegree) return false;
+    List<Interval> ownIntervals = pattern.intervals.sublist(1, 3);
+    List<Interval> otherIntervals = other.pattern.intervals.sublist(1, 3);
+    for (int i = 0; i < 2; i++) {
+      if (!ownIntervals[i].equals(ownIntervals[i])) return false;
+    }
+    if (pattern.intervals.length >= 4) {
+      if (other.pattern.intervals.length >= 4) {
+        if (!pattern.intervals[3].equals(other.pattern.intervals[3])) {
+          return false;
+        }
+      } else {
+        if (!rootDegree.add(scalePattern, pattern.intervals[3]).isDiatonic) {
+          return false;
+        }
+      }
+    } else {
+      if (other.pattern.intervals.length >= 4) {
+        if (!other.rootDegree
+            .add(scalePattern, other.pattern.intervals[3])
+            .isDiatonic) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  // TDC: Check if this works correctly!!
+  /// Returns a hash of the chord with no tensions. 7th are hashed in if
+  /// they're not diatonic (based on [scalePattern]).
+  int weakHash(ScalePattern scalePattern) {
+    List<Interval> intervals = pattern.intervals.sublist(1, 3);
+    if (intervals.length >= 4) {
+      if (!rootDegree.add(scalePattern, pattern.intervals[3]).isDiatonic) {
+        intervals.add(pattern.intervals[3]);
+      }
+    }
+    return Object.hash(rootDegree,
+        Object.hashAll([for (Interval interval in intervals) interval.hashEx]));
+  }
 }
 
 enum HarmonicFunction {

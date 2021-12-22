@@ -7,7 +7,6 @@ import 'package:tonic/tonic.dart';
 abstract class Weight {
   final ScoringStage scoringStage;
   final List<WeightDescription> description;
-  final bool requiresScale;
 
   /// The max [importance] value a [Weight] can have (inclusive).
   static const maxImportance = 5;
@@ -22,7 +21,6 @@ abstract class Weight {
     required this.scoringStage,
     required this.description,
     required this.importance,
-    required this.requiresScale,
   }) : assert(importance >= 0 && importance <= maxImportance);
 
   double score(ScaleDegreeProgression progression, [Scale? scale]);

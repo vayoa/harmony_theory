@@ -9,14 +9,9 @@ class InScaleWeight extends Weight {
   const InScaleWeight()
       : super(
           importance: 2,
-          requiresScale: false,
           scoringStage: ScoringStage.beforeSubstitution,
           description: const [WeightDescription.diatonic],
         );
-
-  static final List<ScaleDegree> degreesInScale = ScaleDegree.degrees
-      .map((e) => ScaleDegree.parse(e))
-      .toList(growable: false);
 
   static final List<ChordPattern> patternsInScale = [
     'Major',
@@ -41,12 +36,8 @@ class InScaleWeight extends Weight {
     // them is in degreesInScale.
     int count = 0;
     for (ScaleDegreeChord chord in progression.values) {
-      final int index = degreesInScale.indexOf(chord.rootDegree);
-      if (index != -1) {
-        if (patternsInScale[index] == chord.pattern ||
-            chord.degrees.every((d) => degreesInScale.contains(d))) {
-          count++;
-        }
+      if (chord.isDiatonic(progression.scalePattern)) {
+        count++;
       }
     }
     return count / progression.length;

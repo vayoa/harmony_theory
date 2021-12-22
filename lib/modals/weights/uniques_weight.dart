@@ -7,9 +7,8 @@ class UniquesWeight extends Weight {
   const UniquesWeight()
       : super(
           importance: 2,
-          requiresScale: false,
           scoringStage: ScoringStage.afterSubstitution,
-          description: const [WeightDescription.technical],
+          description: const [WeightDescription.exotic],
         );
 
   // FIXME: Optimize this a bit more...

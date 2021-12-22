@@ -1,11 +1,12 @@
 import 'dart:io';
 
-import 'package:thoery_test/extensions/scale_extensions.dart';
+import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/weights/in_scale_weight.dart';
+import 'package:thoery_test/modals/weights/overtaking_weight.dart';
 import 'package:thoery_test/modals/weights/uniques_weight.dart';
 import 'package:tonic/tonic.dart';
 import 'package:thoery_test/extensions/chord_extension.dart';
@@ -29,18 +30,26 @@ void main() {
   //     1 / 4);
   // print(weight.score(progression));
 
-  // RepetitionWeight
+  // // UniquesWeight
+  // ScaleDegreeProgression progression =
+  //     ScaleDegreeProgression.fromList(['ii', 'V', 'I', 'II', 'I']);
+  // const UniquesWeight weight = UniquesWeight();
+  // print(weight.score(progression));
+  // // Remember that the extra chords here get joined together...
+  // progression =
+  //     ScaleDegreeProgression.fromList(['ii', 'V', 'V', 'V', 'V', 'V', 'I']);
+  // print(weight.score(progression));
+  // progression =
+  //     ScaleDegreeProgression.fromList(['ii', 'I', 'II', 'V', 'v', 'V', 'VI']);
+  // print(weight.score(progression));
+
+  // OvertakingWeight
+  const OvertakingWeight overtakingWeight = OvertakingWeight();
+  const UniquesWeight uniquesWeight = UniquesWeight();
   ScaleDegreeProgression progression =
-      ScaleDegreeProgression.fromList(['ii', 'V', 'I', 'II', 'I']);
-  const UniquesWeight weight = UniquesWeight();
-  print(weight.score(progression));
-  // Remember that the extra chords here get joined together...
-  progression =
-      ScaleDegreeProgression.fromList(['ii', 'V', 'V', 'V', 'V', 'V', 'I']);
-  print(weight.score(progression));
-  progression =
-      ScaleDegreeProgression.fromList(['ii', 'I', 'II', 'V', 'v', 'V', 'VI']);
-  print(weight.score(progression));
+      ScaleDegreeProgression.fromList(['ii', 'I', 'ii', 'I']);
+  print(overtakingWeight.score(progression));
+  print(uniquesWeight.score(progression));
 }
 
 _basicMatchingTest({bool inputChords = false}) {
@@ -111,10 +120,11 @@ _basicMatchingTest({bool inputChords = false}) {
   // To demonstrate duration matching we'll add another ii V I progression but
   // with a different rhythm...
   _savedProgressions.addAll([
-    ScaleDegreeProgression.fromList(['ii', 'V', 'I'], [1 / 4, 1 / 4, 1 / 2]),
-    ScaleDegreeProgression.fromList(['V', 'I'], [1 / 4, 1 / 2]),
-    ScaleDegreeProgression.fromList(
-        ['ii', 'v', 'V', 'I'], [1 / 8, 1 / 8, 1 / 8, 1 / 2]),
+    ScaleDegreeProgression.fromList(['ii', 'V', 'I'],
+        durations: [1 / 4, 1 / 4, 1 / 2]),
+    ScaleDegreeProgression.fromList(['V', 'I'], durations: [1 / 4, 1 / 2]),
+    ScaleDegreeProgression.fromList(['ii', 'v', 'V', 'I'],
+        durations: [1 / 8, 1 / 8, 1 / 8, 1 / 2]),
   ]);
 
   print('Saved Progressions:\n$_savedProgressions.\n');

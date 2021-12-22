@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:tonic/tonic.dart';
 
 class ScaleDegree {
@@ -25,8 +27,11 @@ class ScaleDegree {
   /// Negative for flats and positive for sharps.
   int get offset => _offset;
 
+  bool get isDiatonic => _offset == 0;
+
   ScaleDegree.raw(int degree, int offset)
-      : _degree = degree,
+      : assert(degree > 0 && degree < 8),
+        _degree = degree,
         _offset = offset;
 
   ScaleDegree(ScalePattern scalePattern, Interval interval) {
@@ -37,7 +42,7 @@ class ScaleDegree {
     _offset = interval.semitones - _semitones[_degree - 1];
   }
 
-  /// Returns a [ScaleDegree] from the given [Interval], based on a major scale.
+  /// Returns a [ScaleDegree] from the given [Interval], based on a major scale!
   ScaleDegree.fromInterval(Interval interval) : this(majorKey, interval);
 
   ScaleDegree.parse(String degree) {
@@ -62,12 +67,14 @@ class ScaleDegree {
     }
   }
 
-  PitchClass inScale(Scale scale) => PitchClass.fromSemitones(
-      scale.pitchClasses[_degree - 1].integer + _offset);
+  PitchClass inScale(Scale scale) {
+    return PitchClass.fromSemitones(
+        scale.pitchClasses[_degree - 1].integer + _offset);
+  }
 
-  ScaleDegree add(ScalePattern pattern, Interval interval) {
+  ScaleDegree add(ScalePattern scalePattern, Interval interval) {
     final List<int> _semitones =
-        pattern.intervals.map<int>((e) => e.semitones).toList();
+        scalePattern.intervals.map<int>((e) => e.semitones).toList();
     Interval scaleDegree =
         Interval.fromSemitones(_semitones[_degree - 1] + _offset);
     interval = Interval.fromSemitones(
@@ -77,6 +84,15 @@ class ScaleDegree {
   }
 
   ScaleDegree addInMajor(Interval interval) => add(majorKey, interval);
+
+  Interval from(ScalePattern scalePattern, ScaleDegree other) =>
+      Interval.fromSemitones((scalePattern.intervals
+                  .sublist(min(_degree, other._degree) - 1,
+                      max(_degree, other._degree) - 1)
+                  .fold<int>(0, (prev, e) => prev + e.semitones) +
+              _offset +
+              other._offset) %
+          12);
 
   @override
   String toString() =>

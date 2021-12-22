@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:thoery_test/modals/progression.dart';
+import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
@@ -8,36 +9,60 @@ import 'chord_progression.dart';
 
 // TODO: Support uneven time signatures, in constructors and in the enter class.
 class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
+  final ScalePattern _scalePattern;
+
   ScaleDegreeProgression(List<ScaleDegreeChord> base, List<double> durations,
-      {TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : super(base, durations, timeSignature: timeSignature);
+      {ScalePattern? scalePattern,
+      TimeSignature timeSignature = const TimeSignature.evenTime()})
+      : _scalePattern = scalePattern ?? ScaleDegree.majorKey,
+        super(base, durations, timeSignature: timeSignature);
 
   ScaleDegreeProgression.empty(
-      {TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : this([], [], timeSignature: timeSignature);
+      {ScalePattern? scalePattern,
+      TimeSignature timeSignature = const TimeSignature.evenTime()})
+      : this([], [], timeSignature: timeSignature, scalePattern: scalePattern);
 
   ScaleDegreeProgression.fromProgression(
-      Progression<ScaleDegreeChord> progression)
-      : super(progression.values, progression.durations,
-            timeSignature: progression.timeSignature);
+      Progression<ScaleDegreeChord> progression,
+      {ScalePattern? scalePattern})
+      : this(progression.values, progression.durations,
+            timeSignature: progression.timeSignature,
+            scalePattern: scalePattern);
 
-  ScaleDegreeProgression.evenTime(List<ScaleDegreeChord> base)
-      : super.evenTime(base);
+  ScaleDegreeProgression.evenTime(List<ScaleDegreeChord> base,
+      {ScalePattern? scalePattern})
+      : _scalePattern = scalePattern ?? ScaleDegree.majorKey,
+        super.evenTime(base);
 
   /// Gets a list of [String] each representing a ScaleDegreeChord and returns
   /// a new [ScaleDegreeProgression].
-  ScaleDegreeProgression.fromList(List<String> base, [List<double>? durations])
-      : super(
-            base.map((String chord) => ScaleDegreeChord.parse(chord)).toList(),
-            durations ?? List.generate(base.length, (index) => 1 / 4));
+  /// If [scalePattern] isn't specified, it will be [ScaleDegree.majorKey].
+  ScaleDegreeProgression.fromList(List<String> base,
+      {List<double>? durations,
+      TimeSignature? timeSignature,
+      ScalePattern? scalePattern})
+      : this(
+            base
+                .map((String chord) => ScaleDegreeChord.parse(
+                    scalePattern ?? ScaleDegree.majorKey, chord))
+                .toList(),
+            durations ?? List.generate(base.length, (index) => 1 / 4),
+            timeSignature: timeSignature ?? const TimeSignature.evenTime(),
+            scalePattern: scalePattern);
 
-  ScaleDegreeProgression.fromChords(Scale scale, ChordProgression chords)
-      : super(
+  ScaleDegreeProgression.fromChords(Scale scale, ChordProgression chords,
+      {TimeSignature? timeSignature})
+      : this(
             chords
                 .map((Chord chord) => ScaleDegreeChord(scale, chord))
                 .toList(),
-            chords.durations);
+            chords.durations,
+            timeSignature: timeSignature ?? const TimeSignature.evenTime(),
+            scalePattern: scale.pattern);
 
+  ScalePattern get scalePattern => _scalePattern;
+
+  // TDC: Implement scale pattern matching!!
   /// Returns a list containing lists of match locations (first element is
   /// the location in [base] and second is location "here"...).
   List<List<int>> getFittingMatchLocations(ScaleDegreeProgression base) {
@@ -223,13 +248,15 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     return points / length;
   }
 
+  // TDC: Implement scale pattern matching!!
   /// Returns a substituted [base] from the current progression if possible.
   /// If not, returns [base].
   /* TODO: Don't just copy the code, also it's inefficient to calculate these
       things twice.
   */
   /* TODO: If the base is a IVmaj7 V7 Imaj7 and we're a ii V I we should still
-          match, and suggest a ii7 V7 Imaj7.
+          match, and suggest a ii7 V7 Imaj7. (THIS CAN NOW BE DONE WITH THE NEW
+          WEAK EQUALITY FUNCTION...).
    */
   List<ScaleDegreeProgression> getPossibleSubstitutions(
       ScaleDegreeProgression base) {
