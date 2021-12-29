@@ -10,7 +10,7 @@ class InScaleWeight extends Weight {
       : super(
           importance: 2,
           scoringStage: ScoringStage.beforeSubstitution,
-          description: const [WeightDescription.diatonic],
+          description: WeightDescription.diatonic,
         );
 
   static final List<ChordPattern> patternsInScale = [

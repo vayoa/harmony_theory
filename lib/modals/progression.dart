@@ -6,17 +6,13 @@ class Progression<T> {
   late final List<T> _values;
 
   List<T> get values => _values;
-  late final List<double> _durations;
+  final List<double> _durations;
 
   List<double> get durations => _durations;
 
-  TimeSignature _timeSignature;
+  final TimeSignature _timeSignature;
 
   TimeSignature get timeSignature => _timeSignature;
-
-  Progression<T> get reversed =>
-      Progression(_values.reversed.toList(), _durations.reversed.toList(),
-          timeSignature: timeSignature);
 
   bool _full = false;
 
@@ -36,7 +32,7 @@ class Progression<T> {
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : assert(_values.length == _durations.length),
         _timeSignature = timeSignature {
-    if (isNotEmpty) {
+    if (!isEmpty) {
       // Join all the adjacent equal values.
       int i = 0;
       while (i < length - 1) {
@@ -62,8 +58,13 @@ class Progression<T> {
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this([], [], timeSignature: timeSignature);
 
-  Progression.evenTime(List<T> base)
-      : this(base, List.generate(base.length, (index) => 1 / 4));
+  Progression.evenTime(List<T> base,
+      {TimeSignature timeSignature = const TimeSignature.evenTime()})
+      : this(
+            base,
+            List.generate(
+                base.length, (index) => 1 / timeSignature.denominator),
+            timeSignature: timeSignature);
 
   bool updateFull() {
     if (isEmpty) return false;
@@ -141,7 +142,7 @@ class Progression<T> {
       currentRhythmSum += newDur;
       currentMeasure.add(_values[i], newDur);
     }
-    if (currentMeasure.isNotEmpty) measures.add(currentMeasure);
+    if (!currentMeasure.isEmpty) measures.add(currentMeasure);
     return measures;
   }
 
@@ -165,6 +166,7 @@ class Progression<T> {
     updateFull();
   }
 
+  // TODO: Change this from map entry to something else...
   MapEntry<T, double> removeAt(int index) {
     T val = _values.removeAt(index);
     double dur = _durations.removeAt(index);
@@ -254,8 +256,6 @@ class Progression<T> {
   }
 
   bool get isEmpty => _values.isEmpty;
-
-  bool get isNotEmpty => _values.isNotEmpty;
 
   Progression<T> sublist(int start, [int? end]) =>
       Progression(_values.sublist(start, end), _durations.sublist(start, end),

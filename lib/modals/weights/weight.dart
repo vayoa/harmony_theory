@@ -6,7 +6,7 @@ import 'package:tonic/tonic.dart';
 /// 0 - 1, that is later multiplied by it's [importance].
 abstract class Weight {
   final ScoringStage scoringStage;
-  final List<WeightDescription> description;
+  final WeightDescription description;
 
   /// The max [importance] value a [Weight] can have (inclusive).
   static const maxImportance = 5;

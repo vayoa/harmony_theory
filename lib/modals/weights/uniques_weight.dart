@@ -8,7 +8,7 @@ class UniquesWeight extends Weight {
       : super(
           importance: 2,
           scoringStage: ScoringStage.afterSubstitution,
-          description: const [WeightDescription.exotic],
+          description: WeightDescription.exotic,
         );
 
   // FIXME: Optimize this a bit more...

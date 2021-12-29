@@ -1,16 +1,12 @@
 import 'dart:io';
 
 import 'package:thoery_test/extensions/scale_extension.dart';
-import 'package:thoery_test/modals/progression.dart';
-import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/weights/in_scale_weight.dart';
-import 'package:thoery_test/modals/weights/overtaking_weight.dart';
-import 'package:thoery_test/modals/weights/uniques_weight.dart';
 import 'package:tonic/tonic.dart';
 import 'package:thoery_test/extensions/chord_extension.dart';
 import 'modals/chord_progression.dart';
+import 'modals/scale_degree.dart';
 
 void main() {
   // // InScaleWeight
@@ -43,13 +39,21 @@ void main() {
   //     ScaleDegreeProgression.fromList(['ii', 'I', 'II', 'V', 'v', 'V', 'VI']);
   // print(weight.score(progression));
 
-  // OvertakingWeight
-  const OvertakingWeight overtakingWeight = OvertakingWeight();
-  const UniquesWeight uniquesWeight = UniquesWeight();
-  ScaleDegreeProgression progression =
-      ScaleDegreeProgression.fromList(['ii', 'I', 'ii', 'I']);
-  print(overtakingWeight.score(progression));
-  print(uniquesWeight.score(progression));
+  // // OvertakingWeight
+  // const OvertakingWeight overtakingWeight = OvertakingWeight();
+  // const UniquesWeight uniquesWeight = UniquesWeight();
+  // ScaleDegreeProgression progression =
+  //     ScaleDegreeProgression.fromList(['ii7', 'I', 'ii', 'I']);
+  // print(overtakingWeight.score(progression));
+  // print(uniquesWeight.score(progression));
+
+  ScaleDegreeProgression prog =
+      ScaleDegreeProgression.fromList(['ii7', 'V7', 'I']);
+  print(prog);
+  print(prog.modeShift(5));
+  print(prog.harmonicModeShift(true));
+
+  // _basicMatchingTest();
 }
 
 _basicMatchingTest({bool inputChords = false}) {
@@ -86,7 +90,7 @@ _basicMatchingTest({bool inputChords = false}) {
   print('Your Progression:\n$_baseChordProgression.');
 
   // Detect the base progressions' scale
-  final List<Scale> _possibleScales = _baseChordProgression.matchWithKeys();
+  final List<Scale> _possibleScales = _baseChordProgression.matchWithScales();
   print('Scale Found: ${_possibleScales[0].getCommonName()}.');
 
   // Convert the base progression to roman numerals, we used the most probable
@@ -126,6 +130,11 @@ _basicMatchingTest({bool inputChords = false}) {
     ScaleDegreeProgression.fromList(['ii', 'v', 'V', 'I'],
         durations: [1 / 8, 1 / 8, 1 / 8, 1 / 2]),
   ]);
+
+  // To demonstrate different modes matching we'll add another ii V I
+  // progression but in a minor scale...
+  _savedProgressions.add(ScaleDegreeProgression.fromList(['iidim', 'V', 'I'],
+      scalePattern: ScaleDegree.minorKey));
 
   print('Saved Progressions:\n$_savedProgressions.\n');
 
@@ -172,28 +181,6 @@ _basicMatchingTest({bool inputChords = false}) {
           ' ${rS.rating.toStringAsFixed(3)},\n';
     }
     print('-- ${e.key} --\n$subs');
-  }
-}
-
-_test() {
-  ChordProgression chords = ChordProgression.evenTime([
-    Chord.parse('Dm'),
-    Chord.parse('G'),
-    Chord.parse('C'),
-  ]);
-
-  final List<String> _chordNames =
-      chords.map<String>((chord) => chord.getCommonName()).toList();
-
-  print(_chordNames.toString() + '\n');
-
-  final List<Scale> scales = matchChordNamesWithKey(_chordNames);
-  for (Scale scale in scales) {
-    print(scale.getCommonName());
-    List<ScaleDegreeChord> _scaleDegreeChords = chords
-        .map<ScaleDegreeChord>((chord) => ScaleDegreeChord(scale, chord))
-        .toList();
-    print(_scaleDegreeChords.toString() + '\n');
   }
 }
 

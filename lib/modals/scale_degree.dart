@@ -13,15 +13,17 @@ class ScaleDegree {
     'VII'
   ];
 
+  // TODO: Move this...
   static final majorKey = ScalePattern.findByName('Diatonic Major');
+  static final minorKey = ScalePattern.findByName('Natural Minor');
 
   late final int _degree;
   late final int _offset;
 
   /// The scale degree number.
   /// Examples:
-  /// The [degree] for III is 3.
-  /// The [degree] for V is 5.
+  /// The [degree] for III is 2.
+  /// The [degree] for V is 4.
   int get degree => _degree;
 
   /// Negative for flats and positive for sharps.
@@ -38,8 +40,8 @@ class ScaleDegree {
     final List<int> _semitones =
         scalePattern.intervals.map<int>((e) => e.semitones).toList();
     interval = Interval.fromSemitones(interval.semitones % 12);
-    _degree = interval.number;
-    _offset = interval.semitones - _semitones[_degree - 1];
+    _degree = interval.number - 1;
+    _offset = interval.semitones - _semitones[_degree];
   }
 
   /// Returns a [ScaleDegree] from the given [Interval], based on a major scale!
@@ -53,7 +55,7 @@ class ScaleDegree {
     if (index == 0) {
       throw FormatException("invalid ScaleDegree name: $degree");
     }
-    _degree = index;
+    _degree = index - 1;
     // TODO: Test offset handling.
     if (offsetStr.isNotEmpty) {
       if (offsetStr.startsWith(RegExp(r'[#b♯♭𝄪𝄫]'))) {
@@ -67,16 +69,26 @@ class ScaleDegree {
     }
   }
 
+  // TODO: This only works for major based modes...,
+  /// Returns a new [ScaleDegree] converted from the [fromMode] mode to [toMode]
+  /// mode.
+  /// Ionian's (Major) mode number is 0 and so on...
+  /// Example: I.modeShift(0, 5) [major to minor] => IV.
+  ScaleDegree modeShift(int fromMode, int toMode) {
+    assert(fromMode >= 0 && fromMode <= 7 && toMode >= 0 && toMode <= 7);
+    return ScaleDegree.raw((_degree + (toMode - fromMode)) % 7, _offset);
+  }
+
   PitchClass inScale(Scale scale) {
     return PitchClass.fromSemitones(
-        scale.pitchClasses[_degree - 1].integer + _offset);
+        scale.pitchClasses[_degree].integer + _offset);
   }
 
   ScaleDegree add(ScalePattern scalePattern, Interval interval) {
     final List<int> _semitones =
         scalePattern.intervals.map<int>((e) => e.semitones).toList();
     Interval scaleDegree =
-        Interval.fromSemitones(_semitones[_degree - 1] + _offset);
+        Interval.fromSemitones(_semitones[_degree] + _offset);
     interval = Interval.fromSemitones(
         (interval.semitones + scaleDegree.semitones) % 12);
     return ScaleDegree.raw(
@@ -87,8 +99,8 @@ class ScaleDegree {
 
   Interval from(ScalePattern scalePattern, ScaleDegree other) =>
       Interval.fromSemitones((scalePattern.intervals
-                  .sublist(min(_degree, other._degree) - 1,
-                      max(_degree, other._degree) - 1)
+                  .sublist(
+                      min(_degree, other._degree), max(_degree, other._degree))
                   .fold<int>(0, (prev, e) => prev + e.semitones) +
               _offset +
               other._offset) %
@@ -96,7 +108,7 @@ class ScaleDegree {
 
   @override
   String toString() =>
-      ((_offset.isNegative ? 'b' : '#') * _offset.abs()) + degrees[_degree - 1];
+      ((_offset.isNegative ? 'b' : '#') * _offset.abs()) + degrees[_degree];
 
   @override
   bool operator ==(Object other) =>

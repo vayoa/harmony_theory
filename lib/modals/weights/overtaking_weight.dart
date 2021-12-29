@@ -8,7 +8,7 @@ class OvertakingWeight extends Weight {
       : super(
           importance: 4,
           scoringStage: ScoringStage.afterSubstitution,
-          description: const [WeightDescription.technical],
+          description: WeightDescription.technical,
         );
 
   static const double overtaking = 1 / 3;

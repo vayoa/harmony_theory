@@ -5,14 +5,25 @@ extension ScaleExtension on Scale {
   String getCommonName() {
     final String scaleTonic = tonic.toString();
     final String scalePattern =
-    pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
+        pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
     return scaleTonic + ' ' + scalePattern;
   }
 }
 
 extension ScalePatternExtension on ScalePattern {
-  bool equals(Object other) {
-    if (other is ScalePattern && intervals.length == other.intervals.length) {
+  String get shortName {
+    switch (name) {
+      case 'Diatonic Major':
+        return 'M';
+      case 'Natural Minor':
+        return 'm';
+      default:
+        return name;
+    }
+  }
+
+  bool equals(ScalePattern other) {
+    if (intervals.length == other.intervals.length) {
       for (int i = 0; i < intervals.length; i++) {
         if (!intervals[i].equals(other.intervals[i])) return false;
       }
