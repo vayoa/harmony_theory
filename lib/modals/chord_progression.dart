@@ -4,8 +4,9 @@ import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
 
 class ChordProgression extends Progression<Chord> {
-  ChordProgression(List<Chord> base, List<double> durations)
-      : super(base, durations);
+  ChordProgression(List<Chord> base, List<double> durations,
+      {TimeSignature timeSignature = const TimeSignature.evenTime()})
+      : super(base, durations, timeSignature: timeSignature);
 
   /// Returns a new [ChordProgression] where all the chords are of 1/4 duration.
   ChordProgression.evenTime(List<Chord> base,
@@ -76,7 +77,7 @@ class ChordProgression extends Progression<Chord> {
   String valueFormat(Chord value) => value.getCommonName();
 }
 
-class ScaleMatchUtilities {
+abstract class ScaleMatchUtilities {
   static String getRootChord(String scale) {
     List<String> sep = scale.split(' ');
     final String type = sep[1] == "Major" ? '' : 'm';

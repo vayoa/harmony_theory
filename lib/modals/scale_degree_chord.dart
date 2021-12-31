@@ -51,8 +51,15 @@ class ScaleDegreeChord {
         _rootDegree = rootDegree;
 
   ScaleDegreeChord.copy(ScaleDegreeChord chord)
-      : _pattern = chord._pattern,
-        _rootDegree = chord.rootDegree;
+      : _pattern = ChordPattern(
+            name: chord._pattern.name,
+            fullName: chord._pattern.fullName,
+            abbrs: chord._pattern.abbrs,
+            intervals: chord._pattern.intervals),
+        _rootDegree = ScaleDegree.raw(
+          chord.rootDegree.degree,
+          chord.rootDegree.offset,
+        );
 
   ScaleDegreeChord.parse(String chord) {
     final match = chordNamePattern.matchAsPrefix(chord);
@@ -95,29 +102,6 @@ class ScaleDegreeChord {
   /// Example: ii.modeShift(0, 5) [major to minor] => iv.
   ScaleDegreeChord modeShift(int fromMode, int toMode) =>
       ScaleDegreeChord.raw(_pattern, rootDegree.modeShift(fromMode, toMode));
-
-  // TODO: This only works for major based modes...
-  // TODO: Optimize this...
-  /// Returns a new [ScaleDegreeChord] converted from major to minor if
-  /// [toMinor] is true and the opposite otherwise.
-  /// Example: ii.harmonicModeShift(true) [major to minor] => iidim.
-  ScaleDegreeChord harmonicModeShift(bool toMinor) {
-    int index = _rootDegree.degree, add = index;
-    if (toMinor) {
-      add += 5;
-    }
-    // Only if we're diatonic we has an harmonic equivalent...
-    if (_rootDegree.isDiatonic) {
-      if (_majorChordPatternNames[index] == _pattern.name) {
-        return ScaleDegreeChord.raw(
-            ChordPattern.parse(_majorChordPatternNames[add]), _rootDegree);
-      } else if (_major7sChordPatternNames[index] == _pattern.name) {
-        return ScaleDegreeChord.raw(
-            ChordPattern.parse(_major7sChordPatternNames[add]), _rootDegree);
-      }
-    }
-    return ScaleDegreeChord.copy(this);
-  }
 
   @override
   String toString() {
@@ -190,7 +174,7 @@ class ScaleDegreeChord {
       }
     }
     return Object.hash(_rootDegree,
-        Object.hashAll([for (Interval interval in intervals) interval.hashEx]));
+        Object.hashAll([for (Interval interval in intervals) interval.getHash]));
   }
 }
 

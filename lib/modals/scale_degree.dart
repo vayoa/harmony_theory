@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:tonic/tonic.dart';
 
 class ScaleDegree {
@@ -13,10 +14,6 @@ class ScaleDegree {
     'VII'
   ];
 
-  // TODO: Move this...
-  static final majorKey = ScalePattern.findByName('Diatonic Major');
-  static final minorKey = ScalePattern.findByName('Natural Minor');
-
   late final int _degree;
   late final int _offset;
 
@@ -26,6 +23,7 @@ class ScaleDegree {
   /// The [degree] for V is 4.
   int get degree => _degree;
 
+  // TODO: Rename to accidentals.
   /// Negative for flats and positive for sharps.
   int get offset => _offset;
 
@@ -36,6 +34,8 @@ class ScaleDegree {
         _degree = degree,
         _offset = offset;
 
+  /* TODO: Combine this and add into one method and then implement it (since
+            they share code...) */
   ScaleDegree(ScalePattern scalePattern, Interval interval) {
     final List<int> _semitones =
         scalePattern.intervals.map<int>((e) => e.semitones).toList();
@@ -45,7 +45,8 @@ class ScaleDegree {
   }
 
   /// Returns a [ScaleDegree] from the given [Interval], based on a major scale!
-  ScaleDegree.fromInterval(Interval interval) : this(majorKey, interval);
+  ScaleDegree.fromInterval(Interval interval)
+      : this(ScalePatternExtension.majorKey, interval);
 
   ScaleDegree.parse(String degree) {
     final int startIndex = degree.indexOf(RegExp(r'i|v', caseSensitive: false));
@@ -95,7 +96,8 @@ class ScaleDegree {
         interval.number, interval.semitones - _semitones[interval.number - 1]);
   }
 
-  ScaleDegree addInMajor(Interval interval) => add(majorKey, interval);
+  ScaleDegree addInMajor(Interval interval) =>
+      add(ScalePatternExtension.majorKey, interval);
 
   Interval from(ScalePattern scalePattern, ScaleDegree other) =>
       Interval.fromSemitones((scalePattern.intervals

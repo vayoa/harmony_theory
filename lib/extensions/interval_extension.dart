@@ -5,5 +5,5 @@ extension IntervalExtension on Interval {
       other is Interval &&
       (number == other.number && qualitySemitones == other.qualitySemitones);
 
-  int get hashEx => Object.hash(number, qualitySemitones);
+  int get getHash => Object.hash(number, qualitySemitones);
 }

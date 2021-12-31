@@ -13,6 +13,6 @@ class UniquesWeight extends Weight {
 
   // FIXME: Optimize this a bit more...
   @override
-  double score(ScaleDegreeProgression progression, [Scale? scale]) =>
+  double score(ScaleDegreeProgression progression) =>
       progression.values.toSet().length / progression.length;
 }

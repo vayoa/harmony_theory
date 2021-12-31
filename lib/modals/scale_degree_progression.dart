@@ -15,7 +15,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   ScaleDegreeProgression(List<ScaleDegreeChord> base, List<double> durations,
       {ScalePattern? scalePattern,
       TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : _scalePattern = scalePattern ?? ScaleDegree.majorKey,
+      : _scalePattern = scalePattern ?? ScalePatternExtension.majorKey,
         super(base, durations, timeSignature: timeSignature);
 
   ScaleDegreeProgression.empty(
@@ -33,7 +33,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   ScaleDegreeProgression.evenTime(List<ScaleDegreeChord> base,
       {TimeSignature timeSignature = const TimeSignature.evenTime(),
       ScalePattern? scalePattern})
-      : _scalePattern = scalePattern ?? ScaleDegree.majorKey,
+      : _scalePattern = scalePattern ?? ScalePatternExtension.majorKey,
         super.evenTime(base, timeSignature: timeSignature);
 
   /// Gets a list of [String] each representing a ScaleDegreeChord and returns
@@ -41,21 +41,24 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   /// If [scalePattern] isn't specified, it will be [ScaleDegree.majorKey].
   ScaleDegreeProgression.fromList(List<String> base,
       {List<double>? durations,
-      TimeSignature? timeSignature,
+      TimeSignature timeSignature = const TimeSignature.evenTime(),
       ScalePattern? scalePattern})
-      : this(base.map((String chord) => ScaleDegreeChord.parse(chord)).toList(),
-            durations ?? List.generate(base.length, (index) => 1 / 4),
-            timeSignature: timeSignature ?? const TimeSignature.evenTime(),
+      : this(
+            base.map((String chord) => ScaleDegreeChord.parse(chord)).toList(),
+            durations ??
+                List.generate(
+                    base.length, (index) => 1 / timeSignature.denominator),
+            timeSignature: timeSignature,
             scalePattern: scalePattern);
 
   ScaleDegreeProgression.fromChords(Scale scale, ChordProgression chords,
-      {TimeSignature? timeSignature})
+      {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this(
-            chords
+            chords.values
                 .map((Chord chord) => ScaleDegreeChord(scale, chord))
                 .toList(),
             chords.durations,
-            timeSignature: timeSignature ?? const TimeSignature.evenTime(),
+            timeSignature: timeSignature,
             scalePattern: scale.pattern);
 
   ScalePattern get scalePattern => _scalePattern;
@@ -71,27 +74,12 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           .map((ScaleDegreeChord chord) => chord.modeShift(fromMode, toMode))
           .toList(),
       [...durations],
-      scalePattern: toMode == 0 ? ScaleDegree.majorKey : ScaleDegree.minorKey,
+      scalePattern: toMode == 0
+          ? ScalePatternExtension.majorKey
+          : ScalePatternExtension.minorKey,
       timeSignature: timeSignature,
     );
   }
-
-  // TODO: This only works for major based modes...
-  // TODO: Optimize this...
-  /// Returns a new [ScaleDegreeProgression] converted from major to minor if
-  /// [toMinor] is true and the opposite otherwise.
-  /// Example: [ii, V, I].harmonicModeShift(true) [major to minor] =>
-  /// [iidim, V, I].
-  ScaleDegreeProgression harmonicModeShift(bool toMinor) =>
-      ScaleDegreeProgression(
-        [
-          for (ScaleDegreeChord chord in values)
-            chord.harmonicModeShift(toMinor)
-        ],
-        [...durations],
-        scalePattern: toMinor ? ScaleDegree.minorKey : ScaleDegree.majorKey,
-        timeSignature: timeSignature,
-      );
 
   // TDC: Implement scale pattern matching!!
   /// Returns a list containing lists of match locations (first element is
@@ -204,7 +192,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     while (i < length && j < length) {
       // If both chords are at the same duration away from the beginning of
       // the progression and are both the same in chord and in duration,
-      // we add they're duration to the durationSum.
+      // we add their duration to the durationSum.
       if (sum == otherSum) {
         if (this[i] == other[j] && durations[i] == other.durations[j]) {
           durationSum += durations[i];

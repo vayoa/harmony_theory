@@ -1,12 +1,9 @@
 import 'dart:io';
 
 import 'package:thoery_test/extensions/scale_extension.dart';
-import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:tonic/tonic.dart';
-import 'package:thoery_test/extensions/chord_extension.dart';
 import 'modals/chord_progression.dart';
-import 'modals/scale_degree.dart';
 
 void main() {
   // // InScaleWeight
@@ -51,7 +48,6 @@ void main() {
       ScaleDegreeProgression.fromList(['ii7', 'V7', 'I']);
   print(prog);
   print(prog.modeShift(5));
-  print(prog.harmonicModeShift(true));
 
   // _basicMatchingTest();
 }
@@ -134,7 +130,7 @@ _basicMatchingTest({bool inputChords = false}) {
   // To demonstrate different modes matching we'll add another ii V I
   // progression but in a minor scale...
   _savedProgressions.add(ScaleDegreeProgression.fromList(['iidim', 'V', 'I'],
-      scalePattern: ScaleDegree.minorKey));
+      scalePattern: ScalePatternExtension.minorKey));
 
   print('Saved Progressions:\n$_savedProgressions.\n');
 

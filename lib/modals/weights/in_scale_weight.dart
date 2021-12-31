@@ -26,7 +26,7 @@ class InScaleWeight extends Weight {
   /* TODO: Currently works only with minor and major scales, should update this
             if necessary. */
   @override
-  double score(ScaleDegreeProgression progression, [Scale? scale]) {
+  double score(ScaleDegreeProgression progression) {
     // check if the degree is in degreesInScale
     // if it is, check if it's pattern (in the same index) is in
     // patternsInScale.

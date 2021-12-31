@@ -175,7 +175,9 @@ class Progression<T> {
 
   @override
   bool operator ==(Object other) {
-    if (other is! Progression<T> || length != other.length) {
+    if (other is! Progression<T> ||
+        _duration != other._duration ||
+        length != other.length) {
       return false;
     }
     for (int i = 0; i < length; i++) {
@@ -244,11 +246,6 @@ class Progression<T> {
 
   int get length => _values.length;
 
-  set length(int newLength) {
-    _values.length = newLength;
-    _durations.length = newLength;
-  }
-
   T operator [](int index) => _values[index];
 
   void operator []=(int index, T value) {
@@ -260,6 +257,4 @@ class Progression<T> {
   Progression<T> sublist(int start, [int? end]) =>
       Progression(_values.sublist(start, end), _durations.sublist(start, end),
           timeSignature: _timeSignature);
-
-  Iterable<E> map<E>(E Function(T e) toElement) => _values.map(toElement);
 }

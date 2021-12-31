@@ -9,7 +9,7 @@ abstract class Weight {
   final WeightDescription description;
 
   /// The max [importance] value a [Weight] can have (inclusive).
-  static const maxImportance = 5;
+  static const int maxImportance = 5;
 
   /// Represents the importance of the weight, ranges between 0 and
   /// [maxImportance] (inclusive).
@@ -23,11 +23,12 @@ abstract class Weight {
     required this.importance,
   }) : assert(importance >= 0 && importance <= maxImportance);
 
-  double score(ScaleDegreeProgression progression, [Scale? scale]);
+  // TDC: Add a minor / major flag here.
+  double score(ScaleDegreeProgression progression);
 
   /// Returns the [progression]'s score after scaling it based on [importance].
-  double scaledScore(ScaleDegreeProgression progression, [Scale? scale]) =>
-      score(progression, scale) * importance;
+  double scaledScore(ScaleDegreeProgression progression) =>
+      score(progression) * importance;
 }
 
 enum WeightDescription {

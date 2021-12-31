@@ -11,6 +11,9 @@ extension ScaleExtension on Scale {
 }
 
 extension ScalePatternExtension on ScalePattern {
+  static final majorKey = ScalePattern.findByName('Diatonic Major');
+  static final minorKey = ScalePattern.findByName('Natural Minor');
+
   String get shortName {
     switch (name) {
       case 'Diatonic Major':
