@@ -1,3 +1,4 @@
+import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/extensions/interval_extension.dart';
 import 'package:tonic/tonic.dart';
@@ -87,12 +88,15 @@ class ScaleDegreeChord {
 
   ScaleDegree get rootDegree => _rootDegree;
 
-  List<ScaleDegree> degrees(ScalePattern scalePattern) =>
-      _pattern.intervals.map((i) => _rootDegree.add(scalePattern, i)).toList();
+  /// Returns a list of [ScaleDegree] that represents the degrees that make up
+  /// the [ScaleDegreeChord] in the major scale.
+  List<ScaleDegree> get degrees => _pattern.intervals
+      .map((i) => _rootDegree.add(ScalePatternExtension.majorKey, i))
+      .toList();
 
   // FIXME: Optimize this!
-  bool isDiatonic(ScalePattern scalePattern) =>
-      degrees(scalePattern).every((degree) => degree.isDiatonic);
+  /// Returns true if the chord is diatonic in the major scale.
+  bool get isDiatonic => degrees.every((degree) => degree.isDiatonic);
 
   // TODO: This only works for major based modes...
   /// Returns a new [ScaleDegreeChord] representing the current
@@ -163,18 +167,23 @@ class ScaleDegreeChord {
     return true;
   }
 
+  // TDC: Only works for the major scale, is this correct?
   // TDC: Check if this works correctly!!
   /// Returns a hash of the chord with no tensions. 7th are hashed in if
-  /// they're not diatonic (based on [scalePattern]).
-  int weakHash(ScalePattern scalePattern) {
+  /// they're not diatonic (based on the major scale).
+  int get weakHash {
     List<Interval> intervals = _pattern.intervals.sublist(1, 3);
     if (intervals.length >= 4) {
-      if (!_rootDegree.add(scalePattern, _pattern.intervals[3]).isDiatonic) {
+      if (!_rootDegree
+          .add(ScalePatternExtension.majorKey, _pattern.intervals[3])
+          .isDiatonic) {
         intervals.add(_pattern.intervals[3]);
       }
     }
-    return Object.hash(_rootDegree,
-        Object.hashAll([for (Interval interval in intervals) interval.getHash]));
+    return Object.hash(
+        _rootDegree,
+        Object.hashAll(
+            [for (Interval interval in intervals) interval.getHash]));
   }
 }
 

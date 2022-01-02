@@ -44,12 +44,12 @@ void main() {
   // print(overtakingWeight.score(progression));
   // print(uniquesWeight.score(progression));
 
-  ScaleDegreeProgression prog =
-      ScaleDegreeProgression.fromList(['ii7', 'V7', 'I']);
-  print(prog);
-  print(prog.modeShift(5));
+  // ScaleDegreeProgression prog =
+  //     ScaleDegreeProgression.fromList(['ii7', 'V7', 'I']);
+  // print(prog);
+  // print(prog.modeShift(toMode: 5));
 
-  // _basicMatchingTest();
+  _basicMatchingTest();
 }
 
 _basicMatchingTest({bool inputChords = false}) {
@@ -73,16 +73,16 @@ _basicMatchingTest({bool inputChords = false}) {
     } while (input != '-');
   } else {
     _chords = [
+      Chord.parse('C'),
       Chord.parse('F'),
       Chord.parse('G'),
       Chord.parse('C'),
-      // Chord.parse('C'),
     ];
   }
 
   final ChordProgression _baseChordProgression = inputChords
       ? ChordProgression.evenTime(_chords)
-      : ChordProgression(_chords, [1 / 2, 1 / 2, 1]);
+      : ChordProgression(_chords, [1 / 2, 1 / 2, 1, 1]);
   print('Your Progression:\n$_baseChordProgression.');
 
   // Detect the base progressions' scale
@@ -129,20 +129,26 @@ _basicMatchingTest({bool inputChords = false}) {
 
   // To demonstrate different modes matching we'll add another ii V I
   // progression but in a minor scale...
-  _savedProgressions.add(ScaleDegreeProgression.fromList(['iidim', 'V', 'I'],
-      scalePattern: ScalePatternExtension.minorKey));
+  _savedProgressions
+      .add(ScaleDegreeProgression.fromList(['iidim', 'V', 'I'], inMinor: true));
 
   print('Saved Progressions:\n$_savedProgressions.\n');
 
   // Calculate all of the possible substitutions based on the library and
   // save each one's similarity rating.
-  Map<ScaleDegreeProgression, List<RatedSubstitution>> _ratedSubstitutions = {
-    for (var e in _savedProgressions) e: []
-  };
+  Map<ScaleDegreeProgression, List<RatedSubstitution>> _ratedSubstitutions = {};
   for (ScaleDegreeProgression progression in _savedProgressions) {
-    progression.getPossibleSubstitutions(_baseProgression).forEach(
-        (ScaleDegreeProgression sub) => _ratedSubstitutions[progression]!.add(
-            RatedSubstitution(sub, sub.percentMatchedTo(_baseProgression))));
+    final List<ScaleDegreeProgression> subs =
+        progression.getPossibleSubstitutions(_baseProgression);
+    for (var sub in subs) {
+      final RatedSubstitution rs =
+          RatedSubstitution(sub, sub.percentMatchedTo(_baseProgression));
+      if (_ratedSubstitutions.containsKey(progression)) {
+        _ratedSubstitutions[progression]!.add(rs);
+      } else {
+        _ratedSubstitutions[progression] = [rs];
+      }
+    }
   }
 
   // Sort the rated progressions based on their ratings, descending order...

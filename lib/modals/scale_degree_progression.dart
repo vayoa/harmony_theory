@@ -9,74 +9,84 @@ import 'package:tonic/tonic.dart';
 import 'chord_progression.dart';
 
 // TODO: Support uneven time signatures, in constructors and in the enter class.
+
+/// A class representing a harmonic progression, built by [ScaleDegreeChord].
+/// The mode of the progression will always be Ionian (Major).
 class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
-  final ScalePattern _scalePattern;
+
+  /// While the individual [ScaleDegreeChord] in the progression are represented
+  /// in the major scale. The overall progression could still be in the minor
+  /// scale.
+  final bool _inMinor;
 
   ScaleDegreeProgression(List<ScaleDegreeChord> base, List<double> durations,
-      {ScalePattern? scalePattern,
+      {bool inMinor = false,
       TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : _scalePattern = scalePattern ?? ScalePatternExtension.majorKey,
+      : _inMinor = inMinor,
         super(base, durations, timeSignature: timeSignature);
 
   ScaleDegreeProgression.empty(
-      {ScalePattern? scalePattern,
+      {bool inMinor = false,
       TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : this([], [], timeSignature: timeSignature, scalePattern: scalePattern);
+      : this([], [], inMinor: inMinor, timeSignature: timeSignature);
 
   ScaleDegreeProgression.fromProgression(
       Progression<ScaleDegreeChord> progression,
-      {ScalePattern? scalePattern})
+      {bool inMinor = false})
       : this(progression.values, progression.durations,
-            timeSignature: progression.timeSignature,
-            scalePattern: scalePattern);
+            inMinor: inMinor, timeSignature: progression.timeSignature);
 
   ScaleDegreeProgression.evenTime(List<ScaleDegreeChord> base,
-      {TimeSignature timeSignature = const TimeSignature.evenTime(),
-      ScalePattern? scalePattern})
-      : _scalePattern = scalePattern ?? ScalePatternExtension.majorKey,
+      {bool inMinor = false,
+      TimeSignature timeSignature = const TimeSignature.evenTime()})
+      : _inMinor = inMinor,
         super.evenTime(base, timeSignature: timeSignature);
 
   /// Gets a list of [String] each representing a ScaleDegreeChord and returns
   /// a new [ScaleDegreeProgression].
   /// If [scalePattern] isn't specified, it will be [ScaleDegree.majorKey].
-  ScaleDegreeProgression.fromList(List<String> base,
-      {List<double>? durations,
-      TimeSignature timeSignature = const TimeSignature.evenTime(),
-      ScalePattern? scalePattern})
-      : this(
+  ScaleDegreeProgression.fromList(
+    List<String> base, {
+    List<double>? durations,
+    bool inMinor = false,
+    TimeSignature timeSignature = const TimeSignature.evenTime(),
+  }) : this(
             base.map((String chord) => ScaleDegreeChord.parse(chord)).toList(),
             durations ??
                 List.generate(
                     base.length, (index) => 1 / timeSignature.denominator),
-            timeSignature: timeSignature,
-            scalePattern: scalePattern);
+            inMinor: inMinor,
+            timeSignature: timeSignature);
 
+  // TDC: Remove 'inMinor' and infer it from scale.
   ScaleDegreeProgression.fromChords(Scale scale, ChordProgression chords,
-      {TimeSignature timeSignature = const TimeSignature.evenTime()})
+      {bool inMinor = false,
+      TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this(
             chords.values
                 .map((Chord chord) => ScaleDegreeChord(scale, chord))
                 .toList(),
             chords.durations,
-            timeSignature: timeSignature,
-            scalePattern: scale.pattern);
+            inMinor: inMinor,
+            timeSignature: timeSignature);
 
-  ScalePattern get scalePattern => _scalePattern;
+  /// While the individual [ScaleDegreeChord] in the progression are represented
+  /// in the major scale. The overall progression could still be in the minor
+  /// scale.
+  bool get inMinor => _inMinor;
 
   // TDC: Make this work only for minor/major...
-  /// Returns a new [ScaleDegreeChord] converted from current mode to
+  /// Returns a new [ScaleDegreeChord] converted from [fromMode] mode to
   /// [toMode] mode.
+  /// If [fromMode] isn't specified it is based on [_inMinor].
   /// Ionian's (Major) mode number is 0 and so on...
-  ScaleDegreeProgression modeShift(int toMode) {
-    final int fromMode = _scalePattern.intervals.first.number - 1;
+  ScaleDegreeProgression modeShift({int? fromMode, required int toMode}) {
+    fromMode ??= _inMinor ? 5 : 0;
     return ScaleDegreeProgression(
       values
-          .map((ScaleDegreeChord chord) => chord.modeShift(fromMode, toMode))
+          .map((ScaleDegreeChord chord) => chord.modeShift(fromMode!, toMode))
           .toList(),
       [...durations],
-      scalePattern: toMode == 0
-          ? ScalePatternExtension.majorKey
-          : ScalePatternExtension.minorKey,
       timeSignature: timeSignature,
     );
   }
@@ -92,12 +102,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     // List containing lists of match locations (first element is location in
     // base and second is location here).
     final List<List<int>> matchLocations = [];
-
-    // If the base progression is in a different mode than us, convert it to
-    // our mode...
-    if (!base._scalePattern.equals(_scalePattern)) {
-      base = base.modeShift(_scalePattern.intervals.first.number);
-    }
 
     // TODO: Check if it's the way this needs to be
     // TDC: Update this explanation with the new durations...
@@ -182,10 +186,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   /// and 1.0 means they are the same progression.
   // TODO: Check that this is how it's intended to be...
   double percentMatchedTo(ScaleDegreeProgression other) {
-    // In case the other progression is in a different mode...
-    if (!other._scalePattern.equals(_scalePattern)) {
-      other = other.modeShift(_scalePattern.intervals.first.number);
-    }
     if (duration != other.duration) return 0.0;
     double durationSum = 0, otherSum = 0, sum = 0;
     var i = 0, j = 0;
@@ -298,11 +298,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     /* FIXME: This gets computed twice (first time in
               getFittingMatchLocations()...).
      */
-    // If base is in a different mode we need to shift ourselves to it's mode...
-    ScaleDegreeProgression shifted = this;
-    if (!base._scalePattern.equals(_scalePattern)) {
-      shifted = modeShift(base._scalePattern.intervals.first.number);
-    }
 
     for (List<int> match in matchLocations) {
       int baseChord = match[0];
@@ -312,7 +307,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
                 getFittingMatchLocations()...), convert it. */
       final ScaleDegreeProgression relativeMatch =
           ScaleDegreeProgression.fromProgression(
-              shifted.relativeTo(base.durations[baseChord] / durations[chord]));
+              relativeTo(base.durations[baseChord] / durations[chord]));
       double d1 = -1 * relativeMatch.sumDurations(0, chord);
       // First index that could be changed
       int left = base.getIndexFromDuration(d1, from: baseChord);
@@ -375,7 +370,4 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     }
     return _chords;
   }
-
-  @override
-  String toString() => _scalePattern.shortName + ': ' + super.toString();
 }

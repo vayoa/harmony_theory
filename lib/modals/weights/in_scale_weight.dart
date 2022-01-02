@@ -36,7 +36,7 @@ class InScaleWeight extends Weight {
     // them is in degreesInScale.
     int count = 0;
     for (ScaleDegreeChord chord in progression.values) {
-      if (chord.isDiatonic(progression.scalePattern)) {
+      if (chord.isDiatonic) {
         count++;
       }
     }
