@@ -94,9 +94,41 @@ class ScaleDegreeChord {
       .map((i) => _rootDegree.add(ScalePatternExtension.majorKey, i))
       .toList();
 
+  int get degreesLength => _pattern.intervals.length;
+
   // FIXME: Optimize this!
   /// Returns true if the chord is diatonic in the major scale.
   bool get isDiatonic => degrees.every((degree) => degree.isDiatonic);
+
+  bool get canBeTonic {
+    final List<Interval> _intervals = _pattern.intervals;
+    if ((_intervals[0] - _intervals[2]).equals(Interval.P5)) {
+      final Interval third = _intervals[0] - _intervals[1];
+      if (third.equals(Interval.M3) || third.equals(Interval.m3)) {
+        if (_intervals.length < 4) return true;
+        final Interval seventh = (_intervals[0] - _intervals[3]);
+        if (seventh.equals(Interval.m7)) {
+          return true;
+        }
+        return third.equals(Interval.M3) || seventh.equals(Interval.M7);
+      }
+    }
+    return false;
+  }
+
+  // TODO: The other checks here might be redundant...
+  bool get containsSeventh {
+    if (degreesLength >= 4) {
+      if (_pattern.intervals[3].number == 7) {
+        return true;
+      } else {
+        for (int i = degreesLength - 1; i >= 0; i--) {
+          if (_pattern.intervals[i].number == 7) return true;
+        }
+      }
+    }
+    return false;
+  }
 
   // TODO: This only works for major based modes...
   /// Returns a new [ScaleDegreeChord] representing the current
@@ -136,14 +168,18 @@ class ScaleDegreeChord {
   /// Returns true if the chord is equal to [other], such that their triads + 7
   /// are equal. Tensions aren't taken into consideration.
   /// If there's no 7 in only one of the chords we treat it as if it had the
-  /// relevant diatonic 7, base on [scalePattern]. Meaning that in a major key
+  /// relevant diatonic 7, base on the Major Scale. Meaning that in a major key
   /// a ii would be weakly equal to a ii7 but not a iimaj7.
-  bool weakEqual(ScalePattern scalePattern, ScaleDegreeChord other) {
-    if (_rootDegree != other._rootDegree) return false;
+  bool weakEqual(ScaleDegreeChord other) {
+    if (_rootDegree != other._rootDegree) {
+      return false;
+    } else if (_pattern == other._pattern) {
+      return true;
+    }
     List<Interval> ownIntervals = _pattern.intervals.sublist(1, 3);
     List<Interval> otherIntervals = other._pattern.intervals.sublist(1, 3);
     for (int i = 0; i < 2; i++) {
-      if (!ownIntervals[i].equals(ownIntervals[i])) return false;
+      if (!ownIntervals[i].equals(otherIntervals[i])) return false;
     }
     if (_pattern.intervals.length >= 4) {
       if (other._pattern.intervals.length >= 4) {
@@ -151,14 +187,16 @@ class ScaleDegreeChord {
           return false;
         }
       } else {
-        if (!_rootDegree.add(scalePattern, _pattern.intervals[3]).isDiatonic) {
+        if (!_rootDegree
+            .add(ScalePatternExtension.majorKey, _pattern.intervals[3])
+            .isDiatonic) {
           return false;
         }
       }
     } else {
       if (other._pattern.intervals.length >= 4) {
         if (!other._rootDegree
-            .add(scalePattern, other._pattern.intervals[3])
+            .add(ScalePatternExtension.majorKey, other._pattern.intervals[3])
             .isDiatonic) {
           return false;
         }
@@ -185,6 +223,8 @@ class ScaleDegreeChord {
         Object.hashAll(
             [for (Interval interval in intervals) interval.getHash]));
   }
+
+  static final ScaleDegreeChord majorTonicTriad = ScaleDegreeChord.parse('I');
 }
 
 enum HarmonicFunction {

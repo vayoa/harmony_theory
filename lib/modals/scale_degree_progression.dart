@@ -1,9 +1,7 @@
-import 'dart:math';
-
-import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
+import 'package:thoery_test/modals/substitution_match.dart';
 import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
 import 'chord_progression.dart';
@@ -13,17 +11,28 @@ import 'chord_progression.dart';
 /// A class representing a harmonic progression, built by [ScaleDegreeChord].
 /// The mode of the progression will always be Ionian (Major).
 class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
-
   /// While the individual [ScaleDegreeChord] in the progression are represented
   /// in the major scale. The overall progression could still be in the minor
   /// scale.
   final bool _inMinor;
 
+  //TDC: Might be too destructive to base...
+  static List<ScaleDegreeChord> _convertToMinor(
+      bool inMinor, List<ScaleDegreeChord> base) {
+    if (inMinor) {
+      for (int i = 0; i < base.length; i++) {
+        base[i] = base[i].modeShift(0, 5);
+      }
+    }
+    return base;
+  }
+
   ScaleDegreeProgression(List<ScaleDegreeChord> base, List<double> durations,
       {bool inMinor = false,
       TimeSignature timeSignature = const TimeSignature.evenTime()})
       : _inMinor = inMinor,
-        super(base, durations, timeSignature: timeSignature);
+        super(_convertToMinor(inMinor, base), durations,
+            timeSignature: timeSignature);
 
   ScaleDegreeProgression.empty(
       {bool inMinor = false,
@@ -40,7 +49,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       {bool inMinor = false,
       TimeSignature timeSignature = const TimeSignature.evenTime()})
       : _inMinor = inMinor,
-        super.evenTime(base, timeSignature: timeSignature);
+        super.evenTime(_convertToMinor(inMinor, base),
+            timeSignature: timeSignature);
 
   /// Gets a list of [String] each representing a ScaleDegreeChord and returns
   /// a new [ScaleDegreeProgression].
@@ -94,14 +104,15 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   // TDC: Implement scale pattern matching!!
   /// Returns a list containing lists of match locations (first element is
   /// the location in [base] and second is location "here"...).
-  List<List<int>> getFittingMatchLocations(ScaleDegreeProgression base) {
+  List<SubstitutionMatch> getFittingMatchLocations(
+      ScaleDegreeProgression base) {
     // Explanation to why this is done is below...
     // if we (as a saved progression) can't fit in the base progression...
     if (duration > base.duration) return const [];
 
     // List containing lists of match locations (first element is location in
     // base and second is location here).
-    final List<List<int>> matchLocations = [];
+    final List<SubstitutionMatch> matches = [];
 
     // TODO: Check if it's the way this needs to be
     // TDC: Update this explanation with the new durations...
@@ -126,7 +137,13 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     for (var chordPos = 0; chordPos < length; chordPos++) {
       for (var baseChordPos = 0; baseChordPos < base.length; baseChordPos++) {
         // If the two chords are equal.
-        if (this[chordPos] == base[baseChordPos]) {
+        // Or if we have a tonicization.
+        final SubstitutionMatchType? type = SubstitutionMatch.getMatchType(
+          base: base[baseChordPos],
+          sub: this[chordPos],
+          isSubLast: chordPos == length - 1,
+        );
+        if (type != null) {
           // We now check if there's enough space for this progression to
           // substitute in place for the current chord.
           // For this to be true there needs to be enough duration to cover the
@@ -170,13 +187,21 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
               // searching.
               // The first element is the location in base and the second is the
               // location here...
-              matchLocations.add([baseChordPos, chordPos]);
+              matches.add(
+                SubstitutionMatch(
+                  baseIndex: baseChordPos,
+                  subIndex: chordPos,
+                  type: type,
+                  withSeventh: this[chordPos].containsSeventh ||
+                      base[baseChordPos].containsSeventh,
+                ),
+              );
             }
           }
         }
       }
     }
-    return matchLocations;
+    return matches;
   }
 
   /// Get a comparing rating of this [ScaleDegreeProgression] against another
@@ -292,22 +317,22 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
    */
   List<ScaleDegreeProgression> getPossibleSubstitutions(
       ScaleDegreeProgression base) {
-    final List<List<int>> matchLocations = getFittingMatchLocations(base);
+    final List<SubstitutionMatch> matches = getFittingMatchLocations(base);
     final List<ScaleDegreeProgression> substitutions = [];
 
     /* FIXME: This gets computed twice (first time in
               getFittingMatchLocations()...).
      */
 
-    for (List<int> match in matchLocations) {
-      int baseChord = match[0];
-      int chord = match[1];
+    for (SubstitutionMatch match in matches) {
+      int baseChord = match.baseIndex;
+      int chord = match.subIndex;
       /* TODO: We don't have to compute the relative straight away (we can just
                 multiply the sum by the ratio like we do in
                 getFittingMatchLocations()...), convert it. */
       final ScaleDegreeProgression relativeMatch =
           ScaleDegreeProgression.fromProgression(
-              relativeTo(base.durations[baseChord] / durations[chord]));
+              relativeRhythmTo(base.durations[baseChord] / durations[chord]));
       double d1 = -1 * relativeMatch.sumDurations(0, chord);
       // First index that could be changed
       int left = base.getIndexFromDuration(d1, from: baseChord);

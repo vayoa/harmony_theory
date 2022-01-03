@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:thoery_test/extensions/scale_extension.dart';
+import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:tonic/tonic.dart';
 import 'modals/chord_progression.dart';
+import 'modals/scale_degree.dart';
 
 void main() {
   // // InScaleWeight
@@ -73,16 +75,21 @@ _basicMatchingTest({bool inputChords = false}) {
     } while (input != '-');
   } else {
     _chords = [
-      Chord.parse('C'),
       Chord.parse('F'),
       Chord.parse('G'),
+      Chord.parse('C'),
       Chord.parse('C'),
     ];
   }
 
   final ChordProgression _baseChordProgression = inputChords
       ? ChordProgression.evenTime(_chords)
-      : ChordProgression(_chords, [1 / 2, 1 / 2, 1, 1]);
+      : ChordProgression(_chords, [
+          1 / 2,
+          1 / 2,
+          1,
+          1,
+        ]);
   print('Your Progression:\n$_baseChordProgression.');
 
   // Detect the base progressions' scale

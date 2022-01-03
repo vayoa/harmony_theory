@@ -110,7 +110,7 @@ class Progression<T> {
   /// Example:
   /// [Progression] p.durations => [1/4, 1/4, 1/4, 1/4].
   /// p.relativeTo(0.5).durations => [1/8, 1/8, 1/8, 1/8].
-  Progression<T> relativeTo(double ratio) {
+  Progression<T> relativeRhythmTo(double ratio) {
     return Progression(
       _values,
       _durations.map((double duration) => duration * ratio).toList(),
@@ -138,6 +138,12 @@ class Progression<T> {
         currentRhythmSum = 0.0;
         measures.add(currentMeasure);
         currentMeasure = Progression.empty(timeSignature: timeSignature);
+        while (newDur > _timeSignature.decimal) {
+          currentMeasure.add(_values[i], 1.0);
+          measures.add(currentMeasure);
+          currentMeasure = Progression.empty(timeSignature: timeSignature);
+          newDur -= _timeSignature.decimal;
+        }
       }
       currentRhythmSum += newDur;
       currentMeasure.add(_values[i], newDur);

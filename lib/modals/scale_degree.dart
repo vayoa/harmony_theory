@@ -25,6 +25,7 @@ class ScaleDegree {
 
   // TODO: Rename to accidentals.
   /// Negative for flats and positive for sharps.
+  /// Max value is 11 (as 12 will be an octave...).
   int get offset => _offset;
 
   bool get isDiatonic => _offset == 0;
@@ -32,7 +33,7 @@ class ScaleDegree {
   ScaleDegree.raw(int degree, int offset)
       : assert(degree > 0 && degree < 8),
         _degree = degree,
-        _offset = offset;
+        _offset = offset % 12;
 
   /* TODO: Combine this and add into one method and then implement it (since
             they share code...) */
@@ -41,7 +42,7 @@ class ScaleDegree {
         scalePattern.intervals.map<int>((e) => e.semitones).toList();
     interval = Interval.fromSemitones(interval.semitones % 12);
     _degree = interval.number - 1;
-    _offset = interval.semitones - _semitones[_degree];
+    _offset = (interval.semitones - _semitones[_degree]) % 12;
   }
 
   /// Returns a [ScaleDegree] from the given [Interval], based on a major scale!
@@ -60,8 +61,9 @@ class ScaleDegree {
     // TODO: Test offset handling.
     if (offsetStr.isNotEmpty) {
       if (offsetStr.startsWith(RegExp(r'[#b♯♭𝄪𝄫]'))) {
-        _offset = offsetStr[0].allMatches(offsetStr).length *
-            (offsetStr[0].contains(RegExp(r'[b♭𝄫]')) ? -1 : 1);
+        _offset = (offsetStr[0].allMatches(offsetStr).length *
+                (offsetStr[0].contains(RegExp(r'[b♭𝄫]')) ? -1 : 1)) %
+            12;
       } else {
         throw FormatException("invalid ScaleDegree name: $degree");
       }
@@ -99,14 +101,15 @@ class ScaleDegree {
   ScaleDegree addInMajor(Interval interval) =>
       add(ScalePatternExtension.majorKey, interval);
 
-  Interval from(ScalePattern scalePattern, ScaleDegree other) =>
-      Interval.fromSemitones((scalePattern.intervals
-                  .sublist(
-                      min(_degree, other._degree), max(_degree, other._degree))
-                  .fold<int>(0, (prev, e) => prev + e.semitones) +
-              _offset +
-              other._offset) %
-          12);
+  Interval to(ScaleDegree other) => Interval.fromSemitones(
+      (_semitonesFromTonicInMajor - other._semitonesFromTonicInMajor) % 12);
+
+  int get _semitonesFromTonicInMajor {
+    int semitones =
+        ScalePatternExtension.majorKey.intervals[_degree].semitones + _offset;
+    if (semitones < 0) return 12 + semitones;
+    return semitones;
+  }
 
   @override
   String toString() =>
