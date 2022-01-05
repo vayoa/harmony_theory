@@ -42,8 +42,14 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   ScaleDegreeProgression.fromProgression(
       Progression<ScaleDegreeChord> progression,
       {bool inMinor = false})
-      : this(progression.values, progression.durations,
-            inMinor: inMinor, timeSignature: progression.timeSignature);
+      : _inMinor = inMinor,
+        super.raw(
+          values: progression.values,
+          durations: progression.durations,
+          timeSignature: progression.timeSignature,
+          duration: progression.duration,
+          full: progression.full,
+        );
 
   ScaleDegreeProgression.evenTime(List<ScaleDegreeChord> base,
       {bool inMinor = false,
@@ -99,6 +105,29 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       [...durations],
       timeSignature: timeSignature,
     );
+  }
+
+  /* TDC: Not sure if this is the best way to do it and if it's even
+          important... */
+  ScaleDegreeProgression addSeventh({double ratio = 1.0}) {
+    ScaleDegreeProgression converted = ScaleDegreeProgression.empty(
+        timeSignature: timeSignature, inMinor: _inMinor);
+    for (int i = 0; i < length; i++) {
+      converted.add(values[i].addSeventh(), durations[i] * ratio);
+    }
+    return converted;
+  }
+
+  ScaleDegreeProgression tonicizedFor(ScaleDegree tonic,
+      {bool addSeventh = false, double ratio = 1.0}) {
+    ScaleDegreeProgression converted = ScaleDegreeProgression.empty(
+        timeSignature: timeSignature, inMinor: _inMinor);
+    for (int i = 0; i < length; i++) {
+      ScaleDegreeChord convertedChord = values[i].tonicizedFor(tonic);
+      if (addSeventh) convertedChord = convertedChord.addSeventh();
+      converted.add(convertedChord, durations[i] * ratio);
+    }
+    return converted;
   }
 
   // TDC: Implement scale pattern matching!!
@@ -331,8 +360,12 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
                 multiply the sum by the ratio like we do in
                 getFittingMatchLocations()...), convert it. */
       final ScaleDegreeProgression relativeMatch =
-          ScaleDegreeProgression.fromProgression(
-              relativeRhythmTo(base.durations[baseChord] / durations[chord]));
+          SubstitutionMatch.getSubstitution(
+              progression: this,
+              type: match.type,
+              addSeventh: match.withSeventh,
+              ratio: base.durations[baseChord] / durations[chord],
+              tonic: base[match.baseIndex].rootDegree);
       double d1 = -1 * relativeMatch.sumDurations(0, chord);
       // First index that could be changed
       int left = base.getIndexFromDuration(d1, from: baseChord);
@@ -341,18 +374,11 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       // Last index to change...
       int right = base.getIndexFromDuration(d2, from: baseChord);
       ScaleDegreeProgression substitution =
-          ScaleDegreeProgression.fromProgression(base.sublist(0, left));
+          ScaleDegreeProgression.fromProgression(base.sublist(0, left),
+              inMinor: base.inMinor);
       // TDC: This won't support empty chord spaces...
       double bd1 = -1 * base.sumDurations(left, baseChord);
-      try {
-        base.sumDurations(baseChord, right + 1) - base.durations[baseChord];
-      } catch (e) {
-        print(relativeMatch);
-        print(relativeMatch.values[chord]);
-        print(baseChord);
-        print("$d2");
-        print("${base.durations.length}, $baseChord, ${right + 1}");
-      }
+      base.sumDurations(baseChord, right + 1) - base.durations[baseChord];
       double bd2 =
           base.sumDurations(baseChord, right + 1) - base.durations[baseChord];
       if (bd1 - d1 != 0) {

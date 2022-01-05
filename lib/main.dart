@@ -51,10 +51,7 @@ void main() {
   // print(prog);
   // print(prog.modeShift(toMode: 5));
 
-  print(ScaleDegreeChord.parse('V').tonicizedFor(ScaleDegree.parse('I')));
-  print(ScaleDegreeChord.parse('ii').tonicizedFor(ScaleDegree.parse('VI')));
-
-  // _basicMatchingTest();
+  _basicMatchingTest();
 }
 
 _basicMatchingTest({bool inputChords = false}) {
@@ -130,9 +127,9 @@ _basicMatchingTest({bool inputChords = false}) {
   // To demonstrate duration matching we'll add another ii V I progression but
   // with a different rhythm...
   _savedProgressions.addAll([
+    ScaleDegreeProgression.fromList(['V', 'I'], durations: [1 / 4, 1 / 2]),
     ScaleDegreeProgression.fromList(['ii', 'V', 'I'],
         durations: [1 / 4, 1 / 4, 1 / 2]),
-    ScaleDegreeProgression.fromList(['V', 'I'], durations: [1 / 4, 1 / 2]),
     ScaleDegreeProgression.fromList(['ii', 'v', 'V', 'I'],
         durations: [1 / 8, 1 / 8, 1 / 8, 1 / 2]),
   ]);
@@ -192,7 +189,8 @@ _basicMatchingTest({bool inputChords = false}) {
           '${rS.substitution} -> ${rS.substitution.inScale(_possibleScales[0])}:'
           ' ${rS.rating.toStringAsFixed(3)},\n';
     }
-    print('-- ${e.key} --\n$subs');
+    print('-- ${e.key} --\ndurations: ${e.key.durations}\n'
+        'base: $_baseProgression.\n$subs');
   }
 }
 

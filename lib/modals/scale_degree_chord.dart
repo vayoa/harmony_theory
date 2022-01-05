@@ -41,6 +41,14 @@ class ScaleDegreeChord {
     'Diminished 7♭5',
   ];
 
+  static const List<String> _canBeTonicizedPatterns = [
+    'Major',
+    'Minor',
+    'Major 7th',
+    'Minor 7th',
+    'Dominant 7th',
+  ];
+
   ScaleDegreeChord(Scale scale, Chord chord) {
     _pattern = chord.pattern;
     _rootDegree =
@@ -96,13 +104,15 @@ class ScaleDegreeChord {
   /// Returns true if the chord is diatonic in the major scale.
   bool get isDiatonic => degrees.every((degree) => degree.isDiatonic);
 
+  // TODO: Optimize this...
   bool get canBeTonic {
+    if (_canBeTonicizedPatterns.contains(_pattern.name)) return true;
     final List<Interval> _intervals = _pattern.intervals;
-    if ((_intervals[0] - _intervals[2]).equals(Interval.P5)) {
-      final Interval third = _intervals[0] - _intervals[1];
+    if ((_intervals[2] - _intervals[0]).equals(Interval.P5)) {
+      final Interval third = _intervals[1] - _intervals[0];
       if (third.equals(Interval.M3) || third.equals(Interval.m3)) {
         if (_intervals.length < 4) return true;
-        final Interval seventh = (_intervals[0] - _intervals[3]);
+        final Interval seventh = (_intervals[3] - _intervals[0]);
         if (seventh.equals(Interval.m7)) {
           return true;
         }
@@ -144,6 +154,36 @@ class ScaleDegreeChord {
       return ScaleDegreeChord.copy(this);
     }
     return ScaleDegreeChord.raw(_pattern, rootDegree.tonicizedFor(tonic));
+  }
+
+  // TDC: Not sure about this...
+  /// Will return a new [ScaleDegreeChord] with an added 7th if possible.
+  /// [harmonicFunction] can be given for slightly more relevant results.
+  ScaleDegreeChord addSeventh({HarmonicFunction? harmonicFunction}) {
+    switch (_pattern.name) {
+      case "Minor":
+        return ScaleDegreeChord.raw(
+            ChordPattern.parse('Minor 7th'), _rootDegree);
+      case "Major":
+        if (_rootDegree == ScaleDegree.V ||
+            (harmonicFunction != null &&
+                harmonicFunction == HarmonicFunction.dominant)) {
+          return ScaleDegreeChord.raw(
+              ChordPattern.parse('Dominant 7th'), _rootDegree);
+        } else {
+          return ScaleDegreeChord.raw(
+              ChordPattern.parse('Major 7th'), _rootDegree);
+        }
+      case "Augmented":
+        return ScaleDegreeChord.raw(
+            ChordPattern.parse('Augmented 7th'), _rootDegree);
+      case "Diminished":
+        // not sure if to add 'Diminished 7th' here somehow...
+        return ScaleDegreeChord.raw(
+            ChordPattern.parse('Minor 7th ♭5'), _rootDegree);
+      default:
+        return ScaleDegreeChord.copy(this);
+    }
   }
 
   @override

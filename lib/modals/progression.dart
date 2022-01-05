@@ -54,6 +54,20 @@ class Progression<T> {
     }
   }
 
+  /// Doesn't check for duplicates or full and just sets the values for the
+  /// fields.
+  Progression.raw({
+    required List<T> values,
+    required List<double> durations,
+    required TimeSignature timeSignature,
+    required double duration,
+    required bool full,
+  })  : _values = values,
+        _durations = durations,
+        _timeSignature = timeSignature,
+        _duration = duration,
+        _full = full;
+
   Progression.empty(
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this([], [], timeSignature: timeSignature);

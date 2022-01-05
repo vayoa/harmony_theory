@@ -77,6 +77,8 @@ class ScaleDegree {
   }
 
   static final tonic = ScaleDegree.parse('I');
+  static final V = ScaleDegree.parse('V');
+  static final vii = ScaleDegree.parse('vii');
 
   // TODO: This only works for major based modes...,
   /// Returns a new [ScaleDegree] converted from the [fromMode] mode to [toMode]
