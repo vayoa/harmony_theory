@@ -51,7 +51,10 @@ void main() {
   // print(prog);
   // print(prog.modeShift(toMode: 5));
 
-  _basicMatchingTest();
+  print(ScaleDegreeChord.parse('V').tonicizedFor(ScaleDegree.parse('I')));
+  print(ScaleDegreeChord.parse('ii').tonicizedFor(ScaleDegree.parse('VI')));
+
+  // _basicMatchingTest();
 }
 
 _basicMatchingTest({bool inputChords = false}) {

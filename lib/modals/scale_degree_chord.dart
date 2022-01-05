@@ -57,10 +57,7 @@ class ScaleDegreeChord {
             fullName: chord._pattern.fullName,
             abbrs: chord._pattern.abbrs,
             intervals: chord._pattern.intervals),
-        _rootDegree = ScaleDegree.raw(
-          chord.rootDegree.degree,
-          chord.rootDegree.offset,
-        );
+        _rootDegree = ScaleDegree.copy(chord._rootDegree);
 
   ScaleDegreeChord.parse(String chord) {
     final match = chordNamePattern.matchAsPrefix(chord);
@@ -90,9 +87,8 @@ class ScaleDegreeChord {
 
   /// Returns a list of [ScaleDegree] that represents the degrees that make up
   /// the [ScaleDegreeChord] in the major scale.
-  List<ScaleDegree> get degrees => _pattern.intervals
-      .map((i) => _rootDegree.add(ScalePatternExtension.majorKey, i))
-      .toList();
+  List<ScaleDegree> get degrees =>
+      _pattern.intervals.map((i) => _rootDegree.add(i)).toList();
 
   int get degreesLength => _pattern.intervals.length;
 
@@ -138,6 +134,17 @@ class ScaleDegreeChord {
   /// Example: ii.modeShift(0, 5) [major to minor] => iv.
   ScaleDegreeChord modeShift(int fromMode, int toMode) =>
       ScaleDegreeChord.raw(_pattern, rootDegree.modeShift(fromMode, toMode));
+
+  /// Returns a new [ScaleDegreeChord] converted such that [tonic] is the new
+  /// tonic. Everything is still represented in the major scale, besides to degree the function is called on...
+  /// Example: V.tonicizedFor(VI) => III, I.tonicizedFor(VI) => VI,
+  /// ii.tonicizedFor(VI) => vii.
+  ScaleDegreeChord tonicizedFor(ScaleDegree tonic) {
+    if (tonic == ScaleDegree.tonic) {
+      return ScaleDegreeChord.copy(this);
+    }
+    return ScaleDegreeChord.raw(_pattern, rootDegree.tonicizedFor(tonic));
+  }
 
   @override
   String toString() {
@@ -187,17 +194,13 @@ class ScaleDegreeChord {
           return false;
         }
       } else {
-        if (!_rootDegree
-            .add(ScalePatternExtension.majorKey, _pattern.intervals[3])
-            .isDiatonic) {
+        if (!_rootDegree.add(_pattern.intervals[3]).isDiatonic) {
           return false;
         }
       }
     } else {
       if (other._pattern.intervals.length >= 4) {
-        if (!other._rootDegree
-            .add(ScalePatternExtension.majorKey, other._pattern.intervals[3])
-            .isDiatonic) {
+        if (!other._rootDegree.add(other._pattern.intervals[3]).isDiatonic) {
           return false;
         }
       }
@@ -212,9 +215,7 @@ class ScaleDegreeChord {
   int get weakHash {
     List<Interval> intervals = _pattern.intervals.sublist(1, 3);
     if (intervals.length >= 4) {
-      if (!_rootDegree
-          .add(ScalePatternExtension.majorKey, _pattern.intervals[3])
-          .isDiatonic) {
+      if (!_rootDegree.add(_pattern.intervals[3]).isDiatonic) {
         intervals.add(_pattern.intervals[3]);
       }
     }
