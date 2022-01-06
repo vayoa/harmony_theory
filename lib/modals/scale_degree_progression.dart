@@ -1,3 +1,4 @@
+import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
@@ -76,14 +77,13 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
 
   // TDC: Remove 'inMinor' and infer it from scale.
   ScaleDegreeProgression.fromChords(Scale scale, ChordProgression chords,
-      {bool inMinor = false,
-      TimeSignature timeSignature = const TimeSignature.evenTime()})
+      {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this(
             chords.values
                 .map((Chord chord) => ScaleDegreeChord(scale, chord))
                 .toList(),
             chords.durations,
-            inMinor: inMinor,
+            inMinor: scale.isMinor,
             timeSignature: timeSignature);
 
   /// While the individual [ScaleDegreeChord] in the progression are represented

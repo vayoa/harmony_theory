@@ -100,6 +100,10 @@ class ScaleDegree {
   }
 
   PitchClass inScale(Scale scale) {
+    if (scale.isMinor) {
+      return PitchClass.fromSemitones(
+          scale.pitchClasses[(_degree - 5) % 7].integer + _accidentals);
+    }
     return PitchClass.fromSemitones(
         scale.pitchClasses[_degree].integer + _accidentals);
   }

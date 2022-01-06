@@ -235,11 +235,17 @@ class Progression<T> {
             val is Chord ? val.getCommonName() : valueFormat(_values[i]);
         final String formatted = valueFormatted +
             (durationFormatted.isEmpty ? '' : '($durationFormatted)');
-        if (_durations[i] + stepSum >= step) {
+        double curDuration = _durations[i];
+        // TODO: Check if there's a better more covering way to do this...
+        // while (curDuration < _timeSignature.decimal && curDuration > step) {
+        //   curDuration -= step;
+        //   output += '$formatted, ';
+        // }
+        if (curDuration + stepSum >= step) {
           stepSum = 0.0;
           output += '$formatted, ';
         } else {
-          stepSum += _durations[i];
+          stepSum += curDuration;
           output += '$formatted ';
         }
       }

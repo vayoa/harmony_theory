@@ -8,6 +8,8 @@ extension ScaleExtension on Scale {
         pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
     return scaleTonic + ' ' + scalePattern;
   }
+
+  bool get isMinor => pattern.name == 'Natural Minor';
 }
 
 extension ScalePatternExtension on ScalePattern {

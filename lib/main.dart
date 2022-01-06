@@ -51,6 +51,9 @@ void main() {
   // print(prog);
   // print(prog.modeShift(toMode: 5));
 
+  // print(ScaleDegreeProgression.fromList(['ii', 'V', 'I'],
+  //     durations: [1 / 4, 1 / 4, 1 / 2]));
+
   _basicMatchingTest();
 }
 
@@ -77,8 +80,8 @@ _basicMatchingTest({bool inputChords = false}) {
     _chords = [
       Chord.parse('F'),
       Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('C'),
+      Chord.parse('Cm'),
+      Chord.parse('Cm'),
     ];
   }
 
