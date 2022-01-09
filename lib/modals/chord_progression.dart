@@ -4,12 +4,12 @@ import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
 
 class ChordProgression extends Progression<Chord> {
-  ChordProgression(List<Chord> base, List<double> durations,
+  ChordProgression(List<Chord?> base, List<double> durations,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : super(base, durations, timeSignature: timeSignature);
 
   /// Returns a new [ChordProgression] where all the chords are of 1/4 duration.
-  ChordProgression.evenTime(List<Chord> base,
+  ChordProgression.evenTime(List<Chord?> base,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : super.evenTime(base, timeSignature: timeSignature);
 
@@ -18,8 +18,9 @@ class ChordProgression extends Progression<Chord> {
       : super.empty(timeSignature: timeSignature);
 
   List<Scale> matchWithScales() {
-    List<String> chordNames =
-        values.map((Chord chord) => chord.getCommonName()).toList();
+    List<String> chordNames = values
+        .map((Chord? chord) => chord == null ? 'null' : chord.getCommonName())
+        .toList();
     Map<String, int> counts = {};
     Map<String, int> results = {};
 
@@ -74,7 +75,7 @@ class ChordProgression extends Progression<Chord> {
   }
 
   @override
-  String valueFormat(Chord value) => value.getCommonName();
+  String notNullValueFormat(Chord value) => value.getCommonName();
 }
 
 abstract class ScaleMatchUtilities {

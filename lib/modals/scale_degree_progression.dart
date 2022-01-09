@@ -1,103 +1,156 @@
-import 'dart:math';
-
 import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
+import 'package:thoery_test/modals/substitution_match.dart';
 import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
 import 'chord_progression.dart';
 
 // TODO: Support uneven time signatures, in constructors and in the enter class.
-class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
-  final ScalePattern _scalePattern;
 
-  ScaleDegreeProgression(List<ScaleDegreeChord> base, List<double> durations,
-      {ScalePattern? scalePattern,
+/// A class representing a harmonic progression, built by [ScaleDegreeChord].
+/// The mode of the progression will always be Ionian (Major).
+class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
+  /// While the individual [ScaleDegreeChord] in the progression are represented
+  /// in the major scale. The overall progression could still be in the minor
+  /// scale.
+  final bool _inMinor;
+
+  //TDC: Might be too destructive to base...
+  static List<ScaleDegreeChord?> _convertToMinor(
+      bool inMinor, List<ScaleDegreeChord?> base) {
+    if (inMinor) {
+      for (int i = 0; i < base.length; i++) {
+        base[i] = base[i]?.modeShift(0, 5);
+      }
+    }
+    return base;
+  }
+
+  ScaleDegreeProgression(List<ScaleDegreeChord?> base, List<double> durations,
+      {bool inMinor = false,
       TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : _scalePattern = scalePattern ?? ScalePatternExtension.majorKey,
-        super(base, durations, timeSignature: timeSignature);
+      : _inMinor = inMinor,
+        super(_convertToMinor(inMinor, base), durations,
+            timeSignature: timeSignature);
 
   ScaleDegreeProgression.empty(
-      {ScalePattern? scalePattern,
+      {bool inMinor = false,
       TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : this([], [], timeSignature: timeSignature, scalePattern: scalePattern);
+      : this([], [], inMinor: inMinor, timeSignature: timeSignature);
 
   ScaleDegreeProgression.fromProgression(
-      Progression<ScaleDegreeChord> progression,
-      {ScalePattern? scalePattern})
-      : this(progression.values, progression.durations,
-            timeSignature: progression.timeSignature,
-            scalePattern: scalePattern);
+      Progression<ScaleDegreeChord?> progression,
+      {bool inMinor = false})
+      : _inMinor = inMinor,
+        super.raw(
+          values: progression.values,
+          durations: progression.durations,
+          timeSignature: progression.timeSignature,
+          duration: progression.duration,
+          full: progression.full,
+        );
 
-  ScaleDegreeProgression.evenTime(List<ScaleDegreeChord> base,
-      {TimeSignature timeSignature = const TimeSignature.evenTime(),
-      ScalePattern? scalePattern})
-      : _scalePattern = scalePattern ?? ScalePatternExtension.majorKey,
-        super.evenTime(base, timeSignature: timeSignature);
+  ScaleDegreeProgression.evenTime(List<ScaleDegreeChord?> base,
+      {bool inMinor = false,
+      TimeSignature timeSignature = const TimeSignature.evenTime()})
+      : _inMinor = inMinor,
+        super.evenTime(_convertToMinor(inMinor, base),
+            timeSignature: timeSignature);
 
   /// Gets a list of [String] each representing a ScaleDegreeChord and returns
   /// a new [ScaleDegreeProgression].
   /// If [scalePattern] isn't specified, it will be [ScaleDegree.majorKey].
-  ScaleDegreeProgression.fromList(List<String> base,
-      {List<double>? durations,
-      TimeSignature timeSignature = const TimeSignature.evenTime(),
-      ScalePattern? scalePattern})
-      : this(
-            base.map((String chord) => ScaleDegreeChord.parse(chord)).toList(),
+  ScaleDegreeProgression.fromList(
+    List<String?> base, {
+    List<double>? durations,
+    bool inMinor = false,
+    TimeSignature timeSignature = const TimeSignature.evenTime(),
+  }) : this(
+            base
+                .map((String? chord) =>
+                    chord == null ? null : ScaleDegreeChord.parse(chord))
+                .toList(),
             durations ??
                 List.generate(
                     base.length, (index) => 1 / timeSignature.denominator),
-            timeSignature: timeSignature,
-            scalePattern: scalePattern);
+            inMinor: inMinor,
+            timeSignature: timeSignature);
 
+  // TDC: Remove 'inMinor' and infer it from scale.
   ScaleDegreeProgression.fromChords(Scale scale, ChordProgression chords,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this(
             chords.values
-                .map((Chord chord) => ScaleDegreeChord(scale, chord))
+                .map((Chord? chord) =>
+                    chord == null ? null : ScaleDegreeChord(scale, chord))
                 .toList(),
             chords.durations,
-            timeSignature: timeSignature,
-            scalePattern: scale.pattern);
+            inMinor: scale.isMinor,
+            timeSignature: timeSignature);
 
-  ScalePattern get scalePattern => _scalePattern;
+  /// While the individual [ScaleDegreeChord] in the progression are represented
+  /// in the major scale. The overall progression could still be in the minor
+  /// scale.
+  bool get inMinor => _inMinor;
 
   // TDC: Make this work only for minor/major...
-  /// Returns a new [ScaleDegreeChord] converted from current mode to
+  /// Returns a new [ScaleDegreeChord] converted from [fromMode] mode to
   /// [toMode] mode.
+  /// If [fromMode] isn't specified it is based on [_inMinor].
   /// Ionian's (Major) mode number is 0 and so on...
-  ScaleDegreeProgression modeShift(int toMode) {
-    final int fromMode = _scalePattern.intervals.first.number - 1;
+  ScaleDegreeProgression modeShift({int? fromMode, required int toMode}) {
+    fromMode ??= _inMinor ? 5 : 0;
     return ScaleDegreeProgression(
       values
-          .map((ScaleDegreeChord chord) => chord.modeShift(fromMode, toMode))
+          .map((ScaleDegreeChord? chord) => chord?.modeShift(fromMode!, toMode))
           .toList(),
       [...durations],
-      scalePattern: toMode == 0
-          ? ScalePatternExtension.majorKey
-          : ScalePatternExtension.minorKey,
       timeSignature: timeSignature,
     );
+  }
+
+  /* TDC: Not sure if this is the best way to do it and if it's even
+          important... */
+  ScaleDegreeProgression addSeventh({double ratio = 1.0}) {
+    ScaleDegreeProgression converted = ScaleDegreeProgression.empty(
+        timeSignature: timeSignature, inMinor: _inMinor);
+    for (int i = 0; i < length; i++) {
+      if (values[i] != null) {
+        converted.add(values[i]!.addSeventh(), durations[i] * ratio);
+      }
+    }
+    return converted;
+  }
+
+  ScaleDegreeProgression tonicizedFor(ScaleDegree tonic,
+      {bool addSeventh = false, double ratio = 1.0}) {
+    ScaleDegreeProgression converted = ScaleDegreeProgression.empty(
+        timeSignature: timeSignature, inMinor: _inMinor);
+    for (int i = 0; i < length; i++) {
+      ScaleDegreeChord? convertedChord;
+      if (values[i] != null) {
+        convertedChord = values[i]!.tonicizedFor(tonic);
+        if (addSeventh) convertedChord = convertedChord.addSeventh();
+      }
+      converted.add(convertedChord, durations[i] * ratio);
+    }
+    return converted;
   }
 
   // TDC: Implement scale pattern matching!!
   /// Returns a list containing lists of match locations (first element is
   /// the location in [base] and second is location "here"...).
-  List<List<int>> getFittingMatchLocations(ScaleDegreeProgression base) {
+  List<SubstitutionMatch> getFittingMatchLocations(
+      ScaleDegreeProgression base) {
     // Explanation to why this is done is below...
     // if we (as a saved progression) can't fit in the base progression...
     if (duration > base.duration) return const [];
 
     // List containing lists of match locations (first element is location in
     // base and second is location here).
-    final List<List<int>> matchLocations = [];
-
-    // If the base progression is in a different mode than us, convert it to
-    // our mode...
-    if (!base._scalePattern.equals(_scalePattern)) {
-      base = base.modeShift(_scalePattern.intervals.first.number);
-    }
+    final List<SubstitutionMatch> matches = [];
 
     // TODO: Check if it's the way this needs to be
     // TDC: Update this explanation with the new durations...
@@ -122,7 +175,13 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     for (var chordPos = 0; chordPos < length; chordPos++) {
       for (var baseChordPos = 0; baseChordPos < base.length; baseChordPos++) {
         // If the two chords are equal.
-        if (this[chordPos] == base[baseChordPos]) {
+        // Or if we have a tonicization.
+        final SubstitutionMatchType? type = SubstitutionMatch.getMatchType(
+          base: base[baseChordPos],
+          sub: this[chordPos],
+          isSubLast: chordPos == length - 1,
+        );
+        if (type != null) {
           // We now check if there's enough space for this progression to
           // substitute in place for the current chord.
           // For this to be true there needs to be enough duration to cover the
@@ -166,13 +225,23 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
               // searching.
               // The first element is the location in base and the second is the
               // location here...
-              matchLocations.add([baseChordPos, chordPos]);
+              matches.add(
+                SubstitutionMatch(
+                  baseIndex: baseChordPos,
+                  subIndex: chordPos,
+                  type: type,
+                  withSeventh: (this[chordPos] != null &&
+                          this[chordPos]!.containsSeventh) ||
+                      (base[baseChordPos] != null &&
+                          base[baseChordPos]!.containsSeventh),
+                ),
+              );
             }
           }
         }
       }
     }
-    return matchLocations;
+    return matches;
   }
 
   /// Get a comparing rating of this [ScaleDegreeProgression] against another
@@ -180,32 +249,44 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   /// the progressions are (the more chords they have in common in the same
   /// duration from their start), where 0.0 means they are completely different
   /// and 1.0 means they are the same progression.
-  // TODO: Check that this is how it's intended to be...
+  // TDC: This isn't really working correctly...
   double percentMatchedTo(ScaleDegreeProgression other) {
-    // In case the other progression is in a different mode...
-    if (!other._scalePattern.equals(_scalePattern)) {
-      other = other.modeShift(_scalePattern.intervals.first.number);
-    }
     if (duration != other.duration) return 0.0;
     double durationSum = 0, otherSum = 0, sum = 0;
-    var i = 0, j = 0;
-    while (i < length && j < length) {
+    var index = 0, otherIndex = 0;
+    while (index < length && otherIndex < length) {
       // If both chords are at the same duration away from the beginning of
-      // the progression and are both the same in chord and in duration,
-      // we add their duration to the durationSum.
+      // the progression and are both the same in chord, we add their duration
+      // difference (unless it's 0.0 in which case we add their duration) to
+      // durationSum.
+
       if (sum == otherSum) {
-        if (this[i] == other[j] && durations[i] == other.durations[j]) {
-          durationSum += durations[i];
+        if (this[index] == other[otherIndex]) {
+          // print(this[index]);
+          // print(other[index]);
+          double add = (durations[index] - other.durations[otherIndex]).abs();
+          if (add == 0.0) add = durations[index];
+          durationSum += add;
         }
-        i++;
-        j++;
+        if (durations[index] == other.durations[otherIndex]) {
+          sum += durations[index];
+          otherSum += other.durations[otherIndex];
+          index++;
+          otherIndex++;
+        } else if (durations[index] < other.durations[otherIndex]) {
+          sum += durations[index];
+          index++;
+        } else {
+          otherSum += other.durations[otherIndex];
+          otherIndex++;
+        }
       } else if (sum < otherSum) {
-        i++;
+        sum += durations[index];
+        index++;
       } else {
-        j++;
+        otherSum += other.durations[otherIndex];
+        otherIndex++;
       }
-      otherSum += other.durations[j - 1];
-      sum += durations[i - 1];
     }
     return durationSum / duration;
   }
@@ -292,27 +373,26 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
    */
   List<ScaleDegreeProgression> getPossibleSubstitutions(
       ScaleDegreeProgression base) {
-    final List<List<int>> matchLocations = getFittingMatchLocations(base);
+    final List<SubstitutionMatch> matches = getFittingMatchLocations(base);
     final List<ScaleDegreeProgression> substitutions = [];
 
     /* FIXME: This gets computed twice (first time in
               getFittingMatchLocations()...).
      */
-    // If base is in a different mode we need to shift ourselves to it's mode...
-    ScaleDegreeProgression shifted = this;
-    if (!base._scalePattern.equals(_scalePattern)) {
-      shifted = modeShift(base._scalePattern.intervals.first.number);
-    }
 
-    for (List<int> match in matchLocations) {
-      int baseChord = match[0];
-      int chord = match[1];
+    for (SubstitutionMatch match in matches) {
+      int baseChord = match.baseIndex;
+      int chord = match.subIndex;
       /* TODO: We don't have to compute the relative straight away (we can just
                 multiply the sum by the ratio like we do in
                 getFittingMatchLocations()...), convert it. */
       final ScaleDegreeProgression relativeMatch =
-          ScaleDegreeProgression.fromProgression(
-              shifted.relativeTo(base.durations[baseChord] / durations[chord]));
+          SubstitutionMatch.getSubstitution(
+              progression: this,
+              type: match.type,
+              addSeventh: match.withSeventh,
+              ratio: base.durations[baseChord] / durations[chord],
+              tonic: base[match.baseIndex]?.rootDegree);
       double d1 = -1 * relativeMatch.sumDurations(0, chord);
       // First index that could be changed
       int left = base.getIndexFromDuration(d1, from: baseChord);
@@ -321,24 +401,17 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       // Last index to change...
       int right = base.getIndexFromDuration(d2, from: baseChord);
       ScaleDegreeProgression substitution =
-          ScaleDegreeProgression.fromProgression(base.sublist(0, left));
+          ScaleDegreeProgression.fromProgression(base.sublist(0, left),
+              inMinor: base.inMinor);
       // TDC: This won't support empty chord spaces...
       double bd1 = -1 * base.sumDurations(left, baseChord);
-      try {
-        base.sumDurations(baseChord, right + 1) - base.durations[baseChord];
-      } catch (e) {
-        print(relativeMatch);
-        print(relativeMatch.values[chord]);
-        print(baseChord);
-        print("$d2");
-        print("${base.durations.length}, $baseChord, ${right + 1}");
-      }
+      base.sumDurations(baseChord, right + 1) - base.durations[baseChord];
       double bd2 =
           base.sumDurations(baseChord, right + 1) - base.durations[baseChord];
       if (bd1 - d1 != 0) {
         substitution.add(base[left], -1 * (bd1 - d1));
       }
-      substitution.addAll(relativeMatch);
+      substitution.addAll(base.fillWith(substitution.duration, relativeMatch));
       if (bd2 - d2 != 0) {
         substitution.add(base[right], bd2 - d2);
       }
@@ -349,6 +422,25 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     }
     // TODO: This makes sure the results will be unique, make it more efficient.
     return substitutions.toSet().toList();
+  }
+
+  /// Returns [relativeSubSection], but if a null values is there returns
+  /// replaces the null value should be if [relativeSubSection] substituted the
+  /// current one, a [durationBefore] duration away from the start.
+  ScaleDegreeProgression fillWith(
+      double durationBefore, ScaleDegreeProgression relativeSubSection) {
+    double sum = 0.0;
+    ScaleDegreeProgression filled = ScaleDegreeProgression.empty(
+        inMinor: relativeSubSection.inMinor,
+        timeSignature: relativeSubSection.timeSignature);
+    for (int i = 0; i < relativeSubSection.length; i++) {
+      ScaleDegreeChord? filler = relativeSubSection[i];
+      double dur = relativeSubSection.durations[i];
+      filler ??= this[getIndexFromDuration(durationBefore + sum)];
+      sum += dur;
+      filled.add(filler, dur);
+    }
+    return filled;
   }
 
   List<ScaleDegreeProgression> getFailed() {
@@ -365,17 +457,16 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     ChordProgression _chords =
         ChordProgression.empty(timeSignature: timeSignature);
     for (var i = 0; i < length; i++) {
-      final ScaleDegreeChord scaleDegreeChord = values[i];
-      _chords.add(
-          Chord(
-            pattern: scaleDegreeChord.pattern,
-            root: scaleDegreeChord.rootDegree.inScale(scale).toPitch(),
-          ),
-          durations[i]);
+      if (values[i] != null) {
+        final ScaleDegreeChord scaleDegreeChord = values[i]!;
+        _chords.add(
+            Chord(
+              pattern: scaleDegreeChord.pattern,
+              root: scaleDegreeChord.rootDegree.inScale(scale).toPitch(),
+            ),
+            durations[i]);
+      }
     }
     return _chords;
   }
-
-  @override
-  String toString() => _scalePattern.shortName + ': ' + super.toString();
 }

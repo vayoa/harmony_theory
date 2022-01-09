@@ -8,11 +8,17 @@ extension ScaleExtension on Scale {
         pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
     return scaleTonic + ' ' + scalePattern;
   }
+
+  bool get isMinor => pattern.name == 'Natural Minor';
 }
 
 extension ScalePatternExtension on ScalePattern {
-  static final majorKey = ScalePattern.findByName('Diatonic Major');
-  static final minorKey = ScalePattern.findByName('Natural Minor');
+  static final ScalePattern majorKey =
+      ScalePattern.findByName('Diatonic Major');
+  static final ScalePattern minorKey = ScalePattern.findByName('Natural Minor');
+  static final List<int> majorKeySemitones = majorKey.intervals
+      .map<int>((Interval interval) => interval.semitones)
+      .toList();
 
   String get shortName {
     switch (name) {

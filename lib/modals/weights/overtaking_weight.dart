@@ -22,17 +22,18 @@ class OvertakingWeight extends Weight {
     if (progression.duration < progression.timeSignature.decimal) return 1.0;
     final Map<int, double> chordDurations = {};
     for (int i = 0; i < progression.length; i++) {
-      final int hash =
-          progression.values[i].weakHash(progression.scalePattern);
-      final double duration = progression.durations[i];
-      if (chordDurations.containsKey(hash)) {
-        // FIXME: Dart stuff...
-        chordDurations[hash] = chordDurations[hash]! + duration;
-      } else {
-        chordDurations[hash] = duration;
-      }
-      if (chordDurations[hash]! / progression.duration >= overtaking) {
-        return 0.0;
+      if (progression.values[i] != null) {
+        final int hash = progression.values[i]!.weakHash;
+        final double duration = progression.durations[i];
+        if (chordDurations.containsKey(hash)) {
+          // FIXME: Dart stuff...
+          chordDurations[hash] = chordDurations[hash]! + duration;
+        } else {
+          chordDurations[hash] = duration;
+        }
+        if (chordDurations[hash]! / progression.duration >= overtaking) {
+          return 0.0;
+        }
       }
     }
     return 1.0;

@@ -3,9 +3,9 @@ import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
 
 class Progression<T> {
-  late final List<T> _values;
+  late final List<T?> _values;
 
-  List<T> get values => _values;
+  List<T?> get values => _values;
   final List<double> _durations;
 
   List<double> get durations => _durations;
@@ -54,11 +54,25 @@ class Progression<T> {
     }
   }
 
+  /// Doesn't check for duplicates or full and just sets the values for the
+  /// fields.
+  Progression.raw({
+    required List<T?> values,
+    required List<double> durations,
+    required TimeSignature timeSignature,
+    required double duration,
+    required bool full,
+  })  : _values = values,
+        _durations = durations,
+        _timeSignature = timeSignature,
+        _duration = duration,
+        _full = full;
+
   Progression.empty(
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this([], [], timeSignature: timeSignature);
 
-  Progression.evenTime(List<T> base,
+  Progression.evenTime(List<T?> base,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this(
             base,
@@ -110,7 +124,7 @@ class Progression<T> {
   /// Example:
   /// [Progression] p.durations => [1/4, 1/4, 1/4, 1/4].
   /// p.relativeTo(0.5).durations => [1/8, 1/8, 1/8, 1/8].
-  Progression<T> relativeTo(double ratio) {
+  Progression<T> relativeRhythmTo(double ratio) {
     return Progression(
       _values,
       _durations.map((double duration) => duration * ratio).toList(),
@@ -138,6 +152,12 @@ class Progression<T> {
         currentRhythmSum = 0.0;
         measures.add(currentMeasure);
         currentMeasure = Progression.empty(timeSignature: timeSignature);
+        while (newDur > _timeSignature.decimal) {
+          currentMeasure.add(_values[i], 1.0);
+          measures.add(currentMeasure);
+          currentMeasure = Progression.empty(timeSignature: timeSignature);
+          newDur -= _timeSignature.decimal;
+        }
       }
       currentRhythmSum += newDur;
       currentMeasure.add(_values[i], newDur);
@@ -146,7 +166,7 @@ class Progression<T> {
     return measures;
   }
 
-  void add(T value, double duration) {
+  void add(T? value, double duration) {
     if (_values.isNotEmpty && value == _values.last) {
       _durations.last += duration;
     } else {
@@ -158,8 +178,8 @@ class Progression<T> {
 
   void addAll(Progression<T> progression) {
     if (_values.isNotEmpty && progression.values.first == _values.last) {
-      double dur = progression.removeAt(0).value;
-      _durations.last += dur;
+      _durations.last += progression.durations.first;
+      progression = progression.sublist(1);
     }
     _values.addAll(progression._values);
     _durations.addAll(progression._durations);
@@ -167,8 +187,8 @@ class Progression<T> {
   }
 
   // TODO: Change this from map entry to something else...
-  MapEntry<T, double> removeAt(int index) {
-    T val = _values.removeAt(index);
+  MapEntry<T?, double> removeAt(int index) {
+    T? val = _values.removeAt(index);
     double dur = _durations.removeAt(index);
     return MapEntry(val, dur);
   }
@@ -192,22 +212,26 @@ class Progression<T> {
   int get hashCode =>
       Object.hash(Object.hashAll(_values), Object.hashAll(_durations));
 
-  String valueFormat(T value) => value.toString();
+  String valueFormat(T? value) =>
+      value == null ? 'null' : notNullValueFormat(value);
 
-  String durationFormat(double duration) => '';
+  String notNullValueFormat(T value) => value.toString();
+
+  String durationFormat(double duration) => duration.toString();
 
   /* TODO: Support chords with duration bigger than a step (like a 1/2 in a 1/4
       step, which would just not display the second 1/4 of it currently) and
       chords that move between measures. */
   @override
-  String toString() {
+  String toString([detailed = false]) {
     String output = '';
     if (measureCount <= 1.0) {
       output = '| ';
       final double step = 1 / _timeSignature.denominator;
       double stepSum = 0.0;
       for (var i = 0; i < length; i++) {
-        String durationFormatted = durationFormat(_durations[i]);
+        String durationFormatted =
+            detailed ? durationFormat(_durations[i]) : '';
         final val = _values[i];
         /* FIXME: This is written badly but I can't think of another way to
                   make it work */
@@ -215,11 +239,17 @@ class Progression<T> {
             val is Chord ? val.getCommonName() : valueFormat(_values[i]);
         final String formatted = valueFormatted +
             (durationFormatted.isEmpty ? '' : '($durationFormatted)');
-        if (_durations[i] + stepSum >= step) {
+        double curDuration = _durations[i];
+        // TODO: Check if there's a better more covering way to do this...
+        // while (curDuration < _timeSignature.decimal && curDuration > step) {
+        //   curDuration -= step;
+        //   output += '$formatted, ';
+        // }
+        if (curDuration + stepSum >= step) {
           stepSum = 0.0;
           output += '$formatted, ';
         } else {
-          stepSum += _durations[i];
+          stepSum += curDuration;
           output += '$formatted ';
         }
       }
@@ -246,7 +276,7 @@ class Progression<T> {
 
   int get length => _values.length;
 
-  T operator [](int index) => _values[index];
+  T? operator [](int index) => _values[index];
 
   void operator []=(int index, T value) {
     _values[index] = value;

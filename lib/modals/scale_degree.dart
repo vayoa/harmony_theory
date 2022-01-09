@@ -15,7 +15,7 @@ class ScaleDegree {
   ];
 
   late final int _degree;
-  late final int _offset;
+  late final int _accidentals;
 
   /// The scale degree number.
   /// Examples:
@@ -25,14 +25,19 @@ class ScaleDegree {
 
   // TODO: Rename to accidentals.
   /// Negative for flats and positive for sharps.
-  int get offset => _offset;
+  /// Max value is 11 (as 12 will be an octave...).
+  int get accidentals => _accidentals;
 
-  bool get isDiatonic => _offset == 0;
+  bool get isDiatonic => _accidentals == 0;
 
-  ScaleDegree.raw(int degree, int offset)
-      : assert(degree > 0 && degree < 8),
+  ScaleDegree.raw(int degree, int accidentals)
+      : assert(degree >= 0 && degree <= 6),
         _degree = degree,
-        _offset = offset;
+        _accidentals = accidentals.sign * (accidentals.abs() % 12);
+
+  ScaleDegree.copy(ScaleDegree other)
+      : _degree = other._degree,
+        _accidentals = other._accidentals;
 
   /* TODO: Combine this and add into one method and then implement it (since
             they share code...) */
@@ -41,7 +46,7 @@ class ScaleDegree {
         scalePattern.intervals.map<int>((e) => e.semitones).toList();
     interval = Interval.fromSemitones(interval.semitones % 12);
     _degree = interval.number - 1;
-    _offset = interval.semitones - _semitones[_degree];
+    _accidentals = (interval.semitones - _semitones[_degree]) % 12;
   }
 
   /// Returns a [ScaleDegree] from the given [Interval], based on a major scale!
@@ -60,63 +65,84 @@ class ScaleDegree {
     // TODO: Test offset handling.
     if (offsetStr.isNotEmpty) {
       if (offsetStr.startsWith(RegExp(r'[#b♯♭𝄪𝄫]'))) {
-        _offset = offsetStr[0].allMatches(offsetStr).length *
-            (offsetStr[0].contains(RegExp(r'[b♭𝄫]')) ? -1 : 1);
+        _accidentals = (offsetStr[0].allMatches(offsetStr).length *
+                (offsetStr[0].contains(RegExp(r'[b♭𝄫]')) ? -1 : 1)) %
+            12;
       } else {
         throw FormatException("invalid ScaleDegree name: $degree");
       }
     } else {
-      _offset = 0;
+      _accidentals = 0;
     }
   }
+
+  static final tonic = ScaleDegree.parse('I');
+  static final V = ScaleDegree.parse('V');
+  static final vii = ScaleDegree.parse('vii');
 
   // TODO: This only works for major based modes...,
   /// Returns a new [ScaleDegree] converted from the [fromMode] mode to [toMode]
   /// mode.
   /// Ionian's (Major) mode number is 0 and so on...
-  /// Example: I.modeShift(0, 5) [major to minor] => IV.
+  /// Example: I.modeShift(0, 5) [major to minor] => VI.
   ScaleDegree modeShift(int fromMode, int toMode) {
     assert(fromMode >= 0 && fromMode <= 7 && toMode >= 0 && toMode <= 7);
-    return ScaleDegree.raw((_degree + (toMode - fromMode)) % 7, _offset);
+    return ScaleDegree.raw((_degree + (toMode - fromMode)) % 7, _accidentals);
+  }
+
+  /// Returns a new [ScaleDegree] converted such that [tonic] is the new tonic.
+  /// Everything is still represented in the major scale, besides to degree
+  /// the function is called on...
+  /// Example: V.tonicizedFor(VI) => III, I.tonicizedFor(VI) => VI.
+  ScaleDegree tonicizedFor(ScaleDegree tonic) {
+    if (tonic == ScaleDegree.tonic) return ScaleDegree.copy(this);
+    return tonic.add(to(ScaleDegree.tonic));
   }
 
   PitchClass inScale(Scale scale) {
+    if (scale.isMinor) {
+      return PitchClass.fromSemitones(
+          scale.pitchClasses[(_degree - 5) % 7].integer + _accidentals);
+    }
     return PitchClass.fromSemitones(
-        scale.pitchClasses[_degree].integer + _offset);
+        scale.pitchClasses[_degree].integer + _accidentals);
   }
 
-  ScaleDegree add(ScalePattern scalePattern, Interval interval) {
-    final List<int> _semitones =
-        scalePattern.intervals.map<int>((e) => e.semitones).toList();
+  /// Returns a new [ScaleDegree] that is [interval] far away from the current
+  /// one, in the major scale.
+  /// Notice: The degree will always be [interval.number] away from [_degree].
+  /// Example: ###I.add(Interval.P5) => ###V.
+  ScaleDegree add(Interval interval) {
+    final List<int> _semitones = ScalePatternExtension.majorKeySemitones;
     Interval scaleDegree =
-        Interval.fromSemitones(_semitones[_degree] + _offset);
-    interval = Interval.fromSemitones(
-        (interval.semitones + scaleDegree.semitones) % 12);
-    return ScaleDegree.raw(
-        interval.number, interval.semitones - _semitones[interval.number - 1]);
+        Interval.fromSemitones(_semitones[_degree] + _accidentals);
+    Interval fromTonic =
+        Interval.fromSemitones(interval.semitones + scaleDegree.semitones);
+    int number = (_degree + interval.number - 1) % 7;
+    return ScaleDegree.raw(number, fromTonic.semitones - _semitones[number]);
   }
 
-  ScaleDegree addInMajor(Interval interval) =>
-      add(ScalePatternExtension.majorKey, interval);
+  Interval to(ScaleDegree other) => Interval.fromSemitones(
+      (_semitonesFromTonicInMajor - other._semitonesFromTonicInMajor) % 12);
 
-  Interval from(ScalePattern scalePattern, ScaleDegree other) =>
-      Interval.fromSemitones((scalePattern.intervals
-                  .sublist(
-                      min(_degree, other._degree), max(_degree, other._degree))
-                  .fold<int>(0, (prev, e) => prev + e.semitones) +
-              _offset +
-              other._offset) %
-          12);
+  int get _semitonesFromTonicInMajor {
+    int semitones =
+        ScalePatternExtension.majorKey.intervals[_degree].semitones +
+            _accidentals;
+    if (semitones < 0) return 12 + semitones;
+    return semitones;
+  }
 
   @override
   String toString() =>
-      ((_offset.isNegative ? 'b' : '#') * _offset.abs()) + degrees[_degree];
+      ((_accidentals.isNegative ? 'b' : '#') * _accidentals.abs()) +
+      degrees[_degree];
 
   @override
   bool operator ==(Object other) =>
       other is ScaleDegree &&
-      (other._degree == _degree && other._offset == _offset);
+      (other._degree == _degree && other._accidentals == _accidentals);
 
   @override
-  int get hashCode => Object.hash(_degree, _offset);
+  int get hashCode => Object.hash(_degree, _accidentals);
 }

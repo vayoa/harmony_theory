@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:thoery_test/extensions/scale_extension.dart';
+import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:tonic/tonic.dart';
 import 'modals/chord_progression.dart';
+import 'modals/scale_degree.dart';
 
 void main() {
   // // InScaleWeight
@@ -44,45 +46,78 @@ void main() {
   // print(overtakingWeight.score(progression));
   // print(uniquesWeight.score(progression));
 
-  ScaleDegreeProgression prog =
-      ScaleDegreeProgression.fromList(['ii7', 'V7', 'I']);
-  print(prog);
-  print(prog.modeShift(5));
+  // ScaleDegreeProgression prog =
+  //     ScaleDegreeProgression.fromList(['ii7', 'V7', 'I']);
+  // print(prog);
+  // print(prog.modeShift(toMode: 5));
 
-  // _basicMatchingTest();
+  // print(ScaleDegreeProgression.fromList(['ii', 'V', 'I'],
+  //     durations: [1 / 4, 1 / 4, 1 / 2]));
+
+  // ScaleDegreeProgression base = ScaleDegreeProgression.fromList(
+  //     ['II', 'III', 'vi'],
+  //     durations: [1 / 2, 1 / 2, 2]);
+  // print(base);
+  // print(base.duration);
+  // ScaleDegreeProgression sub = ScaleDegreeProgression.fromList(
+  //     ['vii°', 'III', 'VI', 'vi', 'vi'],
+  //     durations: [1 / 2, 1 / 2, 1 / 2, 1 / 2, 1]);
+  // print(sub);
+  // print(sub.duration);
+  // print(sub.percentMatchedTo(base));
+
+  // ScaleDegreeProgression base =
+  //     ScaleDegreeProgression.fromList(['IV', 'ii', 'V', 'I']);
+  // print(base);
+  // ScaleDegreeProgression bank = ScaleDegreeProgression.fromList(
+  //     ['IV', 'V', null],
+  //     durations: [1 / 8, 1 / 8, 1 / 4]);
+  // print(bank);
+  // print(bank.getPossibleSubstitutions(base));
+
+  _basicMatchingTest();
 }
 
 _basicMatchingTest({bool inputChords = false}) {
   // Example use-case:
   // Base chord progression based on which we suggests chords.
 
-  final List<Chord> _chords;
+  final List<Chord?> _chords;
   if (inputChords) {
     _chords = [];
-    print("Please enter your chords (enter '-' to stop):");
+    print("Please enter your chords (enter 's' to stop and '-' for a rest):");
     String? input;
     do {
       input = stdin.readLineSync() ?? '';
-      Chord _chord;
-      try {
-        _chord = Chord.parse(input);
-        _chords.add(_chord);
-      } on FormatException catch (e) {
-        print(e);
+      if (input == '-') {
+        _chords.add(null);
+      } else {
+        Chord _chord;
+        try {
+          _chord = Chord.parse(input);
+          _chords.add(_chord);
+        } on FormatException catch (e) {
+          print(e);
+        }
       }
-    } while (input != '-');
+    } while (input != 's');
   } else {
     _chords = [
       Chord.parse('F'),
       Chord.parse('G'),
       Chord.parse('C'),
-      // Chord.parse('C'),
+      Chord.parse('C'),
     ];
   }
 
   final ChordProgression _baseChordProgression = inputChords
       ? ChordProgression.evenTime(_chords)
-      : ChordProgression(_chords, [1 / 2, 1 / 2, 1]);
+      : ChordProgression(_chords, [
+          1,
+          1,
+          1,
+          1,
+        ]);
   print('Your Progression:\n$_baseChordProgression.');
 
   // Detect the base progressions' scale
@@ -120,29 +155,40 @@ _basicMatchingTest({bool inputChords = false}) {
   // To demonstrate duration matching we'll add another ii V I progression but
   // with a different rhythm...
   _savedProgressions.addAll([
+    ScaleDegreeProgression.fromList(['V', 'I'], durations: [1 / 4, 1 / 2]),
     ScaleDegreeProgression.fromList(['ii', 'V', 'I'],
         durations: [1 / 4, 1 / 4, 1 / 2]),
-    ScaleDegreeProgression.fromList(['V', 'I'], durations: [1 / 4, 1 / 2]),
     ScaleDegreeProgression.fromList(['ii', 'v', 'V', 'I'],
         durations: [1 / 8, 1 / 8, 1 / 8, 1 / 2]),
   ]);
 
+  // And another one to demonstrate null values in a banked progression.
+  // Granted, this shouldn't really happen in a real case scenario (as it will
+  // try to match any chord and replace the previous with a V...).
+  _savedProgressions.add(ScaleDegreeProgression.fromList(['V', null]));
+
   // To demonstrate different modes matching we'll add another ii V I
   // progression but in a minor scale...
-  _savedProgressions.add(ScaleDegreeProgression.fromList(['iidim', 'V', 'I'],
-      scalePattern: ScalePatternExtension.minorKey));
+  _savedProgressions
+      .add(ScaleDegreeProgression.fromList(['iidim', 'V', 'I'], inMinor: true));
 
   print('Saved Progressions:\n$_savedProgressions.\n');
 
   // Calculate all of the possible substitutions based on the library and
   // save each one's similarity rating.
-  Map<ScaleDegreeProgression, List<RatedSubstitution>> _ratedSubstitutions = {
-    for (var e in _savedProgressions) e: []
-  };
+  Map<ScaleDegreeProgression, List<RatedSubstitution>> _ratedSubstitutions = {};
   for (ScaleDegreeProgression progression in _savedProgressions) {
-    progression.getPossibleSubstitutions(_baseProgression).forEach(
-        (ScaleDegreeProgression sub) => _ratedSubstitutions[progression]!.add(
-            RatedSubstitution(sub, sub.percentMatchedTo(_baseProgression))));
+    List<ScaleDegreeProgression> subs =
+        progression.getPossibleSubstitutions(_baseProgression);
+    for (var sub in subs) {
+      final RatedSubstitution rs =
+          RatedSubstitution(sub, sub.percentMatchedTo(_baseProgression));
+      if (_ratedSubstitutions.containsKey(progression)) {
+        _ratedSubstitutions[progression]!.add(rs);
+      } else {
+        _ratedSubstitutions[progression] = [rs];
+      }
+    }
   }
 
   // Sort the rated progressions based on their ratings, descending order...
@@ -176,7 +222,8 @@ _basicMatchingTest({bool inputChords = false}) {
           '${rS.substitution} -> ${rS.substitution.inScale(_possibleScales[0])}:'
           ' ${rS.rating.toStringAsFixed(3)},\n';
     }
-    print('-- ${e.key} --\n$subs');
+    print('-- ${e.key} --\ndurations: ${e.key.durations}.\n'
+        'base: $_baseProgression.\n$subs');
   }
 }
 

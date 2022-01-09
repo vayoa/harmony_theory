@@ -35,8 +35,8 @@ class InScaleWeight extends Weight {
     // tensions), so split the chord to it's degrees and check that each one of
     // them is in degreesInScale.
     int count = 0;
-    for (ScaleDegreeChord chord in progression.values) {
-      if (chord.isDiatonic(progression.scalePattern)) {
+    for (ScaleDegreeChord? chord in progression.values) {
+      if (chord != null && chord.isDiatonic) {
         count++;
       }
     }
