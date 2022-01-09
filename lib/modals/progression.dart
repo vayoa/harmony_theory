@@ -3,9 +3,9 @@ import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
 
 class Progression<T> {
-  late final List<T> _values;
+  late final List<T?> _values;
 
-  List<T> get values => _values;
+  List<T?> get values => _values;
   final List<double> _durations;
 
   List<double> get durations => _durations;
@@ -57,7 +57,7 @@ class Progression<T> {
   /// Doesn't check for duplicates or full and just sets the values for the
   /// fields.
   Progression.raw({
-    required List<T> values,
+    required List<T?> values,
     required List<double> durations,
     required TimeSignature timeSignature,
     required double duration,
@@ -72,7 +72,7 @@ class Progression<T> {
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this([], [], timeSignature: timeSignature);
 
-  Progression.evenTime(List<T> base,
+  Progression.evenTime(List<T?> base,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this(
             base,
@@ -166,7 +166,7 @@ class Progression<T> {
     return measures;
   }
 
-  void add(T value, double duration) {
+  void add(T? value, double duration) {
     if (_values.isNotEmpty && value == _values.last) {
       _durations.last += duration;
     } else {
@@ -187,8 +187,8 @@ class Progression<T> {
   }
 
   // TODO: Change this from map entry to something else...
-  MapEntry<T, double> removeAt(int index) {
-    T val = _values.removeAt(index);
+  MapEntry<T?, double> removeAt(int index) {
+    T? val = _values.removeAt(index);
     double dur = _durations.removeAt(index);
     return MapEntry(val, dur);
   }
@@ -212,7 +212,10 @@ class Progression<T> {
   int get hashCode =>
       Object.hash(Object.hashAll(_values), Object.hashAll(_durations));
 
-  String valueFormat(T value) => value.toString();
+  String valueFormat(T? value) =>
+      value == null ? 'null' : notNullValueFormat(value);
+
+  String notNullValueFormat(T value) => value.toString();
 
   String durationFormat(double duration) => '';
 
@@ -272,7 +275,7 @@ class Progression<T> {
 
   int get length => _values.length;
 
-  T operator [](int index) => _values[index];
+  T? operator [](int index) => _values[index];
 
   void operator []=(int index, T value) {
     _values[index] = value;

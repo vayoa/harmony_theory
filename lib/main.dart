@@ -54,7 +54,25 @@ void main() {
   // print(ScaleDegreeProgression.fromList(['ii', 'V', 'I'],
   //     durations: [1 / 4, 1 / 4, 1 / 2]));
 
-  _basicMatchingTest();
+  // ScaleDegreeProgression base = ScaleDegreeProgression.fromList(
+  //     ['II', 'III', 'vi'],
+  //     durations: [1 / 2, 1 / 2, 2]);
+  // print(base);
+  // print(base.duration);
+  // ScaleDegreeProgression sub = ScaleDegreeProgression.fromList(
+  //     ['vii°', 'III', 'VI', 'vi', 'vi'],
+  //     durations: [1 / 2, 1 / 2, 1 / 2, 1 / 2, 1]);
+  // print(sub);
+  // print(sub.duration);
+  // print(sub.percentMatchedTo(base));
+
+  ScaleDegreeProgression base =
+      ScaleDegreeProgression.fromList(['IV', null, 'V', 'I']);
+  ScaleDegreeProgression bank =
+      ScaleDegreeProgression.fromList(['ii', 'V', 'I']);
+  print(bank.getPossibleSubstitutions(base));
+
+  // _basicMatchingTest();
 }
 
 _basicMatchingTest({bool inputChords = false}) {
@@ -192,7 +210,7 @@ _basicMatchingTest({bool inputChords = false}) {
           '${rS.substitution} -> ${rS.substitution.inScale(_possibleScales[0])}:'
           ' ${rS.rating.toStringAsFixed(3)},\n';
     }
-    print('-- ${e.key} --\ndurations: ${e.key.durations}\n'
+    print('-- ${e.key} --\ndurations: ${e.key.durations}.\n'
         'base: $_baseProgression.\n$subs');
   }
 }

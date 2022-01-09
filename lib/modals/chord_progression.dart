@@ -18,8 +18,9 @@ class ChordProgression extends Progression<Chord> {
       : super.empty(timeSignature: timeSignature);
 
   List<Scale> matchWithScales() {
-    List<String> chordNames =
-        values.map((Chord chord) => chord.getCommonName()).toList();
+    List<String> chordNames = values
+        .map((Chord? chord) => chord == null ? 'null' : chord.getCommonName())
+        .toList();
     Map<String, int> counts = {};
     Map<String, int> results = {};
 
@@ -74,7 +75,7 @@ class ChordProgression extends Progression<Chord> {
   }
 
   @override
-  String valueFormat(Chord value) => value.getCommonName();
+  String notNullValueFormat(Chord value) => value.getCommonName();
 }
 
 abstract class ScaleMatchUtilities {

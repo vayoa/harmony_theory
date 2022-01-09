@@ -25,10 +25,10 @@ class SubstitutionMatch {
   }
 
   static SubstitutionMatchType? getMatchType(
-      {required ScaleDegreeChord base,
-      required ScaleDegreeChord sub,
+      {required ScaleDegreeChord? base,
+      required ScaleDegreeChord? sub,
       required bool isSubLast}) {
-    if (sub.weakEqual(base)) {
+    if ((sub == null || base == null) || sub.weakEqual(base)) {
       return SubstitutionMatchType.dry;
     } else if (isSubLast &&
         sub.weakEqual(ScaleDegreeChord.majorTonicTriad) &&
