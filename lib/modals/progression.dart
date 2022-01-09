@@ -178,8 +178,8 @@ class Progression<T> {
 
   void addAll(Progression<T> progression) {
     if (_values.isNotEmpty && progression.values.first == _values.last) {
-      double dur = progression.removeAt(0).value;
-      _durations.last += dur;
+      _durations.last += progression.durations.first;
+      progression = progression.sublist(1);
     }
     _values.addAll(progression._values);
     _durations.addAll(progression._durations);
@@ -217,20 +217,21 @@ class Progression<T> {
 
   String notNullValueFormat(T value) => value.toString();
 
-  String durationFormat(double duration) => '';
+  String durationFormat(double duration) => duration.toString();
 
   /* TODO: Support chords with duration bigger than a step (like a 1/2 in a 1/4
       step, which would just not display the second 1/4 of it currently) and
       chords that move between measures. */
   @override
-  String toString() {
+  String toString([detailed = false]) {
     String output = '';
     if (measureCount <= 1.0) {
       output = '| ';
       final double step = 1 / _timeSignature.denominator;
       double stepSum = 0.0;
       for (var i = 0; i < length; i++) {
-        String durationFormatted = durationFormat(_durations[i]);
+        String durationFormatted =
+            detailed ? durationFormat(_durations[i]) : '';
         final val = _values[i];
         /* FIXME: This is written badly but I can't think of another way to
                   make it work */

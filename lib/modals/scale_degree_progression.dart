@@ -411,7 +411,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       if (bd1 - d1 != 0) {
         substitution.add(base[left], -1 * (bd1 - d1));
       }
-      substitution.addAll(relativeMatch);
+      substitution.addAll(base.fillWith(substitution.duration, relativeMatch));
       if (bd2 - d2 != 0) {
         substitution.add(base[right], bd2 - d2);
       }
@@ -422,6 +422,25 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     }
     // TODO: This makes sure the results will be unique, make it more efficient.
     return substitutions.toSet().toList();
+  }
+
+  /// Returns [relativeSubSection], but if a null values is there returns
+  /// replaces the null value should be if [relativeSubSection] substituted the
+  /// current one, a [durationBefore] duration away from the start.
+  ScaleDegreeProgression fillWith(
+      double durationBefore, ScaleDegreeProgression relativeSubSection) {
+    double sum = 0.0;
+    ScaleDegreeProgression filled = ScaleDegreeProgression.empty(
+        inMinor: relativeSubSection.inMinor,
+        timeSignature: relativeSubSection.timeSignature);
+    for (int i = 0; i < relativeSubSection.length; i++) {
+      ScaleDegreeChord? filler = relativeSubSection[i];
+      double dur = relativeSubSection.durations[i];
+      filler ??= this[getIndexFromDuration(durationBefore + sum)];
+      sum += dur;
+      filled.add(filler, dur);
+    }
+    return filled;
   }
 
   List<ScaleDegreeProgression> getFailed() {
