@@ -1,18 +1,19 @@
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 
-class DefaultBank {
+class ProgressionBank {
   static final Map<int, ScaleDegreeProgression> _bank = {};
 
   /// Notice: if the major tonic is in the last place it will be saved in a
   /// different group then if it's in any other place (for tonicization).
   static final Map<int, List<int>> _groupedBank = {};
 
-  DefaultBank([List<ScaleDegreeProgression>? additionalProgressions]) {
+  ProgressionBank([List<ScaleDegreeProgression>? additionalProgressions]) {
     if (additionalProgressions != null && additionalProgressions.isNotEmpty) {
       _bankList.addAll(additionalProgressions);
     }
 
+  // TODO: Make sure no two same hashes are in a list in _groupedBank.
     for (ScaleDegreeProgression progression in _bankList) {
       int hash = progression.hashCode;
       _bank[hash] = progression;

@@ -5,6 +5,7 @@ import 'package:tonic/tonic.dart';
 /// A particular [ScoreGiver] that scores a [Progression] within a range of
 /// 0 - 1, that is later multiplied by it's [importance].
 abstract class Weight {
+  final String name;
   final ScoringStage scoringStage;
   final WeightDescription description;
 
@@ -18,6 +19,7 @@ abstract class Weight {
   /// Returns a new [Weight] object.
   /// [importance] must be between 0 and [maxImportance] (inclusive).
   const Weight({
+    required this.name,
     required this.scoringStage,
     required this.description,
     required this.importance,

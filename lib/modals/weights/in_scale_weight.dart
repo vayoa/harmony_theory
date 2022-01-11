@@ -8,6 +8,7 @@ import '../scale_degree.dart';
 class InScaleWeight extends Weight {
   const InScaleWeight()
       : super(
+          name: 'InScale',
           importance: 2,
           scoringStage: ScoringStage.beforeSubstitution,
           description: WeightDescription.diatonic,

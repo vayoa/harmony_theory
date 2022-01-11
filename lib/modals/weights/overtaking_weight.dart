@@ -6,6 +6,7 @@ import 'package:tonic/tonic.dart';
 class OvertakingWeight extends Weight {
   const OvertakingWeight()
       : super(
+    name: 'Overtaking',
           importance: 4,
           scoringStage: ScoringStage.afterSubstitution,
           description: WeightDescription.technical,

@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/state/default_bank.dart';
+import 'package:thoery_test/state/progression_bank.dart';
+import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:tonic/tonic.dart';
 import 'modals/chord_progression.dart';
 import 'modals/scale_degree.dart';
@@ -75,8 +76,18 @@ void main() {
   // print(bank);
   // print(base.getPossibleSubstitutions(bank));
 
-  DefaultBank defaultBank = DefaultBank();
-  print(defaultBank.getByGroup(ScaleDegreeChord.majorTonicTriad));
+  ProgressionBank bank = ProgressionBank();
+  SubstitutionHandler.test(
+    base: ChordProgression.evenTime(
+      [
+        Chord.parse('F'),
+        Chord.parse('G'),
+        Chord.parse('C'),
+        Chord.parse('C'),
+      ],
+    ),
+    bank: bank,
+  );
 
   // _basicMatchingTest();
 }
@@ -85,42 +96,20 @@ _basicMatchingTest({bool inputChords = false}) {
   // Example use-case:
   // Base chord progression based on which we suggests chords.
 
-  final List<Chord?> _chords;
+  ChordProgression _baseChordProgression;
   if (inputChords) {
-    _chords = [];
-    print("Please enter your chords (enter 's' to stop and '-' for a rest):");
-    String? input;
-    do {
-      input = stdin.readLineSync() ?? '';
-      if (input == '-') {
-        _chords.add(null);
-      } else {
-        Chord _chord;
-        try {
-          _chord = Chord.parse(input);
-          _chords.add(_chord);
-        } on FormatException catch (e) {
-          print(e);
-        }
-      }
-    } while (input != 's');
+    _baseChordProgression = SubstitutionHandler.inputChords();
   } else {
-    _chords = [
-      Chord.parse('F'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('C'),
-    ];
+    _baseChordProgression = ChordProgression.evenTime(
+      [
+        Chord.parse('F'),
+        Chord.parse('G'),
+        Chord.parse('C'),
+        Chord.parse('C'),
+      ],
+    );
   }
 
-  final ChordProgression _baseChordProgression = inputChords
-      ? ChordProgression.evenTime(_chords)
-      : ChordProgression(_chords, [
-          1,
-          1,
-          1,
-          1,
-        ]);
   print('Your Progression:\n$_baseChordProgression.');
 
   // Detect the base progressions' scale

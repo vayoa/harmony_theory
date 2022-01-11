@@ -6,6 +6,7 @@ import 'package:tonic/tonic.dart';
 class UniquesWeight extends Weight {
   const UniquesWeight()
       : super(
+          name: 'Uniques',
           importance: 2,
           scoringStage: ScoringStage.afterSubstitution,
           description: WeightDescription.exotic,
