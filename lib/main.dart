@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
+import 'package:thoery_test/state/default_bank.dart';
 import 'package:tonic/tonic.dart';
 import 'modals/chord_progression.dart';
 import 'modals/scale_degree.dart';
@@ -69,13 +70,15 @@ void main() {
   // ScaleDegreeProgression base =
   //     ScaleDegreeProgression.fromList(['IV', 'ii', 'V', 'I']);
   // print(base);
-  // ScaleDegreeProgression bank = ScaleDegreeProgression.fromList(
-  //     ['IV', 'V', null],
-  //     durations: [1 / 8, 1 / 8, 1 / 4]);
+  // ScaleDegreeProgression bank =
+  //     ScaleDegreeProgression.fromList(['ii', 'V', 'I']);
   // print(bank);
-  // print(bank.getPossibleSubstitutions(base));
+  // print(base.getPossibleSubstitutions(bank));
 
-  _basicMatchingTest();
+  DefaultBank defaultBank = DefaultBank();
+  print(defaultBank.getByGroup(ScaleDegreeChord.majorTonicTriad));
+
+  // _basicMatchingTest();
 }
 
 _basicMatchingTest({bool inputChords = false}) {
@@ -170,7 +173,7 @@ _basicMatchingTest({bool inputChords = false}) {
   // To demonstrate different modes matching we'll add another ii V I
   // progression but in a minor scale...
   _savedProgressions
-      .add(ScaleDegreeProgression.fromList(['iidim', 'V', 'I'], inMinor: true));
+      .add(ScaleDegreeProgression.fromList(['iidim', 'V', 'i'], inMinor: true));
 
   print('Saved Progressions:\n$_savedProgressions.\n');
 
@@ -179,7 +182,7 @@ _basicMatchingTest({bool inputChords = false}) {
   Map<ScaleDegreeProgression, List<RatedSubstitution>> _ratedSubstitutions = {};
   for (ScaleDegreeProgression progression in _savedProgressions) {
     List<ScaleDegreeProgression> subs =
-        progression.getPossibleSubstitutions(_baseProgression);
+        _baseProgression.getPossibleSubstitutions(progression);
     for (var sub in subs) {
       final RatedSubstitution rs =
           RatedSubstitution(sub, sub.percentMatchedTo(_baseProgression));

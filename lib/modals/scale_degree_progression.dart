@@ -140,13 +140,12 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   }
 
   // TDC: Implement scale pattern matching!!
-  /// Returns a list containing lists of match locations (first element is
-  /// the location in [base] and second is location "here"...).
-  List<SubstitutionMatch> getFittingMatchLocations(
-      ScaleDegreeProgression base) {
+  /// Returns a list containing substitution match locations, where [sub] could
+  /// substitute the current progression (base).
+  List<SubstitutionMatch> getFittingMatchLocations(ScaleDegreeProgression sub) {
     // Explanation to why this is done is below...
-    // if we (as a saved progression) can't fit in the base progression...
-    if (duration > base.duration) return const [];
+    // if the potential sub can't fit in the base progression...
+    if (sub.duration > duration) return const [];
 
     // List containing lists of match locations (first element is location in
     // base and second is location here).
@@ -172,14 +171,14 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     // progression [1 2, 3, -, -] where 1 and 2 are 1/8 and 3 is a 1/4 would be
     // considered the same as a [1, 2, 3] where 1 and 2 are 1/4 and 3 is a 1/2.
 
-    for (var chordPos = 0; chordPos < length; chordPos++) {
-      for (var baseChordPos = 0; baseChordPos < base.length; baseChordPos++) {
+    for (var baseChordPos = 0; baseChordPos < length; baseChordPos++) {
+      for (var subChordPos = 0; subChordPos < sub.length; subChordPos++) {
         // If the two chords are equal.
         // Or if we have a tonicization.
         final SubstitutionMatchType? type = SubstitutionMatch.getMatchType(
-          base: base[baseChordPos],
-          sub: this[chordPos],
-          isSubLast: chordPos == length - 1,
+          base: this[baseChordPos],
+          sub: sub[subChordPos],
+          isSubLast: subChordPos == sub.length - 1,
         );
         if (type != null) {
           // We now check if there's enough space for this progression to
@@ -187,30 +186,30 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           // For this to be true there needs to be enough duration to cover the
           // rest of the progression.
           final double ratio =
-              base.durations[baseChordPos] / durations[chordPos];
+              durations[baseChordPos] / sub.durations[subChordPos];
           double neededDurationLeft = 0, neededDurationRight = 0;
           double baseDurationLeft = 0, baseDurationRight = 0;
           bool enoughInLeft = false, enoughInRight = false;
-          neededDurationLeft = sumDurations(0, chordPos) * ratio;
+          neededDurationLeft = sub.sumDurations(0, subChordPos) * ratio;
           // If this is 0 than there's no point on checking the sum since it's
           // 0... (also there'll be an error with base[baseChordPos - 1] if we
           // don't check this...)
           if (baseChordPos != 0) {
             for (var i = baseChordPos - 1; !enoughInLeft && i >= 0; i--) {
-              baseDurationLeft += base.durations[i];
+              baseDurationLeft += durations[i];
               enoughInLeft = baseDurationLeft >= neededDurationLeft;
             }
           }
           enoughInLeft = baseDurationLeft >= neededDurationLeft;
-          // Continue on only if there's enough duration to fit 'us' in the
+          // Continue on only if there's enough duration to fit sub in the
           // left side of base from baseChordPose...
           if (enoughInLeft) {
-            if (chordPos != length - 1) {
-              neededDurationRight = sumDurations(chordPos + 1) * ratio;
+            if (subChordPos != length - 1) {
+              neededDurationRight = sub.sumDurations(subChordPos + 1) * ratio;
               for (var i = baseChordPos + 1;
-                  !enoughInRight && i < base.length;
+                  !enoughInRight && i < length;
                   i++) {
-                baseDurationRight += base.durations[i];
+                baseDurationRight += durations[i];
                 enoughInRight = baseDurationRight >= neededDurationRight;
               }
             }
@@ -223,17 +222,15 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             if (baseDurationRight >= neededDurationRight) {
               // Add the location to the list of match locations and continue
               // searching.
-              // The first element is the location in base and the second is the
-              // location here...
               matches.add(
                 SubstitutionMatch(
                   baseIndex: baseChordPos,
-                  subIndex: chordPos,
+                  subIndex: subChordPos,
                   type: type,
-                  withSeventh: (this[chordPos] != null &&
-                          this[chordPos]!.containsSeventh) ||
-                      (base[baseChordPos] != null &&
-                          base[baseChordPos]!.containsSeventh),
+                  withSeventh: (this[baseChordPos] != null &&
+                          this[baseChordPos]!.containsSeventh) ||
+                      (sub[subChordPos] != null &&
+                          sub[subChordPos]!.containsSeventh),
                 ),
               );
             }
@@ -372,8 +369,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           WEAK EQUALITY FUNCTION...).
    */
   List<ScaleDegreeProgression> getPossibleSubstitutions(
-      ScaleDegreeProgression base) {
-    final List<SubstitutionMatch> matches = getFittingMatchLocations(base);
+      ScaleDegreeProgression sub) {
+    final List<SubstitutionMatch> matches = getFittingMatchLocations(sub);
     final List<ScaleDegreeProgression> substitutions = [];
 
     /* FIXME: This gets computed twice (first time in
@@ -388,35 +385,35 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
                 getFittingMatchLocations()...), convert it. */
       final ScaleDegreeProgression relativeMatch =
           SubstitutionMatch.getSubstitution(
-              progression: this,
+              progression: sub,
               type: match.type,
               addSeventh: match.withSeventh,
-              ratio: base.durations[baseChord] / durations[chord],
-              tonic: base[match.baseIndex]?.rootDegree);
+              ratio: durations[baseChord] / sub.durations[chord],
+              tonic: this[match.baseIndex]?.rootDegree);
       double d1 = -1 * relativeMatch.sumDurations(0, chord);
       // First index that could be changed
-      int left = base.getIndexFromDuration(d1, from: baseChord);
+      int left = getIndexFromDuration(d1, from: baseChord);
       double d2 =
           relativeMatch.sumDurations(chord) - relativeMatch.durations[chord];
       // Last index to change...
-      int right = base.getIndexFromDuration(d2, from: baseChord);
+      int right = getIndexFromDuration(d2, from: baseChord);
       ScaleDegreeProgression substitution =
-          ScaleDegreeProgression.fromProgression(base.sublist(0, left),
-              inMinor: base.inMinor);
+          ScaleDegreeProgression.fromProgression(sublist(0, left),
+              inMinor: _inMinor);
       // TDC: This won't support empty chord spaces...
-      double bd1 = -1 * base.sumDurations(left, baseChord);
-      base.sumDurations(baseChord, right + 1) - base.durations[baseChord];
+      double bd1 = -1 * sumDurations(left, baseChord);
+      sumDurations(baseChord, right + 1) - durations[baseChord];
       double bd2 =
-          base.sumDurations(baseChord, right + 1) - base.durations[baseChord];
+          sumDurations(baseChord, right + 1) - durations[baseChord];
       if (bd1 - d1 != 0) {
-        substitution.add(base[left], -1 * (bd1 - d1));
+        substitution.add(this[left], -1 * (bd1 - d1));
       }
-      substitution.addAll(base.fillWith(substitution.duration, relativeMatch));
+      substitution.addAll(fillWith(substitution.duration, relativeMatch));
       if (bd2 - d2 != 0) {
-        substitution.add(base[right], bd2 - d2);
+        substitution.add(this[right], bd2 - d2);
       }
-      if (right + 1 != base.length) {
-        substitution.addAll(base.sublist(right + 1));
+      if (right + 1 != length) {
+        substitution.addAll(sublist(right + 1));
       }
       substitutions.add(substitution);
     }
