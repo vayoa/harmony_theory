@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
+import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
+import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
+import 'package:thoery_test/modals/weights/in_scale_weight.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:tonic/tonic.dart';
@@ -77,17 +80,55 @@ void main() {
   // print(base.getPossibleSubstitutions(bank));
 
   ProgressionBank bank = ProgressionBank();
-  SubstitutionHandler.test(
-    base: ChordProgression.evenTime(
-      [
-        Chord.parse('F'),
-        Chord.parse('G'),
-        Chord.parse('C'),
-        Chord.parse('C'),
-      ],
-    ),
-    bank: bank,
+  // Chords for "יונתן הקטן".
+  ChordProgression base = ChordProgression(
+    chords: [
+      Chord.parse('C'),
+      Chord.parse('G'),
+      Chord.parse('C'),
+      Chord.parse('G'),
+      Chord.parse('C'),
+      Chord.parse('G'),
+      Chord.parse('C'),
+      Chord.parse('G'),
+      Chord.parse('C'),
+      Chord.parse('Dm'),
+      Chord.parse('G'),
+      Chord.parse('C'),
+      Chord.parse('G'),
+      Chord.parse('C'),
+      Chord.parse('G'),
+      Chord.parse('C'),
+      Chord.parse('G'),
+      Chord.parse('C'),
+    ],
+    durations: [
+      1 / 4,
+      1 / 4,
+      1 / 4,
+      1 / 4,
+      1 / 4,
+      1 / 4,
+      1 / 8,
+      1 / 8,
+      1 / 4,
+      1 / 4,
+      1 / 4,
+      1 / 4,
+      1 / 4,
+      1 / 4,
+      1 / 4,
+      1 / 8,
+      1 / 8,
+      1 / 4,
+    ],
   );
+  // SubstitutionHandler.test(
+  //   base: base,
+  //   bank: bank,
+  // );
+  SubstitutionHandler.substituteUntilSimiliarBy(
+      base: base, bank: bank, percent: 0.2, maxIterations: 100);
 
   // _basicMatchingTest();
 }
@@ -170,8 +211,10 @@ _basicMatchingTest({bool inputChords = false}) {
   // save each one's similarity rating.
   Map<ScaleDegreeProgression, List<RatedSubstitution>> _ratedSubstitutions = {};
   for (ScaleDegreeProgression progression in _savedProgressions) {
-    List<ScaleDegreeProgression> subs =
-        _baseProgression.getPossibleSubstitutions(progression);
+    List<ScaleDegreeProgression> subs = _baseProgression
+        .getPossibleSubstitutions(progression)
+        .map((e) => e.substitutedBase)
+        .toList();
     for (var sub in subs) {
       final RatedSubstitution rs =
           RatedSubstitution(sub, sub.percentMatchedTo(_baseProgression));

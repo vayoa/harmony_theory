@@ -4,14 +4,16 @@ import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
 
 class ChordProgression extends Progression<Chord> {
-  ChordProgression(List<Chord?> base, List<double> durations,
-      {TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : super(base, durations, timeSignature: timeSignature);
+  ChordProgression(
+      {required List<Chord?> chords,
+      required List<double> durations,
+      TimeSignature timeSignature = const TimeSignature.evenTime()})
+      : super(chords, durations, timeSignature: timeSignature);
 
   /// Returns a new [ChordProgression] where all the chords are of 1/4 duration.
-  ChordProgression.evenTime(List<Chord?> base,
+  ChordProgression.evenTime(List<Chord?> chords,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : super.evenTime(base, timeSignature: timeSignature);
+      : super.evenTime(chords, timeSignature: timeSignature);
 
   ChordProgression.empty(
       {TimeSignature timeSignature = const TimeSignature.evenTime()})

@@ -18,9 +18,7 @@ class SubstitutionMatch {
 
   @override
   String toString() {
-    return "base: $baseIndex,\n"
-        "sub: $subIndex,\n"
-        "type: ${type.name},\n"
+    return "base: $baseIndex, sub: $subIndex, type: ${type.name}, "
         "withSeventh: $withSeventh.";
   }
 
@@ -42,7 +40,7 @@ class SubstitutionMatch {
     required SubstitutionMatchType type,
     required bool addSeventh,
     required double ratio,
-    ScaleDegree? tonic,
+    ScaleDegreeChord? tonic,
   }) {
     switch (type) {
       case SubstitutionMatchType.dry:

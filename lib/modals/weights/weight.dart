@@ -43,5 +43,4 @@ enum ScoringStage {
   /// The saved progression will be scored before substituting the base one.
   beforeSubstitution,
   afterSubstitution,
-  both,
 }

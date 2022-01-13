@@ -1,6 +1,7 @@
 import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/extensions/interval_extension.dart';
+import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
 
 class ScaleDegreeChord {
@@ -147,13 +148,22 @@ class ScaleDegreeChord {
 
   /// Returns a new [ScaleDegreeChord] converted such that [tonic] is the new
   /// tonic. Everything is still represented in the major scale, besides to degree the function is called on...
+  ///
   /// Example: V.tonicizedFor(VI) => III, I.tonicizedFor(VI) => VI,
   /// ii.tonicizedFor(VI) => vii.
-  ScaleDegreeChord tonicizedFor(ScaleDegree tonic) {
-    if (tonic == ScaleDegree.tonic) {
+  ScaleDegreeChord tonicizedFor(ScaleDegreeChord tonic) {
+    if (tonic.rootDegree == ScaleDegree.tonic) {
       return ScaleDegreeChord.copy(this);
+    } else if (weakEqual(majorTonicTriad)) {
+      return ScaleDegreeChord.raw(
+          tonic.pattern, rootDegree.tonicizedFor(tonic.rootDegree));
     }
-    return ScaleDegreeChord.raw(_pattern, rootDegree.tonicizedFor(tonic));
+    return TonicizedScaleDegreeChord.raw(
+      tonic: tonic,
+      tonicizedToTonic: ScaleDegreeChord.copy(this),
+      tonicizedToMajorScale:
+          ScaleDegreeChord.raw(_pattern, rootDegree.tonicizedFor(tonic.rootDegree)),
+    );
   }
 
   // TDC: Not sure about this...
@@ -250,6 +260,9 @@ class ScaleDegreeChord {
 
   // TDC: Only works for the major scale, is this correct?
   // TDC: Check if this works correctly!!
+  /* TDC: Needs to be better realized, doesn't really match with the regular
+          hash. */
+
   /// Returns a hash of the chord with no tensions. 7th are hashed in if
   /// they're not diatonic (based on the major scale).
   int get weakHash {
@@ -266,6 +279,12 @@ class ScaleDegreeChord {
   }
 
   static final ScaleDegreeChord majorTonicTriad = ScaleDegreeChord.parse('I');
+  static final ScaleDegreeChord ii = ScaleDegreeChord.parse('ii');
+  static final ScaleDegreeChord iii = ScaleDegreeChord.parse('iii');
+  static final ScaleDegreeChord IV = ScaleDegreeChord.parse('IV');
+  static final ScaleDegreeChord V = ScaleDegreeChord.parse('V');
+  static final ScaleDegreeChord vi = ScaleDegreeChord.parse('vi');
+  static final ScaleDegreeChord viidim = ScaleDegreeChord.parse('viidim');
 }
 
 enum HarmonicFunction {

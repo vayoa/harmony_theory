@@ -1,10 +1,10 @@
 import 'dart:io';
-
 import 'package:thoery_test/extensions/scale_extension.dart';
-import 'package:thoery_test/main.dart';
 import 'package:thoery_test/modals/chord_progression.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
+import 'package:thoery_test/modals/substitution.dart';
+import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/in_scale_weight.dart';
 import 'package:thoery_test/modals/weights/overtaking_weight.dart';
 import 'package:thoery_test/modals/weights/uniques_weight.dart';
@@ -17,6 +17,7 @@ abstract class SubstitutionHandler {
     InScaleWeight(),
     OvertakingWeight(),
     UniquesWeight(),
+    HarmonicFunctionWeight(),
   ];
 
   static ChordProgression inputChords() {
@@ -40,9 +41,9 @@ abstract class SubstitutionHandler {
     return _chords;
   }
 
-  static List<ScaleDegreeProgression> getPossibleSubstitutions(
+  static List<Substitution> getPossibleSubstitutions(
       ScaleDegreeProgression base, ProgressionBank bank) {
-    final List<ScaleDegreeProgression> substitutions = [];
+    final List<Substitution> substitutions = [];
     for (ScaleDegreeChord? chord in base.values) {
       if (chord != null) {
         // TODO: Implement tonicization optimization.
@@ -50,7 +51,13 @@ abstract class SubstitutionHandler {
             bank.getByGroup(chord, false);
         if (progressions != null && progressions.isNotEmpty) {
           for (ScaleDegreeProgression sub in progressions) {
-            substitutions.addAll(base.getPossibleSubstitutions(sub));
+            List<Substitution> possibleSubs =
+                base.getPossibleSubstitutions(sub);
+            for (Substitution possibleSub in possibleSubs) {
+              if (possibleSub.substitutedBase != base) {
+                substitutions.add(possibleSub);
+              }
+            }
           }
         }
       }
@@ -66,31 +73,23 @@ abstract class SubstitutionHandler {
           (double previousValue, Weight weight) =>
               previousValue + weight.score(progression));
 
-  static List<RatedSubstitution> getRatedSubstitutions(
+  static List<Substitution> getRatedSubstitutions(
       ScaleDegreeProgression base, ProgressionBank bank) {
-    List<ScaleDegreeProgression> substitutions =
-        getPossibleSubstitutions(base, bank);
-    List<RatedSubstitution> rated = [
-      for (ScaleDegreeProgression sub in substitutions)
-        RatedSubstitution(sub, scoreProgression(sub))
-    ];
-    rated.sort((RatedSubstitution a, RatedSubstitution b) =>
-        -1 * a.rating.compareTo(b.rating));
-    return rated;
+    List<Substitution> substitutions = getPossibleSubstitutions(base, bank);
+    for (Substitution sub in substitutions) {
+      sub.score(weights);
+    }
+    substitutions.sort(
+        (Substitution a, Substitution b) => -1 * a.rating.compareTo(b.rating));
+    return substitutions;
   }
 
-  static List<RatedSubstitution> test(
-      {ChordProgression? base,
-      bool inputBase = false,
-      required ProgressionBank bank}) {
-    assert(base != null || inputBase);
-    if (inputBase) {
-      base = inputChords();
-    }
+  static MapEntry<Scale, ScaleDegreeProgression> getAndPrintBase(
+      ChordProgression base) {
     print('Your Progression:\n$base.');
 
     // Detect the base progressions' scale
-    final List<Scale> _possibleScales = base!.matchWithScales();
+    final List<Scale> _possibleScales = base.matchWithScales();
     print('Scale Found: ${_possibleScales[0].getCommonName()}.');
 
     // Convert the base progression to roman numerals, we used the most probable
@@ -98,18 +97,50 @@ abstract class SubstitutionHandler {
     final ScaleDegreeProgression baseProgression =
         ScaleDegreeProgression.fromChords(_possibleScales[0], base);
     print('In Roman Numerals: $baseProgression.\n');
+    return MapEntry(_possibleScales[0], baseProgression);
+  }
 
-    List<RatedSubstitution> rated =
-        getRatedSubstitutions(baseProgression, bank);
+  static List<Substitution> test(
+      {ChordProgression? base,
+      bool inputBase = false,
+      required ProgressionBank bank}) {
+    assert(base != null || inputBase);
+    if (inputBase) {
+      base = inputChords();
+    }
+    var sAP = getAndPrintBase(base!);
+    Scale scale = sAP.key;
+    ScaleDegreeProgression baseProgression = sAP.value;
+
+    List<Substitution> rated = getRatedSubstitutions(baseProgression, bank);
 
     print('Suggestions:');
     String subs = '';
-    for (RatedSubstitution rS in rated) {
-      subs +=
-          '${rS.substitution} -> ${rS.substitution.inScale(_possibleScales[0])}:'
-          ' ${rS.rating.toStringAsFixed(3)},\n';
+    for (Substitution sub in rated) {
+      subs += '${sub.toString(baseProgression, scale)}\n\n';
     }
     print(subs);
     return rated;
+  }
+
+  static Substitution substituteUntilSimiliarBy(
+      {required ChordProgression base,
+      required ProgressionBank bank,
+      required double percent,
+      int? maxIterations}) {
+    var sAP = getAndPrintBase(base);
+    Scale scale = sAP.key;
+    ScaleDegreeProgression baseProgression = sAP.value, prev = baseProgression;
+    List<Substitution> rated;
+    do {
+      rated = getRatedSubstitutions(prev, bank);
+      prev = rated.first.substitutedBase;
+      if (maxIterations != null) maxIterations--;
+    } while ((maxIterations != null && maxIterations > 0) ||
+        (maxIterations == null &&
+            prev.percentMatchedTo(baseProgression) > percent));
+    Substitution result = rated.first;
+    print(result.toString(baseProgression, scale));
+    return result;
   }
 }

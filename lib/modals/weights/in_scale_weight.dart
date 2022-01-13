@@ -10,7 +10,10 @@ class InScaleWeight extends Weight {
       : super(
           name: 'InScale',
           importance: 2,
-          scoringStage: ScoringStage.beforeSubstitution,
+          /* TDC: This can be beforeSubstitution but if it's a tonicized
+                  progression the weight will score it before doing the
+                  tonicization, which will give wrong results. */
+          scoringStage: ScoringStage.afterSubstitution,
           description: WeightDescription.diatonic,
         );
 

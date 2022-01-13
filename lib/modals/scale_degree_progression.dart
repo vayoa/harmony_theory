@@ -2,6 +2,7 @@ import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
+import 'package:thoery_test/modals/substitution.dart';
 import 'package:thoery_test/modals/substitution_match.dart';
 import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
@@ -124,7 +125,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     return converted;
   }
 
-  ScaleDegreeProgression tonicizedFor(ScaleDegree tonic,
+  ScaleDegreeProgression tonicizedFor(ScaleDegreeChord tonic,
       {bool addSeventh = false, double ratio = 1.0}) {
     ScaleDegreeProgression converted = ScaleDegreeProgression.empty(
         timeSignature: timeSignature, inMinor: _inMinor);
@@ -368,10 +369,9 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           match, and suggest a ii7 V7 Imaj7. (THIS CAN NOW BE DONE WITH THE NEW
           WEAK EQUALITY FUNCTION...).
    */
-  List<ScaleDegreeProgression> getPossibleSubstitutions(
-      ScaleDegreeProgression sub) {
+  List<Substitution> getPossibleSubstitutions(ScaleDegreeProgression sub) {
     final List<SubstitutionMatch> matches = getFittingMatchLocations(sub);
-    final List<ScaleDegreeProgression> substitutions = [];
+    final List<Substitution> substitutions = [];
 
     /* FIXME: This gets computed twice (first time in
               getFittingMatchLocations()...).
@@ -389,7 +389,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
               type: match.type,
               addSeventh: match.withSeventh,
               ratio: durations[baseChord] / sub.durations[chord],
-              tonic: this[match.baseIndex]?.rootDegree);
+              tonic: this[match.baseIndex]);
       double d1 = -1 * relativeMatch.sumDurations(0, chord);
       // First index that could be changed
       int left = getIndexFromDuration(d1, from: baseChord);
@@ -403,8 +403,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       // TDC: This won't support empty chord spaces...
       double bd1 = -1 * sumDurations(left, baseChord);
       sumDurations(baseChord, right + 1) - durations[baseChord];
-      double bd2 =
-          sumDurations(baseChord, right + 1) - durations[baseChord];
+      double bd2 = sumDurations(baseChord, right + 1) - durations[baseChord];
       if (bd1 - d1 != 0) {
         substitution.add(this[left], -1 * (bd1 - d1));
       }
@@ -415,7 +414,10 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       if (right + 1 != length) {
         substitution.addAll(sublist(right + 1));
       }
-      substitutions.add(substitution);
+      substitutions.add(Substitution(
+          originalSubstitution: sub,
+          substitutedBase: substitution,
+          substitutionMatch: match));
     }
     // TODO: This makes sure the results will be unique, make it more efficient.
     return substitutions.toSet().toList();
