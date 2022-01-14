@@ -186,11 +186,10 @@ class Progression<T> {
     updateFull();
   }
 
-  // TODO: Change this from map entry to something else...
-  MapEntry<T?, double> removeAt(int index) {
+  ProgressionEntry<T> removeAt(int index) {
     T? val = _values.removeAt(index);
     double dur = _durations.removeAt(index);
-    return MapEntry(val, dur);
+    return ProgressionEntry(value: val, duration: dur);
   }
 
   @override
@@ -287,4 +286,11 @@ class Progression<T> {
   Progression<T> sublist(int start, [int? end]) =>
       Progression(_values.sublist(start, end), _durations.sublist(start, end),
           timeSignature: _timeSignature);
+}
+
+class ProgressionEntry<T> {
+  final T? value;
+  final double duration;
+
+  const ProgressionEntry({required this.value, required this.duration});
 }

@@ -66,13 +66,6 @@ abstract class SubstitutionHandler {
     return substitutions.toSet().toList();
   }
 
-  // TODO: Implement preferences and weight parameters (before sub, after...).
-  static double scoreProgression(ScaleDegreeProgression progression) =>
-      weights.fold<double>(
-          0.0,
-          (double previousValue, Weight weight) =>
-              previousValue + weight.score(progression));
-
   static List<Substitution> getRatedSubstitutions(
       ScaleDegreeProgression base, ProgressionBank bank) {
     List<Substitution> substitutions = getPossibleSubstitutions(base, bank);
@@ -123,11 +116,10 @@ abstract class SubstitutionHandler {
     return rated;
   }
 
-  static Substitution substituteUntilSimiliarBy(
+  static Substitution substituteBy(
       {required ChordProgression base,
       required ProgressionBank bank,
-      required double percent,
-      int? maxIterations}) {
+      required int maxIterations}) {
     var sAP = getAndPrintBase(base);
     Scale scale = sAP.key;
     ScaleDegreeProgression baseProgression = sAP.value, prev = baseProgression;
@@ -135,10 +127,8 @@ abstract class SubstitutionHandler {
     do {
       rated = getRatedSubstitutions(prev, bank);
       prev = rated.first.substitutedBase;
-      if (maxIterations != null) maxIterations--;
-    } while ((maxIterations != null && maxIterations > 0) ||
-        (maxIterations == null &&
-            prev.percentMatchedTo(baseProgression) > percent));
+      maxIterations--;
+    } while (maxIterations > 0);
     Substitution result = rated.first;
     print(result.toString(baseProgression, scale));
     return result;

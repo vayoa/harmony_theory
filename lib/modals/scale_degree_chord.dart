@@ -161,8 +161,8 @@ class ScaleDegreeChord {
     return TonicizedScaleDegreeChord.raw(
       tonic: tonic,
       tonicizedToTonic: ScaleDegreeChord.copy(this),
-      tonicizedToMajorScale:
-          ScaleDegreeChord.raw(_pattern, rootDegree.tonicizedFor(tonic.rootDegree)),
+      tonicizedToMajorScale: ScaleDegreeChord.raw(
+          _pattern, rootDegree.tonicizedFor(tonic.rootDegree)),
     );
   }
 
@@ -277,6 +277,54 @@ class ScaleDegreeChord {
         Object.hashAll(
             [for (Interval interval in intervals) interval.getHash]));
   }
+
+  HarmonicFunction deriveHarmonicFunction(
+      {ScaleDegreeChord? before, ScaleDegreeChord? after, required bool inMinor}) {
+    // assert(before != null || after != null);
+    int weakHash;
+    ScaleDegreeChord chord = this;
+    if (chord is TonicizedScaleDegreeChord) {
+      weakHash = chord.tonicizedToTonic.weakHash;
+    } else {
+      weakHash = chord.weakHash;
+    }
+    if (defaultFunctions.containsKey(weakHash) &&
+        defaultFunctions[weakHash]!.containsKey(inMinor)) {
+      return defaultFunctions[weakHash]![inMinor]!;
+    }
+    // TDC: Actually implement this function...
+    return HarmonicFunction.undefined;
+    Interval? toBefore = before?.rootDegree.to(_rootDegree);
+    Interval? toAfter = after?.rootDegree.to(_rootDegree);
+  }
+
+  static final Map<int, Map<bool, HarmonicFunction>> defaultFunctions =
+      <ScaleDegreeChord, Map<bool, HarmonicFunction>>{
+    ScaleDegreeChord.majorTonicTriad: {
+      false: HarmonicFunction.tonic,
+    },
+    ScaleDegreeChord.ii: {
+      false: HarmonicFunction.subDominant,
+    },
+    ScaleDegreeChord.parse('III'): {
+      true: HarmonicFunction.dominant,
+    },
+    ScaleDegreeChord.IV: {
+      false: HarmonicFunction.subDominant,
+    },
+    ScaleDegreeChord.V: {
+      false: HarmonicFunction.dominant,
+    },
+    ScaleDegreeChord.vi: {
+      false: HarmonicFunction.subDominant,
+      true: HarmonicFunction.tonic,
+    },
+    ScaleDegreeChord.viidim: {
+      false: HarmonicFunction.dominant,
+      true: HarmonicFunction.subDominant,
+    }
+  }.map((ScaleDegreeChord key, Map<bool, HarmonicFunction> value) =>
+          MapEntry<int, Map<bool, HarmonicFunction>>(key.weakHash, value));
 
   static final ScaleDegreeChord majorTonicTriad = ScaleDegreeChord.parse('I');
   static final ScaleDegreeChord ii = ScaleDegreeChord.parse('ii');

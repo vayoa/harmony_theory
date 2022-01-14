@@ -20,21 +20,23 @@ class Substitution {
 
   double score(List<Weight> weights) {
     double score = 0.0;
+    int length = 0;
     for (Weight weight in weights) {
       double weightScore = 0.0;
+      length += weight.importance;
       switch (weight.scoringStage) {
         case ScoringStage.beforeSubstitution:
-          weightScore = weight.score(originalSubstitution);
+          weightScore = weight.scaledScore(originalSubstitution);
           break;
         case ScoringStage.afterSubstitution:
-          weightScore = weight.score(substitutedBase);
+          weightScore = weight.scaledScore(substitutedBase);
           break;
       }
       score += weightScore;
-      detailedRating[weight.name] = weightScore;
+      detailedRating[weight.name] = weightScore / weight.importance;
     }
-    rating = score / weights.length;
-    return score;
+    rating = score / length;
+    return rating;
   }
 
   @override

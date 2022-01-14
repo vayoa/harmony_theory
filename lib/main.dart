@@ -11,6 +11,7 @@ import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:tonic/tonic.dart';
 import 'modals/chord_progression.dart';
 import 'modals/scale_degree.dart';
+import 'modals/substitution.dart';
 
 void main() {
   // // InScaleWeight
@@ -127,8 +128,19 @@ void main() {
   //   base: base,
   //   bank: bank,
   // );
-  SubstitutionHandler.substituteUntilSimiliarBy(
-      base: base, bank: bank, percent: 0.2, maxIterations: 100);
+  Substitution sub = SubstitutionHandler.substituteBy(
+    base: base,
+    bank: bank,
+    maxIterations: 50,
+  );
+  for (ScaleDegreeChord? chord in sub.substitutedBase.values) {
+    if (chord != null) {
+      print('$chord: ' +
+          chord
+              .deriveHarmonicFunction(inMinor: sub.substitutedBase.inMinor)
+              .name);
+    }
+  }
 
   // _basicMatchingTest();
 }
