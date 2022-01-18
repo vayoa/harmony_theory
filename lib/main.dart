@@ -133,14 +133,16 @@ void main() {
     bank: bank,
     maxIterations: 50,
   );
-  for (ScaleDegreeChord? chord in sub.substitutedBase.values) {
-    if (chord != null) {
-      print('$chord: ' +
-          chord
-              .deriveHarmonicFunction(inMinor: sub.substitutedBase.inMinor)
-              .name);
-    }
-  }
+  // Substitution sub = SubstitutionHandler.perfectSubstitution(
+  //     base: base, bank: bank, maxIterations: 1000);
+  // for (ScaleDegreeChord? chord in sub.substitutedBase.values) {
+  //   if (chord != null) {
+  //     print('$chord: ' +
+  //         chord
+  //             .deriveHarmonicFunction(inMinor: sub.substitutedBase.inMinor)
+  //             .name);
+  //   }
+  // }
 
   // _basicMatchingTest();
 }

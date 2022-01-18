@@ -7,7 +7,8 @@ class TimeSignature {
   /// beat).
   final int denominator;
 
-  const TimeSignature(this.numerator, this.denominator);
+  const TimeSignature(this.numerator, this.denominator)
+      : assert(numerator > 0 && denominator > 0);
 
   /// Constructs a 4/4 [TimeSignature] object.
   const TimeSignature.evenTime() : this(4, 4);

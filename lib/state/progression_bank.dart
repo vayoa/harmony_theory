@@ -88,7 +88,7 @@ class ProgressionBank {
   }
 
   static final List<ScaleDegreeProgression> _bankList = [
-    ScaleDegreeProgression.fromList(['I', 'vi']),
+    ScaleDegreeProgression.fromList(['V', 'vi']),
     // V I
     ScaleDegreeProgression.fromList(['V', 'I']),
     ScaleDegreeProgression.fromList(['V', 'I'], durations: [1 / 4, 1 / 2]),
@@ -98,7 +98,7 @@ class ProgressionBank {
         durations: [1 / 4, 1 / 4, 1 / 2]),
     ScaleDegreeProgression.fromList(['ii', 'v', 'V', 'I'],
         durations: [1 / 8, 1 / 8, 1 / 8, 1 / 2]),
-    ScaleDegreeProgression.fromList(['iidim', 'V', 'i'], inMinor: true),
+    ScaleDegreeProgression.fromList(['iidim', 'V', 'I']),
     // IV V I
     ScaleDegreeProgression.fromList(['IV', 'V', 'I']),
     ScaleDegreeProgression.fromList(['IV', 'iv', 'I']),

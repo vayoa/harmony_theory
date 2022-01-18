@@ -6,7 +6,7 @@ import 'package:tonic/tonic.dart';
 class OvertakingWeight extends Weight {
   const OvertakingWeight()
       : super(
-    name: 'Overtaking',
+          name: 'Overtaking',
           importance: 4,
           scoringStage: ScoringStage.afterSubstitution,
           description: WeightDescription.technical,
@@ -19,8 +19,13 @@ class OvertakingWeight extends Weight {
   /// of the whole progression's duration, returns 0, otherwise returns 1.
   /// Chords are deemed equal using [ScaleDegreeChord.weakEqual].
   @override
-  double score(ScaleDegreeProgression progression) {
-    if (progression.duration < progression.timeSignature.decimal) return 1.0;
+  Score score(ScaleDegreeProgression progression) {
+    if (progression.duration < progression.timeSignature.decimal) {
+      return Score(
+          score: 1.0,
+          details: 'The progression is smaller than a measure,'
+              ' so it is not checked.');
+    }
     final Map<int, double> chordDurations = {};
     for (int i = 0; i < progression.length; i++) {
       if (progression.values[i] != null) {
@@ -33,10 +38,17 @@ class OvertakingWeight extends Weight {
           chordDurations[hash] = duration;
         }
         if (chordDurations[hash]! / progression.duration >= overtaking) {
-          return 0.0;
+          return Score(
+              score: 0.0,
+              details: 'The chord ${progression.values[i]!} is overall present'
+                  ' ${chordDurations[hash]! / progression.duration} (${chordDurations[hash]!})'
+                  ' and is overtaking ( >= $overtaking).');
         }
       }
     }
-    return 1.0;
+    return Score(
+        score: 1.0,
+        details: 'No chords are overtaking'
+            ' ( >= $overtaking).');
   }
 }

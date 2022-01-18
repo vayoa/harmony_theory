@@ -158,7 +158,7 @@ class ScaleDegreeChord {
       return ScaleDegreeChord.raw(
           tonic.pattern, rootDegree.tonicizedFor(tonic.rootDegree));
     }
-    return TonicizedScaleDegreeChord.raw(
+    return TonicizedScaleDegreeChord(
       tonic: tonic,
       tonicizedToTonic: ScaleDegreeChord.copy(this),
       tonicizedToMajorScale: ScaleDegreeChord.raw(
@@ -279,7 +279,9 @@ class ScaleDegreeChord {
   }
 
   HarmonicFunction deriveHarmonicFunction(
-      {ScaleDegreeChord? before, ScaleDegreeChord? after, required bool inMinor}) {
+      {ScaleDegreeChord? before,
+      ScaleDegreeChord? after,
+      required bool inMinor}) {
     // assert(before != null || after != null);
     int weakHash;
     ScaleDegreeChord chord = this;
@@ -306,8 +308,20 @@ class ScaleDegreeChord {
     ScaleDegreeChord.ii: {
       false: HarmonicFunction.subDominant,
     },
+    ScaleDegreeChord.parse('iidim'): {
+      false: HarmonicFunction.subDominant,
+    },
+    ScaleDegreeChord.parse('bVII'): {
+      false: HarmonicFunction.subDominant,
+    },
+    ScaleDegreeChord.iii: {
+      false: HarmonicFunction.tonic,
+    },
     ScaleDegreeChord.parse('III'): {
       true: HarmonicFunction.dominant,
+    },
+    ScaleDegreeChord.parse('iv'): {
+      false: HarmonicFunction.subDominant,
     },
     ScaleDegreeChord.IV: {
       false: HarmonicFunction.subDominant,
@@ -315,10 +329,11 @@ class ScaleDegreeChord {
     ScaleDegreeChord.V: {
       false: HarmonicFunction.dominant,
     },
+    // TODO: Could also be sub. do the same with viidim.
     ScaleDegreeChord.vi: {
-      false: HarmonicFunction.subDominant,
       true: HarmonicFunction.tonic,
     },
+    // TODO: Instead, check where it's going, if to C it's dom and to Am it's sub etc...
     ScaleDegreeChord.viidim: {
       false: HarmonicFunction.dominant,
       true: HarmonicFunction.subDominant,

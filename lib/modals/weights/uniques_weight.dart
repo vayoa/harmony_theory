@@ -14,6 +14,11 @@ class UniquesWeight extends Weight {
 
   // FIXME: Optimize this a bit more...
   @override
-  double score(ScaleDegreeProgression progression) =>
-      progression.values.toSet().length / progression.length;
+  Score score(ScaleDegreeProgression progression) {
+    int unique = progression.values.toSet().length;
+    return Score(
+        score: unique / progression.length,
+        details:
+            'Out of ${progression.length} chords, only $unique are unique.');
+  }
 }

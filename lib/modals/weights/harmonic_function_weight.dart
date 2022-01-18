@@ -1,7 +1,9 @@
+import 'package:thoery_test/extensions/interval_extension.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
 import 'package:thoery_test/modals/weights/in_scale_weight.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
+import 'package:tonic/tonic.dart';
 
 import '../scale_degree_chord.dart';
 
@@ -47,10 +49,12 @@ class HarmonicFunctionWeight extends Weight {
   }
 
   @override
-  double score(ScaleDegreeProgression progression) {
+  Score score(ScaleDegreeProgression progression) {
     int score = 0, count = 0;
+    String details = '';
     for (int i = 0; i < progression.length - 1; i++) {
       if (progression[i] != null && progression[i + 1] != null) {
+        // TDC: Should add points if I goes to a diatonic chord?
         count++;
         int weakHash =
             prepareForCheck(progression[i]!, progression[i + 1]!).weakHash;
@@ -65,11 +69,35 @@ class HarmonicFunctionWeight extends Weight {
           } else {
             sorted = sortedMode[progression.inMinor]!;
           }
-          score += sorted[next] ?? 0;
+          if (sorted[next] != null) {
+            score += sorted[next]!;
+            details += 'Adding ${sorted[next]} points for'
+                ' ${progression[i]!} -> ${progression[i + 1]!} (now $score)\n';
+          }
+        } else {
+          Interval between =
+              progression[i + 1]!.rootDegree.to(progression[i]!.rootDegree);
+          if (between.equals(Interval.P4)) {
+            score += 2;
+            details += 'Adding 2 points for'
+                ' ${progression[i]!} -> ${progression[i + 1]!} (a 4th apart, now $score)\n';
+          } else if (between.equals(Interval.m2) ||
+              between.equals(Interval.M2) ||
+              between.equals(Interval.m7) ||
+              between.equals(Interval.M7)) {
+            score += 1;
+            details += 'Adding 1 point for'
+                ' ${progression[i]!} -> ${progression[i + 1]!} (a 2 apart, now $score)\n';
+          }
         }
       }
     }
-    return score / (count * maxFunctionImportance);
+    return Score(
+      score: score / (count * maxFunctionImportance),
+      details: details +
+          'Out of max ${count * maxFunctionImportance} points this progression'
+              ' got $score.\n',
+    );
   }
 }
 
@@ -102,20 +130,45 @@ class HarmonicFunctionBank {
       {
     'ii': {
       false: {
-        1: ['IV'],
+        1: ['IV', 'iii', 'vi', 'viidim'],
         3: ['V'],
       },
+    },
+    'iii': {
+      false: {
+        2: ['ii', 'IV'],
+      },
+    },
+    'III': {
+      false: {
+        3: ['vi'],
+      }
     },
     'IV': {
       false: {
         1: ['I'],
-        3: ['V'],
-      }
+        // TODO: Not sure about the score here, should be lower then a ii -> V.
+        2: ['ii', 'V'],
+      },
+      true: {
+        2: ['viidim'],
+      },
     },
     'V': {
       false: {
         2: ['vi'],
         3: ['I'],
+      },
+    },
+    'vi': {
+      false: {
+        1: ['IV', 'ii', 'iii'],
+      },
+    },
+    'viidim': {
+      false: {
+        1: ['iii'],
+        3: ['I', 'III'],
       },
     },
   };

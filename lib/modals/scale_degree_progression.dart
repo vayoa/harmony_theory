@@ -188,52 +188,55 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           // rest of the progression.
           final double ratio =
               durations[baseChordPos] / sub.durations[subChordPos];
-          double neededDurationLeft = 0, neededDurationRight = 0;
-          double baseDurationLeft = 0, baseDurationRight = 0;
-          bool enoughInLeft = false, enoughInRight = false;
-          neededDurationLeft = sub.sumDurations(0, subChordPos) * ratio;
-          // If this is 0 than there's no point on checking the sum since it's
-          // 0... (also there'll be an error with base[baseChordPos - 1] if we
-          // don't check this...)
-          if (baseChordPos != 0) {
-            for (var i = baseChordPos - 1; !enoughInLeft && i >= 0; i--) {
-              baseDurationLeft += durations[i];
-              enoughInLeft = baseDurationLeft >= neededDurationLeft;
-            }
-          }
-          enoughInLeft = baseDurationLeft >= neededDurationLeft;
-          // Continue on only if there's enough duration to fit sub in the
-          // left side of base from baseChordPose...
-          if (enoughInLeft) {
-            if (subChordPos != length - 1) {
-              neededDurationRight = sub.sumDurations(subChordPos + 1) * ratio;
-              for (var i = baseChordPos + 1;
-                  !enoughInRight && i < length;
-                  i++) {
-                baseDurationRight += durations[i];
-                enoughInRight = baseDurationRight >= neededDurationRight;
+          // TDC: Is this condition even necessary?
+          if (sub.duration * ratio <= duration) {
+            double neededDurationLeft = 0, neededDurationRight = 0;
+            double baseDurationLeft = 0, baseDurationRight = 0;
+            bool enoughInLeft = false, enoughInRight = false;
+            neededDurationLeft = sub.sumDurations(0, subChordPos) * ratio;
+            // If this is 0 than there's no point on checking the sum since it's
+            // 0... (also there'll be an error with base[baseChordPos - 1] if we
+            // don't check this...)
+            if (baseChordPos != 0) {
+              for (var i = baseChordPos - 1; !enoughInLeft && i >= 0; i--) {
+                baseDurationLeft += durations[i];
+                enoughInLeft = baseDurationLeft >= neededDurationLeft;
               }
             }
-            // enoughInRight could still be false while this condition will be
-            // true (because if we matched on the last chord we won't sum the
-            // needed duration right and base duration right [because we know
-            // the needed duration is 0 and so we don't care] meaning
-            // enoughInRight won't get updated and stay false from it's
-            // initialization). This is why I'm checking this again...
-            if (baseDurationRight >= neededDurationRight) {
-              // Add the location to the list of match locations and continue
-              // searching.
-              matches.add(
-                SubstitutionMatch(
-                  baseIndex: baseChordPos,
-                  subIndex: subChordPos,
-                  type: type,
-                  withSeventh: (this[baseChordPos] != null &&
-                          this[baseChordPos]!.containsSeventh) ||
-                      (sub[subChordPos] != null &&
-                          sub[subChordPos]!.containsSeventh),
-                ),
-              );
+            enoughInLeft = baseDurationLeft >= neededDurationLeft;
+            // Continue on only if there's enough duration to fit sub in the
+            // left side of base from baseChordPose...
+            if (enoughInLeft) {
+              if (subChordPos != length - 1) {
+                neededDurationRight = sub.sumDurations(subChordPos + 1) * ratio;
+                for (var i = baseChordPos + 1;
+                    !enoughInRight && i < length;
+                    i++) {
+                  baseDurationRight += durations[i];
+                  enoughInRight = baseDurationRight >= neededDurationRight;
+                }
+              }
+              // enoughInRight could still be false while this condition will be
+              // true (because if we matched on the last chord we won't sum the
+              // needed duration right and base duration right [because we know
+              // the needed duration is 0 and so we don't care] meaning
+              // enoughInRight won't get updated and stay false from it's
+              // initialization). This is why I'm checking this again...
+              if (baseDurationRight >= neededDurationRight) {
+                // Add the location to the list of match locations and continue
+                // searching.
+                matches.add(
+                  SubstitutionMatch(
+                    baseIndex: baseChordPos,
+                    subIndex: subChordPos,
+                    type: type,
+                    withSeventh: (this[baseChordPos] != null &&
+                            this[baseChordPos]!.containsSeventh) ||
+                        (sub[subChordPos] != null &&
+                            sub[subChordPos]!.containsSeventh),
+                  ),
+                );
+              }
             }
           }
         }
@@ -390,11 +393,14 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
               addSeventh: match.withSeventh,
               ratio: durations[baseChord] / sub.durations[chord],
               tonic: this[match.baseIndex]);
+      // The duration from the beginning of sub to matching chord in sub.
       double d1 = -1 * relativeMatch.sumDurations(0, chord);
-      // First index that could be changed
+      // First index that could be changed.
       int left = getIndexFromDuration(d1, from: baseChord);
+      // The duration from the matching chord in sub to the end of sub, without
+      // the duration of the matching chord itself.
       double d2 =
-          relativeMatch.sumDurations(chord) - relativeMatch.durations[chord];
+          relativeMatch.sumDurations(chord);
       // Last index to change...
       int right = getIndexFromDuration(d2, from: baseChord);
       ScaleDegreeProgression substitution =
@@ -402,17 +408,28 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
               inMinor: _inMinor);
       // TDC: This won't support empty chord spaces...
       double bd1 = -1 * sumDurations(left, baseChord);
-      sumDurations(baseChord, right + 1) - durations[baseChord];
-      double bd2 = sumDurations(baseChord, right + 1) - durations[baseChord];
+      double bd2 = sumDurations(baseChord, right + 1);
       if (bd1 - d1 != 0) {
         substitution.add(this[left], -1 * (bd1 - d1));
       }
       substitution.addAll(fillWith(substitution.duration, relativeMatch));
       if (bd2 - d2 != 0) {
-        substitution.add(this[right], bd2 - d2);
+        try {
+          substitution.add(this[right], bd2 - d2);
+        }
+        catch (e) {
+          print('base: $baseChord : ${this[baseChord]}');
+          print(this);
+          print('sub: $chord : ${relativeMatch[chord]}');
+          print(relativeMatch);
+          print('left: $left, right: $right');
+          print('d1: $d1, d2: $d2');
+          print('bd1: $bd1, bd2: $bd2');
+          rethrow;
+        }
       }
       if (right + 1 != length) {
-        substitution.addAll(sublist(right + 1));
+          substitution.addAll(sublist(right + 1));
       }
       substitutions.add(Substitution(
           originalSubstitution: sub,

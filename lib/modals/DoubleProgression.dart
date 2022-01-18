@@ -12,9 +12,9 @@ class DoubleProgression<T, E> {
 
   double get duration => max(upper.duration, lower.duration);
 
-  DoubleProgressionEntry getAt(double duration) {
-
-  }
+  // DoubleProgressionEntry getAt(double duration) {
+  //
+  // }
 }
 
 class DoubleProgressionEntry<T, E> {

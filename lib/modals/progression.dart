@@ -36,6 +36,10 @@ class Progression<T> {
       // Join all the adjacent equal values.
       int i = 0;
       while (i < length - 1) {
+        if (_durations[i] < 0) {
+          throw Exception('A negative duration at index $i'
+              ' (${_values[i]} -> ${_durations[i]})');
+        }
         // We do this because Chord doesn't have an equals implementation...
         var val = values[i];
         var val2 = values[i + 1];
@@ -89,10 +93,16 @@ class Progression<T> {
 
   /// Sums [durations] from [start] to [end], not including [end].
   double sumDurations([int start = 0, int? end]) {
-    // assert(end == null || start < end);
+    assert(end == null || start <= end);
     if (start == 0 && end == null) return _duration;
     end ??= length;
-    return _durations.sublist(start, end).fold(0, (prev, e) => prev + e);
+    try {
+      return _durations.sublist(start, end).fold(0, (prev, e) => prev + e);
+    } catch (e) {
+      print('$start - $end');
+      print(_durations);
+      rethrow;
+    }
   }
 
   /// Returns a list index such that the duration from that index to [from] is
@@ -167,6 +177,10 @@ class Progression<T> {
   }
 
   void add(T? value, double duration) {
+    if (duration < 0) {
+      throw Exception(
+          'Tried to add $value with a negative duration ($duration) to $this');
+    }
     if (_values.isNotEmpty && value == _values.last) {
       _durations.last += duration;
     } else {

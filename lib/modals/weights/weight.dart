@@ -25,12 +25,32 @@ abstract class Weight {
     required this.importance,
   }) : assert(importance >= 0 && importance <= maxImportance);
 
-  // TDC: Add a minor / major flag here.
-  double score(ScaleDegreeProgression progression);
+  Score score(ScaleDegreeProgression progression);
 
   /// Returns the [progression]'s score after scaling it based on [importance].
-  double scaledScore(ScaleDegreeProgression progression) =>
-      score(progression) * importance;
+  Score scaledScore(ScaleDegreeProgression progression) =>
+      score(progression).scale(importance);
+}
+
+class Score {
+  final double score;
+  final String details;
+
+  Score({required this.score, required String details})
+      : details = '$details\n'
+            'Final Score: $score';
+
+  Score scale(int importance) {
+    return Score(
+      score: score * importance,
+      details: details + ', scaled: ${score * importance}',
+    );
+  }
+
+  @override
+  String toString() {
+    return 'Final Score: $score\n$details';
+  }
 }
 
 enum WeightDescription {

@@ -7,6 +7,7 @@ import 'package:thoery_test/modals/substitution.dart';
 import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/in_scale_weight.dart';
 import 'package:thoery_test/modals/weights/overtaking_weight.dart';
+import 'package:thoery_test/modals/weights/rhythm_weight.dart';
 import 'package:thoery_test/modals/weights/uniques_weight.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
 import 'package:thoery_test/state/progression_bank.dart';
@@ -18,6 +19,7 @@ abstract class SubstitutionHandler {
     OvertakingWeight(),
     UniquesWeight(),
     HarmonicFunctionWeight(),
+    RhythmWeight(),
   ];
 
   static ChordProgression inputChords() {
@@ -72,8 +74,7 @@ abstract class SubstitutionHandler {
     for (Substitution sub in substitutions) {
       sub.score(weights);
     }
-    substitutions.sort(
-        (Substitution a, Substitution b) => -1 * a.rating.compareTo(b.rating));
+    substitutions.sort((Substitution a, Substitution b) => -1 * a.compareTo(b));
     return substitutions;
   }
 
@@ -110,7 +111,7 @@ abstract class SubstitutionHandler {
     print('Suggestions:');
     String subs = '';
     for (Substitution sub in rated) {
-      subs += '${sub.toString(baseProgression, scale)}\n\n';
+      subs += '${sub.toString(base: baseProgression, scale: scale)}\n\n';
     }
     print(subs);
     return rated;
@@ -130,7 +131,29 @@ abstract class SubstitutionHandler {
       maxIterations--;
     } while (maxIterations > 0);
     Substitution result = rated.first;
-    print(result.toString(baseProgression, scale));
+    print(result.toString(base: baseProgression, scale: scale));
+    return result;
+  }
+
+  static Substitution perfectSubstitution(
+      {required ChordProgression base,
+      required ProgressionBank bank,
+      int? maxIterations}) {
+    var sAP = getAndPrintBase(base);
+    Scale scale = sAP.key;
+    ScaleDegreeProgression baseProgression = sAP.value, prev = baseProgression;
+    List<Substitution> rated;
+    bool again = true;
+    do {
+      rated = getRatedSubstitutions(prev, bank);
+      prev = rated.first.substitutedBase;
+      if (maxIterations != null) {
+        maxIterations--;
+        again = maxIterations > 0;
+      }
+    } while (again && rated.first.rating != 1.0);
+    Substitution result = rated.first;
+    print(result.toString(base: baseProgression, scale: scale));
     return result;
   }
 }
