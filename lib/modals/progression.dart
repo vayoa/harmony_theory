@@ -236,7 +236,7 @@ class Progression<T> {
       step, which would just not display the second 1/4 of it currently) and
       chords that move between measures. */
   @override
-  String toString([detailed = true]) {
+  String toString([detailed = false]) {
     String output = '';
     if (measureCount <= 1.0) {
       output = '| ';

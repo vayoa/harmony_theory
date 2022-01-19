@@ -51,7 +51,7 @@ class Substitution {
 
   @override
   String toString(
-      {ScaleDegreeProgression? base, Scale? scale, bool detailed = true}) {
+      {ScaleDegreeProgression? base, Scale? scale, bool detailed = false}) {
     return '-- $originalSubstitution --\n'
             '$substitutedBase' +
         (scale == null ? ': ' : ' -> ${substitutedBase.inScale(scale)}:') +
