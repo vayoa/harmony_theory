@@ -54,7 +54,7 @@ class Substitution {
       {ScaleDegreeProgression? base, Scale? scale, bool detailed = false}) {
     return '-- $originalSubstitution --\n'
             '$substitutedBase' +
-        (scale == null ? ': ' : ' -> ${substitutedBase.inScale(scale)}:') +
+        (scale == null ? ': ' : ' ->\n${substitutedBase.inScale(scale)}:') +
         ' ${rating.toStringAsFixed(3)} ' +
         (base == null
             ? '\n'

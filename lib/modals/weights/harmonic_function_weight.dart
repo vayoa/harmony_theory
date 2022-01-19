@@ -134,6 +134,11 @@ class HarmonicFunctionBank {
         3: ['V'],
       },
     },
+    'iidim': {
+      false: {
+        3: ['V'],
+      },
+    },
     'iii': {
       false: {
         2: ['ii', 'IV'],
