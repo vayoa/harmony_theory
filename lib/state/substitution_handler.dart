@@ -15,10 +15,10 @@ import 'package:tonic/tonic.dart';
 
 abstract class SubstitutionHandler {
   static const List<Weight> weights = [
-    InScaleWeight(),
-    OvertakingWeight(),
-    UniquesWeight(),
-    HarmonicFunctionWeight(),
+    // InScaleWeight(),
+    // OvertakingWeight(),
+    // UniquesWeight(),
+    // HarmonicFunctionWeight(),
     RhythmWeight(),
   ];
 

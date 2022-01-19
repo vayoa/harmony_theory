@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
 
@@ -13,15 +11,21 @@ class RhythmWeight extends Weight {
           importance: 4,
         );
 
-  // TODO: Not sure about taking down points for not whole divisions...
+  static const int maxPointsToScoreDown = 2;
+
   /// The weight will score progressions lower if they have durations that are
   /// smaller than the most common duration there divided by 2 as well as for
-  /// any durations that don't divide wholly by
-  /// (1 / [progression.timeSignature.denominator]) / 2.
+  /// any durations that don't divide wholly by the progressions step
+  /// (1 / [progression.timeSignature.denominator]) and step / 2.
+  /*
+  TODO: Not sure about taking down points for not whole divisions...
+  TODO: Maybe take down points for durations that are multiples of 4 (like an
+   1/8 to a 1/2).
+  */
   @override
   Score score(ScaleDegreeProgression progression) {
     Map<double, int> commonDur = {};
-    double step = (1 / progression.timeSignature.denominator) / 2;
+    double step = 1 / progression.timeSignature.denominator;
     int count = 0;
     for (double duration in progression.durations) {
       // TODO: This logic might need fixing...
@@ -38,14 +42,23 @@ class RhythmWeight extends Weight {
     String details = 'Step: $step, Common: $common.\n';
     for (double duration in progression.durations) {
       if (duration < common / 2) {
-        count++;
-        details += 'Took down points for $duration smaller than $common,\n';
+        count += 2;
+        details +=
+            'Took down 2 points for $duration smaller than $common / 2,\n';
+      } else if (duration % (step / 2) != 0 && (step / 2) % duration != 0) {
+        count += 2;
+        details +=
+            'Took down 2 points for $duration not dividing wholly by $step / 2'
+            ' (${step / 2}),\n';
       } else if (duration % step != 0 && step % duration != 0) {
         count++;
         details +=
-            'Took down points for $duration not dividing wholly by $step,\n';
+            'Took down 1 point for $duration not dividing wholly by $step,\n';
       }
     }
-    return Score(score: 1.0 - (count / progression.length), details: details);
+    return Score(
+      score: 1.0 - (count / (progression.length * maxPointsToScoreDown)),
+      details: details,
+    );
   }
 }
