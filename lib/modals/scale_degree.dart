@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:thoery_test/extensions/scale_extension.dart';
+import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
 
 class ScaleDegree {
@@ -90,13 +91,26 @@ class ScaleDegree {
     return ScaleDegree.raw((_degree + (toMode - fromMode)) % 7, _accidentals);
   }
 
+  /// We assume we're shifting from a scale where I is the tonic.
+  ScaleDegree shiftFor(ScaleDegree other) {
+    Interval normal = ScalePatternExtension.majorKey.intervals[_degree] -
+        ScalePatternExtension.majorKey.intervals[other.degree];
+    Interval from = this.from(other);
+    // We do this so that if a II.shiftFor(V) will always be a V of sorts no
+    // matter the accidentals...
+    return ScaleDegree.raw(
+      normal.number - 1,
+      (from - normal).semitones,
+    );
+  }
+
   /// Returns a new [ScaleDegree] converted such that [tonic] is the new tonic.
   /// Everything is still represented in the major scale, besides to degree
   /// the function is called on...
   /// Example: V.tonicizedFor(VI) => III, I.tonicizedFor(VI) => VI.
   ScaleDegree tonicizedFor(ScaleDegree tonic) {
     if (tonic == ScaleDegree.tonic) return ScaleDegree.copy(this);
-    return tonic.add(to(ScaleDegree.tonic));
+    return tonic.add(from(ScaleDegree.tonic));
   }
 
   PitchClass inScale(Scale scale) {
@@ -122,7 +136,7 @@ class ScaleDegree {
     return ScaleDegree.raw(number, fromTonic.semitones - _semitones[number]);
   }
 
-  Interval to(ScaleDegree other) => Interval.fromSemitones(
+  Interval from(ScaleDegree other) => Interval.fromSemitones(
       (_semitonesFromTonicInMajor - other._semitonesFromTonicInMajor) % 12);
 
   int get _semitonesFromTonicInMajor {

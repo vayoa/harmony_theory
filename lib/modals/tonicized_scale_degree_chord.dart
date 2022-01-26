@@ -26,6 +26,16 @@ class TonicizedScaleDegreeChord extends ScaleDegreeChord {
             tonicizedToMajorScale:
                 tonicizedToMajorScale ?? tonicizedToTonic.tonicizedFor(tonic));
 
+  TonicizedScaleDegreeChord.shifted(
+      {required ScaleDegreeChord tonic,
+      required ScaleDegreeChord tonicizedToMajorScale})
+      : this.raw(
+            tonic: tonic is TonicizedScaleDegreeChord
+                ? (tonic.tonicizedToMajorScale)
+                : tonic,
+            tonicizedToTonic: tonicizedToMajorScale.shiftFor(tonic),
+            tonicizedToMajorScale: tonicizedToMajorScale);
+
   @override
   String toString() => '$tonicizedToTonic/$tonic';
 }

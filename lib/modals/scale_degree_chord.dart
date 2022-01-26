@@ -166,6 +166,15 @@ class ScaleDegreeChord {
     );
   }
 
+  /// We get a tonic and a chord and decide what chord it is for the new tonic
+  ScaleDegreeChord shiftFor(ScaleDegreeChord tonic) {
+    if (weakEqual(tonic)) {
+      return ScaleDegreeChord.copy(ScaleDegreeChord.majorTonicTriad);
+    } else {
+      return ScaleDegreeChord.raw(_pattern, rootDegree.shiftFor(tonic.rootDegree));
+    }
+  }
+
   // TDC: Not sure about this...
   /// Will return a new [ScaleDegreeChord] with an added 7th if possible.
   /// [harmonicFunction] can be given for slightly more relevant results.
@@ -278,10 +287,7 @@ class ScaleDegreeChord {
             [for (Interval interval in intervals) interval.getHash]));
   }
 
-  HarmonicFunction deriveHarmonicFunction(
-      {ScaleDegreeChord? before,
-      ScaleDegreeChord? after,
-      required bool inMinor}) {
+  HarmonicFunction deriveHarmonicFunction({ScaleDegreeChord? next}) {
     // assert(before != null || after != null);
     int weakHash;
     ScaleDegreeChord chord = this;
@@ -290,56 +296,73 @@ class ScaleDegreeChord {
     } else {
       weakHash = chord.weakHash;
     }
-    if (defaultFunctions.containsKey(weakHash) &&
-        defaultFunctions[weakHash]!.containsKey(inMinor)) {
-      return defaultFunctions[weakHash]![inMinor]!;
+    if (defaultFunctions.containsKey(weakHash)) {
+      Map<List<int>?, HarmonicFunction> forChord = defaultFunctions[weakHash]!;
+      if (next != null) {
+        int nextHash = next.weakHash;
+        for (MapEntry<List<int>?, HarmonicFunction> entry in forChord.entries) {
+          if (entry.key != null && entry.key!.contains(weakHash)) {
+            return entry.value;
+          }
+        }
+      }
+      return forChord[null]!;
     }
     // TDC: Actually implement this function...
     return HarmonicFunction.undefined;
-    Interval? toBefore = before?.rootDegree.to(_rootDegree);
-    Interval? toAfter = after?.rootDegree.to(_rootDegree);
   }
 
-  static final Map<int, Map<bool, HarmonicFunction>> defaultFunctions =
-      <ScaleDegreeChord, Map<bool, HarmonicFunction>>{
+  // TDC: Maybe skip defining where it goes entirely and just do things with percentages...
+  static final Map<int, Map<List<int>?, HarmonicFunction>> defaultFunctions =
+      <ScaleDegreeChord, Map<List<String>?, HarmonicFunction>>{
     ScaleDegreeChord.majorTonicTriad: {
-      false: HarmonicFunction.tonic,
+      null: HarmonicFunction.tonic,
     },
     ScaleDegreeChord.ii: {
-      false: HarmonicFunction.subDominant,
+      null: HarmonicFunction.subDominant,
     },
     ScaleDegreeChord.parse('iidim'): {
-      false: HarmonicFunction.subDominant,
+      null: HarmonicFunction.subDominant,
     },
     ScaleDegreeChord.parse('bVII'): {
-      false: HarmonicFunction.subDominant,
+      null: HarmonicFunction.subDominant,
     },
     ScaleDegreeChord.iii: {
-      false: HarmonicFunction.tonic,
+      null: HarmonicFunction.tonic,
     },
     ScaleDegreeChord.parse('III'): {
-      true: HarmonicFunction.dominant,
+      null: HarmonicFunction.dominant,
     },
     ScaleDegreeChord.parse('iv'): {
-      false: HarmonicFunction.subDominant,
+      null: HarmonicFunction.subDominant,
     },
     ScaleDegreeChord.IV: {
-      false: HarmonicFunction.subDominant,
+      null: HarmonicFunction.subDominant,
     },
     ScaleDegreeChord.V: {
-      false: HarmonicFunction.dominant,
+      null: HarmonicFunction.dominant,
     },
     // TODO: Could also be sub. do the same with viidim.
     ScaleDegreeChord.vi: {
-      true: HarmonicFunction.tonic,
+      null: HarmonicFunction.tonic,
+      ['V', 'V7', 'viidim']: HarmonicFunction.subDominant,
     },
     // TODO: Instead, check where it's going, if to C it's dom and to Am it's sub etc...
     ScaleDegreeChord.viidim: {
-      false: HarmonicFunction.dominant,
-      true: HarmonicFunction.subDominant,
+      ['I']: HarmonicFunction.dominant,
+      ['vi']: HarmonicFunction.subDominant,
     }
-  }.map((ScaleDegreeChord key, Map<bool, HarmonicFunction> value) =>
-          MapEntry<int, Map<bool, HarmonicFunction>>(key.weakHash, value));
+  }.map((ScaleDegreeChord key, Map<List<String>?, HarmonicFunction> value) =>
+          MapEntry<int, Map<List<int>?, HarmonicFunction>>(key.weakHash, {
+            for (MapEntry<List<String>?, HarmonicFunction> entry
+                in value.entries)
+              (entry.key == null
+                  ? null
+                  : [
+                      for (String chord in entry.key!)
+                        ScaleDegreeChord.parse(chord).weakHash
+                    ]): entry.value
+          }));
 
   static final ScaleDegreeChord majorTonicTriad = ScaleDegreeChord.parse('I');
   static final ScaleDegreeChord ii = ScaleDegreeChord.parse('ii');

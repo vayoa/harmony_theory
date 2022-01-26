@@ -76,7 +76,7 @@ class HarmonicFunctionWeight extends Weight {
           }
         } else {
           Interval between =
-              progression[i + 1]!.rootDegree.to(progression[i]!.rootDegree);
+              progression[i + 1]!.rootDegree.from(progression[i]!.rootDegree);
           if (between.equals(Interval.P4)) {
             score += 2;
             details += 'Adding 2 points for'

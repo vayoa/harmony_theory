@@ -1,19 +1,39 @@
-import 'dart:io';
-
 import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
-import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
-import 'package:thoery_test/modals/weights/in_scale_weight.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:tonic/tonic.dart';
 import 'modals/chord_progression.dart';
-import 'modals/scale_degree.dart';
 import 'modals/substitution.dart';
 
 void main() {
+  ScaleDegreeProgression prog = ScaleDegreeProgression.fromChords(
+    Scale(
+        pattern: ScalePattern.findByName("Diatonic Major"),
+        tonic: PitchClass.parse('C')),
+    ChordProgression.evenTime(
+      [
+        Chord.parse('B°'),
+        Chord.parse('E'),
+        Chord.parse('Am'),
+        Chord.parse('Em'),
+        Chord.parse('A'),
+        Chord.parse('Dm'),
+        Chord.parse('G'),
+        Chord.parse('C'),
+        Chord.parse('F'),
+        Chord.parse('G'),
+        Chord.parse('C'),
+      ],
+    ),
+  );
+  print(prog);
+
+  prog.deriveTonicizations;
+}
+
+_test() {
   // // InScaleWeight
   // ScaleDegreeProgression progression =
   //     ScaleDegreeProgression.fromList(['ii', 'V', 'I']);
@@ -133,6 +153,7 @@ void main() {
     bank: bank,
     maxIterations: 50,
   );
+  print(sub.substitutedBase.deriveHarmonicFunctions);
   // Substitution sub = SubstitutionHandler.perfectSubstitution(
   //     base: base, bank: bank, maxIterations: 1000);
   // for (ScaleDegreeChord? chord in sub.substitutedBase.values) {

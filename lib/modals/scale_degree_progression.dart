@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
@@ -5,6 +7,7 @@ import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/substitution.dart';
 import 'package:thoery_test/modals/substitution_match.dart';
 import 'package:thoery_test/modals/time_signature.dart';
+import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
 import 'chord_progression.dart';
 
@@ -399,8 +402,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       int left = getIndexFromDuration(d1, from: baseChord);
       // The duration from the matching chord in sub to the end of sub, without
       // the duration of the matching chord itself.
-      double d2 =
-          relativeMatch.sumDurations(chord);
+      double d2 = relativeMatch.sumDurations(chord);
       // Last index to change...
       int right = getIndexFromDuration(d2, from: baseChord);
       ScaleDegreeProgression substitution =
@@ -416,8 +418,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       if (bd2 - d2 != 0) {
         try {
           substitution.add(this[right], bd2 - d2);
-        }
-        catch (e) {
+        } catch (e) {
           print('base: $baseChord : ${this[baseChord]}');
           print(this);
           print('sub: $chord : ${relativeMatch[chord]}');
@@ -429,7 +430,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         }
       }
       if (right + 1 != length) {
-          substitution.addAll(sublist(right + 1));
+        substitution.addAll(sublist(right + 1));
       }
       substitutions.add(Substitution(
           originalSubstitution: sub,
@@ -485,4 +486,167 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     }
     return _chords;
   }
+
+  List<HarmonicFunction> get deriveHarmonicFunctions {
+    List<HarmonicFunction> harmonicFunctions = [];
+    for (int i = 0; i < length - 1; i++) {
+      ScaleDegreeChord? chord = this[i];
+      if (chord != null) {
+        harmonicFunctions.add(chord.deriveHarmonicFunction(next: this[i + 1]));
+      } else {
+        harmonicFunctions.add(HarmonicFunction.undefined);
+      }
+    }
+    ScaleDegreeChord? last = values.last;
+    if (last != null) {
+      harmonicFunctions.add(last.deriveHarmonicFunction());
+    } else {
+      harmonicFunctions.add(HarmonicFunction.undefined);
+    }
+    return harmonicFunctions;
+  }
+
+  ScaleDegreeProgression get deriveTonicizations {
+    ScaleDegreeProgression progression = ScaleDegreeProgression.empty();
+    Map<int, List<TonicizedScaleDegreeChord?>> tonicizations = {};
+    for (int tonic = 0; tonic < length + 2; tonic++) {
+      ScaleDegreeChord? tonicChord;
+      if (tonic == 0) {
+        tonicChord = ScaleDegreeChord.majorTonicTriad;
+      } else if (tonic == 1) {
+        tonicChord = ScaleDegreeChord.vi;
+      } else {
+        tonicChord = this[tonic - 2];
+      }
+      if (tonicChord != null) {
+        int weakHash = tonicChord.weakHash;
+        if (!tonicizations.containsKey(weakHash)) {
+          tonicizations[weakHash] = [];
+          for (int chord = 0; chord < length; chord++) {
+            if (this[chord] != null) {
+              tonicizations[weakHash]!.add(TonicizedScaleDegreeChord.shifted(
+                  tonic: tonicChord, tonicizedToMajorScale: this[chord]!));
+            } else {
+              tonicizations[weakHash]!.add(null);
+            }
+          }
+        }
+      }
+    }
+
+    Map<int, Map<int, int>> sequences = {};
+    for (List<TonicizedScaleDegreeChord?> tonicization
+        in tonicizations.values) {
+      int tonic =
+          tonicization.firstWhere((element) => element != null)!.tonic.weakHash;
+      sequences[tonic] = {};
+      int last = 0;
+      for (int chord = 0; chord < length - 1; chord++) {
+        TonicizedScaleDegreeChord? tonicized = tonicization[chord],
+            next = tonicization[chord + 1];
+        if (tonicized != null &&
+            next != null &&
+            tonicized.tonicizedToTonic.isDiatonic &&
+            next.tonicizedToTonic.isDiatonic) {
+          if (!sequences[tonic]!.containsKey(last)) {
+            sequences[tonic]![last] = chord + 1;
+          } else {
+            sequences[tonic]![last] = sequences[tonic]![last]! + 1;
+          }
+        } else {
+          last = chord + 1;
+        }
+      }
+    }
+
+    /*
+    Up until now, these were the steps we took:
+    1. Shift the entire progression for each chord in it.
+    2. Grab sequences: When following chords in the shifted progressions are
+       secondarily diatonic.
+
+    We'll now define how to grab the best sequences, and 'moosh' them together.
+    */
+
+    Map<Sequence, List<Sequence>> overlapping = {};
+
+    for (MapEntry<int, Map<int, int>> entry in sequences.entries) {
+      for (MapEntry<int, int> location in entry.value.entries) {
+        Sequence l = Sequence.fromMap(id: entry.key, entry: location);
+        overlapping[l] = [];
+        for (MapEntry<int, Map<int, int>> otherEntry in sequences.entries) {
+          if (otherEntry.key != entry.key) {
+            for (MapEntry<int, int> other in entry.value.entries) {
+              Sequence o = Sequence.fromMap(id: otherEntry.key, entry: other);
+              if (l.overlapsWith(o)) {
+                overlapping[l]!.add(o);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    for (var e in overlapping.entries) {
+      Sequence sequence = e.key;
+      print('- $sequence: '
+          '${tonicizations[sequence.id]!.sublist(sequence.start, sequence.end + 1)} -');
+      for (var o in e.value) {
+        print('$o: ${tonicizations[o.id]!.sublist(o.start, o.end + 1)}');
+      }
+      print('\n');
+    }
+
+    // Map<ScaleDegreeChord, int> count = {};
+    //
+    // for (List<TonicizedScaleDegreeChord?> tonicization
+    //     in tonicizations.values) {
+    //   ScaleDegreeChord tonic =
+    //       tonicization.firstWhere((element) => element != null)!.tonic;
+    //   count[tonic] = 0;
+    //   for (int chord = 0; chord < length; chord++) {
+    //     TonicizedScaleDegreeChord? tonicized = tonicization[chord];
+    //     if (tonicized != null && chord < length - 1) {
+    //       if (tonicized.isDiatonic) {
+    //         count[tonic] = count[tonic]! + 1;
+    //       }
+    //       TonicizedScaleDegreeChord? next = tonicization[chord + 1];
+    //       if (next != null && tonicized.tonic == next.tonic) {
+    //         // Dart stuff...
+    //         count[tonic] = count[tonic]! + 1;
+    //       }
+    //     }
+    //   }
+    // }
+
+    return progression;
+  }
+}
+
+class Sequence {
+  final int id;
+  final int start;
+  final int end;
+
+  const Sequence({required this.id, required this.start, required this.end});
+
+  Sequence.fromMap({required this.id, required MapEntry<int, int> entry})
+      : start = entry.key,
+        end = entry.value;
+
+  bool overlapsWith(Sequence other) =>
+      max(start, other.start) <= min(end, other.end);
+
+  @override
+  bool operator ==(Object other) =>
+      other is Sequence &&
+      id == other.id &&
+      start == other.start &&
+      end == other.end;
+
+  @override
+  int get hashCode => Object.hash(id, start, end);
+
+  @override
+  String toString() => '$start-$end';
 }
