@@ -416,26 +416,19 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       }
       substitution.addAll(fillWith(substitution.duration, relativeMatch));
       if (bd2 - d2 != 0) {
-        try {
-          substitution.add(this[right], bd2 - d2);
-        } catch (e) {
-          print('base: $baseChord : ${this[baseChord]}');
-          print(this);
-          print('sub: $chord : ${relativeMatch[chord]}');
-          print(relativeMatch);
-          print('left: $left, right: $right');
-          print('d1: $d1, d2: $d2');
-          print('bd1: $bd1, bd2: $bd2');
-          rethrow;
-        }
+        substitution.add(this[right], bd2 - d2);
       }
       if (right + 1 != length) {
         substitution.addAll(sublist(right + 1));
       }
-      substitutions.add(Substitution(
+      substitutions.add(
+        Substitution(
           originalSubstitution: sub,
           substitutedBase: substitution,
-          substitutionMatch: match));
+          base: this,
+          substitutionMatch: match,
+        ),
+      );
     }
     // TODO: This makes sure the results will be unique, make it more efficient.
     return substitutions.toSet().toList();

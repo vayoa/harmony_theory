@@ -23,7 +23,10 @@ class RhythmWeight extends Weight {
    1/8 to a 1/2).
   */
   @override
-  Score score(ScaleDegreeProgression progression) {
+  Score score({
+    required ScaleDegreeProgression progression,
+    required ScaleDegreeProgression base,
+  }) {
     Map<double, int> commonDur = {};
     double step = 1 / progression.timeSignature.denominator;
     int count = 0;

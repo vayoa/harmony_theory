@@ -25,11 +25,15 @@ abstract class Weight {
     required this.importance,
   }) : assert(importance >= 0 && importance <= maxImportance);
 
-  Score score(ScaleDegreeProgression progression);
+  Score score(
+      {required ScaleDegreeProgression progression,
+      required ScaleDegreeProgression base});
 
   /// Returns the [progression]'s score after scaling it based on [importance].
-  Score scaledScore(ScaleDegreeProgression progression) =>
-      score(progression).scale(importance);
+  Score scaledScore(
+          {required ScaleDegreeProgression progression,
+          required ScaleDegreeProgression base}) =>
+      score(progression: progression, base: base).scale(importance);
 }
 
 class Score {

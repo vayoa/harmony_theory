@@ -14,7 +14,10 @@ class UniquesWeight extends Weight {
 
   // FIXME: Optimize this a bit more...
   @override
-  Score score(ScaleDegreeProgression progression) {
+  Score score({
+    required ScaleDegreeProgression progression,
+    required ScaleDegreeProgression base,
+  }) {
     int unique = progression.values.toSet().length;
     return Score(
         score: unique / progression.length,

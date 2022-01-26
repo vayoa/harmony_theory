@@ -6,6 +6,7 @@ import 'package:tonic/tonic.dart';
 class Substitution {
   final ScaleDegreeProgression substitutedBase;
   final ScaleDegreeProgression originalSubstitution;
+  final ScaleDegreeProgression base;
   SubstitutionScore substitutionScore;
   final SubstitutionMatch? substitutionMatch;
 
@@ -14,6 +15,7 @@ class Substitution {
   Substitution(
       {required this.substitutedBase,
       required this.originalSubstitution,
+      required this.base,
       SubstitutionScore? substitutionScore,
       this.substitutionMatch})
       : substitutionScore = substitutionScore ?? SubstitutionScore.empty();
@@ -27,10 +29,12 @@ class Substitution {
       length += weight.importance;
       switch (weight.scoringStage) {
         case ScoringStage.beforeSubstitution:
-          weightScore = weight.scaledScore(originalSubstitution);
+          weightScore =
+              weight.scaledScore(progression: originalSubstitution, base: base);
           break;
         case ScoringStage.afterSubstitution:
-          weightScore = weight.scaledScore(substitutedBase);
+          weightScore =
+              weight.scaledScore(progression: substitutedBase, base: base);
           break;
       }
       rating += weightScore.score;
@@ -57,7 +61,8 @@ class Substitution {
         (scale == null ? ': ' : ' ->\n${substitutedBase.inScale(scale)}:') +
         ' ${rating.toStringAsFixed(3)} ' +
         (base == null
-            ? '\n'
+            ? '(${(substitutedBase.percentMatchedTo(this.base) * 100).toInt()}% '
+                'equal).\n'
             : '(${(substitutedBase.percentMatchedTo(base) * 100).toInt()}% '
                 'equal).\n') +
         '${substitutionScore.toString(detailed)}\n'

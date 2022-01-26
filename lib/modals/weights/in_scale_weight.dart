@@ -18,7 +18,10 @@ class InScaleWeight extends Weight {
         );
 
   @override
-  Score score(ScaleDegreeProgression progression) {
+  Score score({
+    required ScaleDegreeProgression progression,
+    required ScaleDegreeProgression base,
+  }) {
     int count = 0, outCount = 0;
     for (ScaleDegreeChord? chord in progression.values) {
       if (chord != null) {

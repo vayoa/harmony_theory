@@ -19,7 +19,10 @@ class OvertakingWeight extends Weight {
   /// of the whole progression's duration, returns 0, otherwise returns 1.
   /// Chords are deemed equal using [ScaleDegreeChord.weakEqual].
   @override
-  Score score(ScaleDegreeProgression progression) {
+  Score score({
+    required ScaleDegreeProgression progression,
+    required ScaleDegreeProgression base,
+  }) {
     if (progression.duration < progression.timeSignature.decimal) {
       return Score(
           score: 1.0,

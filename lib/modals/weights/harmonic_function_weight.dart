@@ -49,7 +49,10 @@ class HarmonicFunctionWeight extends Weight {
   }
 
   @override
-  Score score(ScaleDegreeProgression progression) {
+  Score score({
+    required ScaleDegreeProgression progression,
+    required ScaleDegreeProgression base,
+  }) {
     int score = 0, count = 0;
     String details = '';
     for (int i = 0; i < progression.length - 1; i++) {
