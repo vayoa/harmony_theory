@@ -8,29 +8,7 @@ import 'modals/chord_progression.dart';
 import 'modals/substitution.dart';
 
 void main() {
-  ScaleDegreeProgression prog = ScaleDegreeProgression.fromChords(
-    Scale(
-        pattern: ScalePattern.findByName("Diatonic Major"),
-        tonic: PitchClass.parse('C')),
-    ChordProgression.evenTime(
-      [
-        Chord.parse('B°'),
-        Chord.parse('E'),
-        Chord.parse('Am'),
-        Chord.parse('Em'),
-        Chord.parse('A'),
-        Chord.parse('Dm'),
-        Chord.parse('G'),
-        Chord.parse('C'),
-        Chord.parse('F'),
-        Chord.parse('G'),
-        Chord.parse('C'),
-      ],
-    ),
-  );
-  print(prog);
-
-  prog.deriveTonicizations;
+  _test();
 }
 
 _test() {

@@ -17,36 +17,21 @@ class InScaleWeight extends Weight {
           description: WeightDescription.diatonic,
         );
 
-  static final List<ChordPattern> patternsInScale = [
-    'Major',
-    'Minor',
-    'Minor',
-    'Major',
-    'Major',
-    'Minor',
-    'Diminished',
-  ].map((e) => ChordPattern.parse(e)).toList(growable: false);
-
-  /* TODO: Currently works only with minor and major scales, should update this
-            if necessary. */
   @override
   Score score(ScaleDegreeProgression progression) {
-    // check if the degree is in degreesInScale
-    // if it is, check if it's pattern (in the same index) is in
-    // patternsInScale.
-    // If it is it's in the scale.
-    // If it isn't it can still be in the scale (for instance if it has
-    // tensions), so split the chord to it's degrees and check that each one of
-    // them is in degreesInScale.
-    int count = 0;
+    int count = 0, outCount = 0;
     for (ScaleDegreeChord? chord in progression.values) {
-      if (chord != null && chord.isDiatonic) {
-        count++;
+      if (chord != null) {
+        List<ScaleDegree> degrees = chord.degrees;
+        count += degrees.length;
+        for (ScaleDegree degree in degrees) {
+          if (!degree.isDiatonic) outCount++;
+        }
       }
     }
     return Score(
-      score: count / progression.length,
-      details: 'Out of ${progression.length} chords, $count are out of scale.',
+      score: 1.0 - outCount / count,
+      details: 'Out of $count chord notes, $outCount are out of the scale.',
     );
   }
 }
