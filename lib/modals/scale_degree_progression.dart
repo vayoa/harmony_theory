@@ -426,7 +426,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           originalSubstitution: sub,
           substitutedBase: substitution,
           base: this,
-          substitutionMatch: match,
+          match: match,
         ),
       );
     }
@@ -497,6 +497,18 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       harmonicFunctions.add(HarmonicFunction.undefined);
     }
     return harmonicFunctions;
+  }
+
+  HarmonicFunction deriveHarmonicFunctionOf(int index) {
+    ScaleDegreeChord? chord = this[index];
+    if (chord != null) {
+      if (index == length - 1) {
+        return chord.deriveHarmonicFunction();
+      }
+      return chord.deriveHarmonicFunction(next: this[index + 1]);
+    } else {
+      return HarmonicFunction.undefined;
+    }
   }
 
   ScaleDegreeProgression get deriveTonicizations {

@@ -1,6 +1,7 @@
 import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
+import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:tonic/tonic.dart';
@@ -86,7 +87,7 @@ _test() {
       Chord.parse('G'),
       Chord.parse('C'),
       Chord.parse('G'),
-      Chord.parse('C'),
+      Chord.parse('Am'),
       Chord.parse('G'),
       Chord.parse('C'),
       Chord.parse('G'),
@@ -126,12 +127,20 @@ _test() {
   //   base: base,
   //   bank: bank,
   // );
+
   Substitution sub = SubstitutionHandler.substituteBy(
     base: base,
     bank: bank,
     maxIterations: 50,
+    keepHarmonicFunction: true,
   );
-  print(sub.substitutedBase.deriveHarmonicFunctions);
+
+  ScaleDegreeProgression baseProg = sub.base;
+
+  // baseProg.deriveHarmonicFunctions.forEach((element) => print(element.name));
+
+  print(sub.scoreWith([const KeepHarmonicFunctionWeight()]).toString(true));
+
   // Substitution sub = SubstitutionHandler.perfectSubstitution(
   //     base: base, bank: bank, maxIterations: 1000);
   // for (ScaleDegreeChord? chord in sub.substitutedBase.values) {

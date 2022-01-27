@@ -176,7 +176,9 @@ class HarmonicFunctionBank {
     },
     'vi': {
       false: {
+        // TODO: Not sure about the score here, should be lower then a ii -> V.
         1: ['IV', 'ii', 'iii'],
+        2: ['V'],
       },
     },
     'viidim': {

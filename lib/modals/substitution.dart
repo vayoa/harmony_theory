@@ -1,26 +1,47 @@
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/substitution_match.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
+import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:tonic/tonic.dart';
 
 class Substitution {
   final ScaleDegreeProgression substitutedBase;
   final ScaleDegreeProgression originalSubstitution;
   final ScaleDegreeProgression base;
-  SubstitutionScore substitutionScore;
-  final SubstitutionMatch? substitutionMatch;
+  SubstitutionScore score;
+  final SubstitutionMatch? match;
 
-  double get rating => substitutionScore.score;
+  double get rating => score.score;
 
   Substitution(
       {required this.substitutedBase,
       required this.originalSubstitution,
       required this.base,
-      SubstitutionScore? substitutionScore,
-      this.substitutionMatch})
-      : substitutionScore = substitutionScore ?? SubstitutionScore.empty();
+      SubstitutionScore? score,
+      this.match})
+      : score = score ?? SubstitutionScore.empty();
 
-  SubstitutionScore score(List<Weight> weights) {
+  Substitution copyWith(
+          {ScaleDegreeProgression? substitutedBase,
+          ScaleDegreeProgression? originalSubstitution,
+          ScaleDegreeProgression? base,
+          SubstitutionScore? score,
+          SubstitutionMatch? match}) =>
+      Substitution(
+        substitutedBase: substitutedBase ?? this.substitutedBase,
+        originalSubstitution: originalSubstitution ?? this.originalSubstitution,
+        base: base ?? this.base,
+        score: score ?? this.score,
+        match: match ?? this.match,
+      );
+
+  /// If [keepHarmonicFunction] is true and no [harmonicFunctionBase] is given,
+  /// will use [base] as the latter.
+  SubstitutionScore scoreWith(
+    List<Weight> weights, {
+    bool keepHarmonicFunction = false,
+    ScaleDegreeProgression? harmonicFunctionBase,
+  }) {
     double rating = 0.0;
     int length = 0;
     Map<String, Score> details = {};
@@ -40,11 +61,20 @@ class Substitution {
       rating += weightScore.score;
       details[weight.name] = weightScore;
     }
+    if (keepHarmonicFunction) {
+      Weight keep = SubstitutionHandler.keepHarmonicFunction;
+      Score keepScore = keep.scaledScore(
+          progression: substitutedBase, base: harmonicFunctionBase ?? base);
+      rating += keepScore.score;
+      details[keep.name] = keepScore;
+      length += keep.importance;
+    }
     rating / length;
-    substitutionScore =
-        SubstitutionScore(score: rating / length, details: details);
-    return substitutionScore;
+    score = SubstitutionScore(score: rating / length, details: details);
+    return score;
   }
+
+  void setScore(SubstitutionScore newScore) => score = newScore;
 
   @override
   bool operator ==(Object other) =>
@@ -54,23 +84,18 @@ class Substitution {
   int get hashCode => substitutedBase.hashCode;
 
   @override
-  String toString(
-      {ScaleDegreeProgression? base, Scale? scale, bool detailed = false}) {
+  String toString({Scale? scale, bool detailed = false}) {
     return '-- $originalSubstitution --\n'
             '$substitutedBase' +
         (scale == null ? ': ' : ' ->\n${substitutedBase.inScale(scale)}:') +
-        ' ${rating.toStringAsFixed(3)} ' +
-        (base == null
-            ? '(${(substitutedBase.percentMatchedTo(this.base) * 100).toInt()}% '
-                'equal).\n'
-            : '(${(substitutedBase.percentMatchedTo(base) * 100).toInt()}% '
-                'equal).\n') +
-        '${substitutionScore.toString(detailed)}\n'
-            'Details: $substitutionMatch';
+        ' ${rating.toStringAsFixed(3)} '
+            '(${(substitutedBase.percentMatchedTo(base) * 100).toInt()}% '
+            'equal).\n'
+            '${score.toString(detailed)}\n'
+            'Details: $match';
   }
 
-  int compareTo(Substitution other) =>
-      substitutionScore.compareTo(other.substitutionScore);
+  int compareTo(Substitution other) => score.compareTo(other.score);
 }
 
 class SubstitutionScore {

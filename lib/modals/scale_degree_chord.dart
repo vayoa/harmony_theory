@@ -171,7 +171,8 @@ class ScaleDegreeChord {
     if (weakEqual(tonic)) {
       return ScaleDegreeChord.copy(ScaleDegreeChord.majorTonicTriad);
     } else {
-      return ScaleDegreeChord.raw(_pattern, rootDegree.shiftFor(tonic.rootDegree));
+      return ScaleDegreeChord.raw(
+          _pattern, rootDegree.shiftFor(tonic.rootDegree));
     }
   }
 
@@ -288,14 +289,7 @@ class ScaleDegreeChord {
   }
 
   HarmonicFunction deriveHarmonicFunction({ScaleDegreeChord? next}) {
-    // assert(before != null || after != null);
-    int weakHash;
-    ScaleDegreeChord chord = this;
-    if (chord is TonicizedScaleDegreeChord) {
-      weakHash = chord.tonicizedToTonic.weakHash;
-    } else {
-      weakHash = chord.weakHash;
-    }
+    int weakHash = this.weakHash;
     if (defaultFunctions.containsKey(weakHash)) {
       Map<List<int>?, HarmonicFunction> forChord = defaultFunctions[weakHash]!;
       if (next != null) {
@@ -330,6 +324,9 @@ class ScaleDegreeChord {
     ScaleDegreeChord.iii: {
       null: HarmonicFunction.tonic,
     },
+    /*TODO: Are you sure about this? this means that a V - I could be replaced
+            by a III - I and vice versa.
+     */
     ScaleDegreeChord.parse('III'): {
       null: HarmonicFunction.dominant,
     },
@@ -349,6 +346,7 @@ class ScaleDegreeChord {
     },
     // TODO: Instead, check where it's going, if to C it's dom and to Am it's sub etc...
     ScaleDegreeChord.viidim: {
+      null: HarmonicFunction.dominant,
       ['I']: HarmonicFunction.dominant,
       ['vi']: HarmonicFunction.subDominant,
     }
