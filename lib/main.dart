@@ -87,7 +87,7 @@ _test() {
       Chord.parse('G'),
       Chord.parse('C'),
       Chord.parse('G'),
-      Chord.parse('Am'),
+      Chord.parse('C'),
       Chord.parse('G'),
       Chord.parse('C'),
       Chord.parse('G'),
@@ -136,10 +136,6 @@ _test() {
   );
 
   ScaleDegreeProgression baseProg = sub.base;
-
-  // baseProg.deriveHarmonicFunctions.forEach((element) => print(element.name));
-
-  print(sub.scoreWith([const KeepHarmonicFunctionWeight()]).toString(true));
 
   // Substitution sub = SubstitutionHandler.perfectSubstitution(
   //     base: base, bank: bank, maxIterations: 1000);
