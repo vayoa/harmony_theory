@@ -26,7 +26,7 @@ class Progression<T> {
   double get duration => _duration;
 
   /// The number of measures the [Progression] takes.
-  double get measureCount => duration / _timeSignature.decimal;
+  int get measureCount => (duration / _timeSignature.decimal).ceil();
 
   Progression(this._values, this._durations,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
