@@ -90,7 +90,10 @@ class Substitution {
         (scale == null ? ': ' : ' ->\n${substitutedBase.inScale(scale)}:') +
         ' ${rating.toStringAsFixed(3)} '
             '(${(substitutedBase.percentMatchedTo(base) * 100).toInt()}% '
-            'equal).\n'
+            'equal).\n' +
+        'base: $base' +
+        (scale == null ? '' : ' ->\n${base.inScale(scale)}') +
+        '.\n'
             '${score.toString(detailed)}\n'
             'Details: $match';
   }

@@ -307,4 +307,7 @@ class ProgressionEntry<T> {
   final double duration;
 
   const ProgressionEntry({required this.value, required this.duration});
+
+  @override
+  String toString() => '$value($duration)';
 }
