@@ -4,15 +4,16 @@ import 'package:thoery_test/modals/weights/weight.dart';
 import '../scale_degree_chord.dart';
 
 class KeepHarmonicFunctionWeight extends Weight {
-  const KeepHarmonicFunctionWeight()
-      : super(
+  const KeepHarmonicFunctionWeight({
+    this.keepHarmonicFunctionAmount = 5,
+  }) : super(
           name: 'KeepHarmonicFunction',
           description: WeightDescription.technical,
           importance: 5,
           scoringStage: ScoringStage.afterSubstitution,
         );
 
-  static const int keepHarmonicFunctionAmount = 5;
+  final int keepHarmonicFunctionAmount;
 
   @override
   Score score({

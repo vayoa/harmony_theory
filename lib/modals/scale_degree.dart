@@ -24,7 +24,6 @@ class ScaleDegree {
   /// The [degree] for V is 4.
   int get degree => _degree;
 
-  // TODO: Rename to accidentals.
   /// Negative for flats and positive for sharps.
   /// Max value is 11 (as 12 will be an octave...).
   int get accidentals => _accidentals;
@@ -40,8 +39,6 @@ class ScaleDegree {
       : _degree = other._degree,
         _accidentals = other._accidentals;
 
-  /* TODO: Combine this and add into one method and then implement it (since
-            they share code...) */
   ScaleDegree(ScalePattern scalePattern, Interval interval) {
     final List<int> _semitones =
         scalePattern.intervals.map<int>((e) => e.semitones).toList();

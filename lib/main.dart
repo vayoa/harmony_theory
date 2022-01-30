@@ -2,6 +2,7 @@ import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/double_progression/double_progression.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
+import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
