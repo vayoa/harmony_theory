@@ -95,7 +95,7 @@ abstract class SubstitutionHandler {
     print('Your Progression:\n$base.');
 
     // Detect the base progressions' scale
-    final List<Scale> _possibleScales = base.matchWithScales();
+    final List<Scale> _possibleScales = base.krumhanslSchmucklerScales;
     print('Scale Found: ${_possibleScales[0].getCommonName()}.');
 
     // Convert the base progression to roman numerals, we used the most probable

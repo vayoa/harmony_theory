@@ -10,6 +10,9 @@ extension ScaleExtension on Scale {
   }
 
   bool get isMinor => pattern.name == 'Natural Minor';
+
+  bool equals(Scale other) =>
+      tonic.integer == other.tonic.integer && pattern.equals(other.pattern);
 }
 
 extension ScalePatternExtension on ScalePattern {

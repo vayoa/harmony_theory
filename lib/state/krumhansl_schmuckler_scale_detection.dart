@@ -5,65 +5,72 @@ import 'package:thoery_test/modals/chord_progression.dart';
 import 'package:tonic/tonic.dart';
 
 class KrumhanslSchmucklerScaleDetection {
-  KrumhanslSchmucklerScaleDetection() {
-    majorAverage =
-        CMajorKeyProfile.fold(0.0, (double prev, double cur) => prev + cur) /
-            CMajorKeyProfile.length;
-    minorAverage =
-        CMinorKeyProfile.fold(0.0, (double prev, double cur) => prev + cur) /
-            CMinorKeyProfile.length;
-    majorKeyProfiles = [CMajorKeyProfile];
-    minorKeyProfiles = [CMinorKeyProfile];
-    // Shift the C key profiles to get the rest of them...
-    for (int i = 1; i < 12; i++) {
-      List<double> majorKeyProfile = [], minorKeyProfile = [];
-      for (int j = 0; j < 12; j++) {
-        int next = (12 - i + j) % 12;
-        majorKeyProfile.add(CMajorKeyProfile[next]);
-        minorKeyProfile.add(CMinorKeyProfile[next]);
+  static initialize() {
+    if (!_initialized) {
+      _initialized = true;
+      majorAverage =
+          CMajorKeyProfile.fold(0.0, (double prev, double cur) => prev + cur) /
+              CMajorKeyProfile.length;
+      minorAverage =
+          CMinorKeyProfile.fold(0.0, (double prev, double cur) => prev + cur) /
+              CMinorKeyProfile.length;
+      majorKeyProfiles = [CMajorKeyProfile];
+      minorKeyProfiles = [CMinorKeyProfile];
+      // Shift the C key profiles to get the rest of them...
+      for (int i = 1; i < 12; i++) {
+        List<double> majorKeyProfile = [], minorKeyProfile = [];
+        for (int j = 0; j < 12; j++) {
+          int next = (12 - i + j) % 12;
+          majorKeyProfile.add(CMajorKeyProfile[next]);
+          minorKeyProfile.add(CMinorKeyProfile[next]);
+        }
+        majorKeyProfiles.add(majorKeyProfile);
+        minorKeyProfiles.add(minorKeyProfile);
       }
-      majorKeyProfiles.add(majorKeyProfile);
-      minorKeyProfiles.add(minorKeyProfile);
     }
   }
 
-  late final List<List<double>> majorKeyProfiles;
-  late final List<List<double>> minorKeyProfiles;
+  static late final List<List<double>> majorKeyProfiles;
+  static late final List<List<double>> minorKeyProfiles;
 
-  late final double majorAverage;
-  late final double minorAverage;
+  static bool _initialized = false;
 
+  static late final double majorAverage;
+  static late final double minorAverage;
+
+  /// We're using the Bellman-Budge chord-based profiles...
   static const List<double> CMajorKeyProfile = [
-    6.35,
-    2.23,
-    3.48,
-    2.33,
-    4.38,
-    4.09,
-    2.52,
-    5.19,
-    2.39,
-    3.66,
-    2.29,
-    2.88,
+    16.80,
+    0.86,
+    12.95,
+    1.41,
+    13.49,
+    11.93,
+    1.25,
+    20.28,
+    1.80,
+    8.04,
+    0.62,
+    10.57,
   ];
 
+  /// We're using the Bellman-Budge chord-based profiles...
   static const List<double> CMinorKeyProfile = [
-    6.33,
-    2.68,
-    3.52,
-    5.38,
-    2.60,
-    3.53,
-    2.54,
-    4.75,
-    3.98,
-    2.69,
-    3.34,
-    3.17,
+    18.16,
+    0.69,
+    12.99,
+    13.34,
+    1.07,
+    11.15,
+    1.38,
+    21.07,
+    7.49,
+    1.53,
+    0.92,
+    10.21,
   ];
 
-  double correlationValue(List<double> input, List<double> profile,
+  static double correlationValue(List<double> input, List<double> profile,
       [double? profileAvg]) {
     double inputAvg =
         input.reduce((value, element) => value + element) / input.length;
@@ -80,41 +87,46 @@ class KrumhanslSchmucklerScaleDetection {
     return numerator / denominator;
   }
 
-  // Where indices above 11 are minor scales...
-  int maxCorrelationIndex(List<double> input) {
+  /// Where indices above 11 are minor scales...
+  static List<double> correlations(List<double> input) {
     assert(input.length == 12);
+    List<double> correlations = [];
     double inputAvg =
         input.reduce((value, element) => value + element) / input.length;
     double maxCorrelation = double.negativeInfinity;
-    int maxIndex = 0;
     for (int j = 0; j < 2; j++) {
       List<List<double>> profiles = majorKeyProfiles;
       double avg = majorAverage;
       for (int keyProfile = 0; keyProfile < profiles[j].length; keyProfile++) {
-        double corr =
-            correlationValue(input, profiles[keyProfile], majorAverage);
-        if (corr > maxCorrelation) {
-          maxCorrelation = corr;
-          maxIndex = keyProfile;
-          if (j == 1) maxIndex += 12;
-        }
+        correlations
+            .add(correlationValue(input, profiles[keyProfile], majorAverage));
       }
       profiles = minorKeyProfiles;
       avg = minorAverage;
     }
-    return maxIndex;
+    return correlations;
   }
 
-  Scale correlate(List<double> input) {
-    int index = maxCorrelationIndex(input);
-    return Scale(
-        pattern: index > 11
-            ? ScalePatternExtension.minorKey
-            : ScalePatternExtension.majorKey,
-        tonic: PitchClass.fromSemitones(index % 12));
+  /// Where indices above 11 are minor scales...
+  static Scale fromIndex(int index) => Scale(
+      pattern: index > 11
+          ? ScalePatternExtension.minorKey
+          : ScalePatternExtension.majorKey,
+      tonic: PitchClass.fromSemitones(index % 12));
+
+  static List<Scale> correlate(List<double> input) {
+    List<double> correlations =
+        KrumhanslSchmucklerScaleDetection.correlations(input);
+    List<MapEntry<double, Scale>> entries = [
+      for (int i = 0; i < correlations.length; i++)
+        MapEntry(correlations[i], fromIndex(i))
+    ];
+    entries.sort((MapEntry<double, Scale> a, MapEntry<double, Scale> b) =>
+        -1 * a.key.compareTo(b.key));
+    return [for (MapEntry<double, Scale> entry in entries) entry.value];
   }
 
-  Scale chordProgressionCorrelation(ChordProgression progression) {
+  static List<Scale> correlateChordProgression(ChordProgression progression) {
     return correlate(progression.krumhanslSchmucklerInput);
   }
 }

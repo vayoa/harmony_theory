@@ -1,6 +1,7 @@
 import 'package:thoery_test/extensions/chord_extension.dart';
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/time_signature.dart';
+import 'package:thoery_test/state/krumhansl_schmuckler_scale_detection.dart';
 import 'package:tonic/tonic.dart';
 
 class ChordProgression extends Progression<Chord> {
@@ -74,6 +75,11 @@ class ChordProgression extends Progression<Chord> {
       ));
     }
     return scales;
+  }
+
+  List<Scale> get krumhanslSchmucklerScales {
+    KrumhanslSchmucklerScaleDetection.initialize();
+    return KrumhanslSchmucklerScaleDetection.correlateChordProgression(this);
   }
 
   List<double> get krumhanslSchmucklerInput {
