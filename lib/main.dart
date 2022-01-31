@@ -4,6 +4,7 @@ import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
+import 'package:thoery_test/state/krumhansl_schmuckler_scale_detection.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:tonic/tonic.dart';
@@ -11,7 +12,27 @@ import 'modals/chord_progression.dart';
 import 'modals/substitution.dart';
 
 void main() {
-  _test();
+  KrumhanslSchmucklerScaleDetection kssd = KrumhanslSchmucklerScaleDetection();
+
+  List<double> input = [0, 0, 1, 0, 0, 0, 0, 3, 0, 2, 0, 2];
+  List<double> profile = [
+    6.35,
+    2.23,
+    3.48,
+    2.33,
+    4.38,
+    4.09,
+    2.52,
+    5.19,
+    2.39,
+    3.66,
+    2.29,
+    2.88,
+  ];
+
+  print(kssd.correlate(input).getCommonName());
+
+  // _test();
 }
 
 _test() {

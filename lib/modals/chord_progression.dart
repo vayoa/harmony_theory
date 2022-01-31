@@ -76,6 +76,21 @@ class ChordProgression extends Progression<Chord> {
     return scales;
   }
 
+  List<double> get krumhanslSchmucklerInput {
+    List<double> input = List.generate(12, (index) => 0);
+    for (int i = 0; i < length; i++) {
+      Chord? chord = this[i];
+      double dur = durations[i];
+      if (chord != null) {
+        List<Pitch> pitches = chord.pitches;
+        for (Pitch pitch in pitches) {
+          input[pitch.pitchClass.integer] += dur;
+        }
+      }
+    }
+    return input;
+  }
+
   @override
   String notNullValueFormat(Chord value) => value.getCommonName();
 }
