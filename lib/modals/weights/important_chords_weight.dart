@@ -23,6 +23,12 @@ class ImportantChordsWeight extends Weight {
   /// progression. If the progression has an odd number of measures, no middle
   /// tonic is considered (middle could be if we have 4 measures at the end
   /// of the 2nd one or at the beginning of the 3rd one. Both are checked).
+  // TODO:
+  /// להיזהר, בסולם מינור Am
+  /// A יכול להיות דומיננטה ל-D
+  // להוריד פחות על האמצע
+  // אם רוצה תוריד הכי הרבה על האחרון, ואז ראשון ואז אמצע
+  // להעלות את החשיבות של המשקולת, שים לב שאפשר להתעלל באמצע
   @override
   Score score({
     required ScaleDegreeProgression progression,
@@ -40,6 +46,7 @@ class ImportantChordsWeight extends Weight {
             'Points: $points.\n';
       }
     }
+    // i
     if (_isTonic(base.values.last)) {
       max++;
       if (!_isTonic(progression.values.last)) {

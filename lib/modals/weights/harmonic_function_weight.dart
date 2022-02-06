@@ -57,7 +57,6 @@ class HarmonicFunctionWeight extends Weight {
     String details = '';
     for (int i = 0; i < progression.length - 1; i++) {
       if (progression[i] != null && progression[i + 1] != null) {
-        // TDC: Should add points if a I goes to a diatonic chord?
         count++;
         int weakHash =
             prepareForCheck(progression[i]!, progression[i + 1]!).weakHash;
@@ -131,12 +130,6 @@ class HarmonicFunctionBank {
 
   static final Map<String, Map<bool, Map<int, List<String>>>> _sortedFunctions =
       {
-    'I': {
-      false: {
-        // Yuval said so...
-        2: ['#ivdim'],
-      }
-    },
     'ii': {
       false: {
         1: ['IV', 'iii', 'vi', 'viidim'],
@@ -155,6 +148,7 @@ class HarmonicFunctionBank {
     },
     'III': {
       false: {
+        2: ['IV'],
         3: ['vi'],
       }
     },
@@ -170,6 +164,7 @@ class HarmonicFunctionBank {
     },
     'V': {
       false: {
+        1: ['bVI'],
         2: ['vi'],
         3: ['I'],
       },

@@ -28,6 +28,10 @@ class Progression<T> {
   /// The number of measures the [Progression] takes.
   int get measureCount => (duration / _timeSignature.decimal).ceil();
 
+  double _minDuration = double.infinity;
+
+  double get minDuration => _minDuration;
+
   Progression(this._values, this._durations,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : assert(_values.length == _durations.length),
@@ -86,7 +90,13 @@ class Progression<T> {
 
   bool updateFull() {
     if (isEmpty) return false;
-    _duration = _durations.reduce((value, element) => value + element);
+    _duration = 0.0;
+    for (int i = 0; i < length; i++) {
+      _duration += _durations[i];
+      if (_durations[i] < _minDuration) {
+        _minDuration = _durations[i];
+      }
+    }
     _full = _duration % _timeSignature.decimal == 0;
     return _full;
   }
