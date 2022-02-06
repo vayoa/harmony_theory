@@ -4,6 +4,7 @@ import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
+import 'package:thoery_test/modals/weights/new_rhythm_weight.dart';
 import 'package:thoery_test/state/krumhansl_schmuckler_scale_detection.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
@@ -132,14 +133,16 @@ _test() {
   //   bank: bank,
   // );
 
+
   Substitution sub = SubstitutionHandler.substituteBy(
     base: base,
     bank: bank,
     maxIterations: 50,
-    keepHarmonicFunction: true,
+    // keepHarmonicFunction: true,
   );
 
   ScaleDegreeProgression baseProg = sub.base;
+  // print(const NewRhythmWeight().score(progression: baseProg, base: baseProg));
 
   // Substitution sub = SubstitutionHandler.perfectSubstitution(
   //     base: base, bank: bank, maxIterations: 1000);

@@ -17,6 +17,8 @@ class TimeSignature {
   /// ([numerator] / [denominator]...)
   double get decimal => numerator / denominator;
 
+  double get step => 1 / denominator;
+
   @override
   bool operator ==(Object other) =>
       other is TimeSignature &&
