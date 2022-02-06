@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
 
@@ -17,7 +19,7 @@ class NewRhythmWeight extends Weight {
 
   /// Completely Scores down progressions with durations less the the
   /// progression's step ([progression.timeSignature.step]), as well as
-  /// durations that aren't multiples of 2 and step.
+  /// durations that aren't multiples of 2^n and step (where n is an integer...).
   /// Scores up progressions that have faster durations a bit before the end
   /// (for instance in a 4/4 where 1/4 comes
   @override
@@ -52,7 +54,10 @@ class NewRhythmWeight extends Weight {
     }
     for (int i = 0; i < progression.length; i++) {
       double dur = progression.durations[i], mult = dur / step;
-      if (mult % 2 != 0 && mult != 1) {
+      // TODO: Optimize...
+      //  Log2...
+      double l = log(mult) / ln2;
+      if (l.truncate() != l) {
         return Score(
           score: 0.0,
           details: "Progression has a $dur in it, which isn't a multiple of 2 "
