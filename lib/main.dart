@@ -138,7 +138,7 @@ _test() {
     base: base,
     bank: bank,
     maxIterations: 50,
-    // keepHarmonicFunction: true,
+    keepHarmonicFunction: true,
   );
 
   ScaleDegreeProgression baseProg = sub.base;
