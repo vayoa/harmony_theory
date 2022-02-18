@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:thoery_test/extensions/chord_extension.dart';
+import 'package:thoery_test/modals/temp_durations.dart';
 import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
 
@@ -32,33 +35,50 @@ class Progression<T> {
 
   double get minDuration => _minDuration;
 
-  Progression(this._values, this._durations,
+  /// Creates a new [Progression<T>] object, where all durations are positive
+  /// and smaller than 1 (if an element in [durations] isn't, we split it).
+  Progression(List<T?> values, List<double> durations,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : assert(_values.length == _durations.length),
-        _timeSignature = timeSignature {
-    if (!isEmpty) {
-      // Join all the adjacent equal values.
-      int i = 0;
-      while (i < length - 1) {
-        if (_durations[i] < 0) {
-          throw Exception('A negative duration at index $i'
+      : assert(values.length == durations.length),
+        _timeSignature = timeSignature,
+        _values = [],
+        _durations = [] {
+    if (values.isNotEmpty) {
+      double overallDuration = 0.0;
+      double durSum = 0.0;
+      for (int i = 0; i < values.length; i++) {
+        if (durations[i] <= 0) {
+          throw Exception('A non-positive duration at index $i'
               ' (${_values[i]} -> ${_durations[i]})');
         }
-        // We do this because Chord doesn't have an equals implementation...
-        var val = values[i];
-        var val2 = values[i + 1];
-        /* FIXME: Dart is really dumb sometimes (it won't let me do this
-                otherwise...) */
-        if (val == val2 ||
-            (val is Chord && val2 is Chord && val.equals(val2))) {
-          _durations[i] += _durations[i + 1];
-          _durations.removeAt(i + 1);
-          _values.removeAt(i + 1);
+        // Fails if we made it to the last index or if adjacent values aren't
+        // equal...
+        if (i < values.length - 1 && values[i] == values[i + 1]) {
+          durSum += durations[i];
         } else {
-          i++;
+          durSum += durations[i];
+          T? val = values[i];
+          while (durSum > 0) {
+            double dur = durSum;
+            if ((overallDuration + durSum) % _timeSignature.decimal != 0) {
+              dur = min(durSum, _timeSignature.decimal) -
+                  (overallDuration % _timeSignature.decimal);
+            }
+            _minDuration = min(dur, _minDuration);
+            if (!_timeSignature.validDuration(dur)) {
+              throw Exception('A non valid duration ($dur) was added to a '
+                  'progression with a time signature of $_timeSignature');
+            }
+            overallDuration += dur;
+            _durations.add(overallDuration);
+            _values.add(val);
+            durSum -= dur;
+          }
+          durSum = 0;
         }
       }
-      updateFull();
+      _duration = overallDuration;
+      _full = _duration % _timeSignature.decimal == 0;
     }
   }
 
@@ -180,24 +200,32 @@ class Progression<T> {
         }
       }
       currentRhythmSum += newDur;
-      currentMeasure.add(_values[i], newDur);
+      if (newDur > 0) {
+        currentMeasure.add(_values[i], newDur);
+      }
     }
     if (!currentMeasure.isEmpty) measures.add(currentMeasure);
     return measures;
   }
 
   void add(T? value, double duration) {
-    if (duration < 0) {
+    if (duration <= 0) {
       throw Exception(
-          'Tried to add $value with a negative duration ($duration) to $this');
+          'Tried to add $value with a non-positive duration ($duration) to $this');
     }
-    if (_values.isNotEmpty && value == _values.last) {
+    var last = _values.last;
+    if (_values.isNotEmpty &&
+        (value == last ||
+            (value is Chord && last is Chord && value.equals(last)))) {
       _durations.last += duration;
     } else {
       _values.add(value);
       _durations.add(duration);
     }
-    updateFull();
+    if (!_timeSignature.validDuration(duration)) {
+      throw Exception('A non valid duration ($duration) was added to a '
+          'progression with a time signature of $_timeSignature');
+    }
   }
 
   void addAll(Progression<T> progression) {

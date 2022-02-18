@@ -14,7 +14,20 @@ import 'modals/chord_progression.dart';
 import 'modals/substitution.dart';
 
 void main() {
-  _test();
+  var p = ScaleDegreeProgression.fromList(
+    ['ii', 'V', 'V', 'I'],
+    durations: [1, 2, 2.5, 0.5],
+  );
+
+  // p.add(ScaleDegreeChord.majorTonicTriad, 1.5);
+
+  print(p.values);
+  print(List.generate(
+      p.durations.length,
+      (index) => index == 0
+          ? p.durations.first
+          : p.durations[index] - p.durations[index - 1]));
+  // _test();
 }
 
 _test() {
@@ -132,7 +145,6 @@ _test() {
   //   base: base,
   //   bank: bank,
   // );
-
 
   Substitution sub = SubstitutionHandler.substituteBy(
     base: base,
