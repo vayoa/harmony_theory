@@ -22,9 +22,10 @@ class TimeSignature {
   /// Constructs a 4/4 [TimeSignature] object.
   const TimeSignature.evenTime() : this(4, 4);
 
+  // TDC: Check this!!
   /// Returns whether [duration] is valid for this TimeSignature or not.
-  bool validDuration(double duration) =>
-      duration < step || (log(duration / step) / ln2) % 1 == 0;
+  bool validDuration(double duration) => (duration % decimal == 0) ||
+      duration >= step && (log(duration / step) / ln2) % 1 == 0;
 
   @override
   bool operator ==(Object other) =>

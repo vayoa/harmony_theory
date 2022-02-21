@@ -2,6 +2,7 @@ import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/double_progression/double_progression.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
+import 'package:thoery_test/modals/time_signature.dart';
 import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/new_rhythm_weight.dart';
@@ -19,14 +20,17 @@ void main() {
     durations: [1, 2, 2.5, 0.5],
   );
 
-  // p.add(ScaleDegreeChord.majorTonicTriad, 1.5);
+  p.add(ScaleDegreeChord.majorTonicTriad, 1.75);
+
+  p.addAll(ScaleDegreeProgression.fromList(
+    ['I', 'V', 'V', 'I'],
+    durations: [1, 2, 2.5, 0.5],
+  ));
 
   print(p.values);
-  print(List.generate(
-      p.durations.length,
-      (index) => index == 0
-          ? p.durations.first
-          : p.durations[index] - p.durations[index - 1]));
+  print(p.durations);
+  print(p.minDuration);
+  print(p.duration);
   // _test();
 }
 

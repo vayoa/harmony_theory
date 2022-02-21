@@ -7,10 +7,12 @@ extension ChordExtension on Chord {
     return root.pitchClass.toString() + abbr;
   }
 
-  equals(Chord other) {
-    if (pitches.length != other.pitches.length) return false;
+  equals(Object? other) {
+    if (Object is! Chord) return false;
+    Chord chord = other as Chord;
+    if (pitches.length != chord.pitches.length) return false;
     for (int i = 0; i < pitches.length; i++) {
-      if (pitches[i].midiNumber != other.pitches[i].midiNumber) return false;
+      if (pitches[i].midiNumber != chord.pitches[i].midiNumber) return false;
     }
     return true;
   }
