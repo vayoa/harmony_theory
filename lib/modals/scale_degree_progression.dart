@@ -144,6 +144,17 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   }
 
   // TDC: Implement scale pattern matching!!
+  /* TDC: SUPPORT THE NEW DURATION REFACTOR: MEASURES AREN'T CUT SO A VALUE
+          COULD HAVE A DURATION OF 1.25 FOR INSTANCE. WE NEED TO MATCH THAT
+          VALUE FOR 1.0 AS WELL AS 0.25 IF IT'S SKIPPING A MEASURE!!!
+          |
+          EXAMPLE:
+          [I, V, I]
+          [0.5, 1.0, 0.5]
+          WILL LOOK LIKE THIS | I V | V I |, WE NEED TO GENERATE MATCHES FOR
+          THE V IN THE FIRST MEASURE AND THE V IN THE SECOND ONE, EVEN THOUGH
+          THEY ARE REPRESENTED AS ONE VALUE WITH ONE DURATION!!!
+   */
   /// Returns a list containing substitution match locations, where [sub] could
   /// substitute the current progression (base).
   List<SubstitutionMatch> getFittingMatchLocations(ScaleDegreeProgression sub) {
