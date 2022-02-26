@@ -389,46 +389,50 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       /* TODO: We don't have to compute the relative straight away (we can just
                 multiply the sum by the ratio like we do in
                 getFittingMatchLocations()...), convert it. */
-      final ScaleDegreeProgression relativeMatch =
-          SubstitutionMatch.getSubstitution(
-              progression: sub,
-              type: match.type,
-              addSeventh: match.withSeventh,
-              ratio: durations[baseChord] / sub.durations[chord],
-              tonic: this[match.baseIndex]);
-      // The duration from the beginning of sub to matching chord in sub.
-      double d1 = -1 * relativeMatch.sumDurations(0, chord);
-      // First index that could be changed.
-      int left = getIndexFromDuration(d1, from: baseChord);
-      // The duration from the matching chord in sub to the end of sub, without
-      // the duration of the matching chord itself.
-      double d2 = relativeMatch.sumDurations(chord);
-      // Last index to change...
-      int right = getIndexFromDuration(d2, from: baseChord);
-      ScaleDegreeProgression substitution =
-          ScaleDegreeProgression.fromProgression(sublist(0, left),
-              inMinor: _inMinor);
-      // TDC: This won't support empty chord spaces...
-      double bd1 = -1 * sumDurations(left, baseChord);
-      double bd2 = sumDurations(baseChord, right + 1);
-      if (bd1 - d1 != 0) {
-        substitution.add(this[left], -1 * (bd1 - d1));
+      try {
+        final ScaleDegreeProgression relativeMatch =
+            SubstitutionMatch.getSubstitution(
+                progression: sub,
+                type: match.type,
+                addSeventh: match.withSeventh,
+                ratio: durations[baseChord] / sub.durations[chord],
+                tonic: this[match.baseIndex]);
+        // The duration from the beginning of sub to matching chord in sub.
+        double d1 = -1 * relativeMatch.sumDurations(0, chord);
+        // First index that could be changed.
+        int left = getIndexFromDuration(d1, from: baseChord);
+        // The duration from the matching chord in sub to the end of sub, without
+        // the duration of the matching chord itself.
+        double d2 = relativeMatch.sumDurations(chord);
+        // Last index to change...
+        int right = getIndexFromDuration(d2, from: baseChord);
+        ScaleDegreeProgression substitution =
+            ScaleDegreeProgression.fromProgression(sublist(0, left),
+                inMinor: _inMinor);
+        // TDC: This won't support empty chord spaces...
+        double bd1 = -1 * sumDurations(left, baseChord);
+        double bd2 = sumDurations(baseChord, right + 1);
+        if (bd1 - d1 != 0) {
+          substitution.add(this[left], -1 * (bd1 - d1));
+        }
+        substitution.addAll(fillWith(substitution.duration, relativeMatch));
+        if (bd2 - d2 != 0) {
+          substitution.add(this[right], bd2 - d2);
+        }
+        if (right + 1 != length) {
+          substitution.addAll(sublist(right + 1));
+        }
+        substitutions.add(
+          Substitution(
+            originalSubstitution: sub,
+            substitutedBase: substitution,
+            base: this,
+            match: match,
+          ),
+        );
+      } catch (e) {
+        if (e is! NonValidDuration) rethrow;
       }
-      substitution.addAll(fillWith(substitution.duration, relativeMatch));
-      if (bd2 - d2 != 0) {
-        substitution.add(this[right], bd2 - d2);
-      }
-      if (right + 1 != length) {
-        substitution.addAll(sublist(right + 1));
-      }
-      substitutions.add(
-        Substitution(
-          originalSubstitution: sub,
-          substitutedBase: substitution,
-          base: this,
-          match: match,
-        ),
-      );
     }
     // TODO: This makes sure the results will be unique, make it more efficient.
     return substitutions.toSet().toList();

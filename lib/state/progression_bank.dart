@@ -97,7 +97,7 @@ class ProgressionBank {
     ScaleDegreeProgression.fromList(['ii', 'V', 'I'],
         durations: [1 / 4, 1 / 4, 1 / 2]),
     ScaleDegreeProgression.fromList(['ii', 'v', 'V', 'I'],
-        durations: [1 / 8, 1 / 8, 1 / 8, 1 / 2]),
+        durations: [1 / 4, 1 / 4, 1 / 4, 1 / 4]),
     ScaleDegreeProgression.fromList(['iidim', 'V', 'I']),
     // IV V I
     ScaleDegreeProgression.fromList(['IV', 'V', 'I']),

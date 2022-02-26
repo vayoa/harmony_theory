@@ -15,23 +15,39 @@ import 'modals/chord_progression.dart';
 import 'modals/substitution.dart';
 
 void main() {
+  _test();
+}
+
+void _testBaseClasses() {
   var p = ScaleDegreeProgression.fromList(
     ['ii', 'V', 'V', 'I'],
-    durations: [1, 2, 2.5, 0.5],
+    durations: [1, 2, 2.25, 1.25],
   );
 
   p.add(ScaleDegreeChord.majorTonicTriad, 1.75);
 
-  p.addAll(ScaleDegreeProgression.fromList(
-    ['I', 'V', 'V', 'I'],
-    durations: [1, 2, 2.5, 0.5],
-  ));
+  print(p.values);
+  print(p.durations);
+  print(p.minDuration);
+  print('${p.duration}\n');
+
+  var np = ScaleDegreeProgression.fromList(
+    ['I', 'V'],
+    durations: [1, 1.25],
+  );
+
+  print(np.values);
+  print(np.durations);
+  print(np.minDuration);
+  print(np.duration);
+  print('${np.duration}\n');
+
+  p.addAll(np);
 
   print(p.values);
   print(p.durations);
   print(p.minDuration);
   print(p.duration);
-  // _test();
 }
 
 _test() {

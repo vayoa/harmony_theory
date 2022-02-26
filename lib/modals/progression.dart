@@ -1,10 +1,17 @@
 import 'dart:math';
-
 import 'package:thoery_test/extensions/chord_extension.dart';
-import 'package:thoery_test/modals/temp_durations.dart';
 import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
 
+/// Describes a progression of any sort - a set of values, each with a duration.
+///
+/// The durations have to be all valid ([TimeSignature.validDuration]).
+/// If a duration is bigger than [TimeSignature.decimal], it is determined as
+/// valid if it's remainder from [TimeSignature.decimal] is valid.
+///
+/// If 2 adjacent values are the same, their durations are summed and they
+/// become one value. This is done to save space as the cases in which we need
+/// them to be split are less common then the cases where it doesn't matter.
 class Progression<T> {
   late final List<T?> _values;
 
@@ -39,7 +46,7 @@ class Progression<T> {
   /// since 1.25 - [TimeSignature.decimal] is 0.25...
   double get minDuration => _minDuration;
 
-  /// Creates a new [Progression<T>] object, where all durations are positive
+  /// Creates a new [Progression] object, where all durations are positive
   /// and smaller than 1 (if an element in [durations] isn't, we split it).
   Progression(List<T?> values, List<double> durations,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
@@ -62,9 +69,12 @@ class Progression<T> {
         } else {
           durSum += durations[i];
           T? val = values[i];
-          double dur = durSum % _timeSignature.decimal;
-          _minDuration = min((dur == 0 ? _minDuration : dur), _minDuration);
-          _checkValidDuration(val, dur);
+          _minDuration = min(
+              _checkValidDuration(
+                  value: val,
+                  duration: durSum,
+                  overallDuration: overallDuration),
+              _minDuration);
           overallDuration += durSum;
           _durations.add(durSum);
           _values.add(val);
@@ -190,52 +200,49 @@ class Progression<T> {
 
   void add(T? value, double duration) {
     if (duration <= 0) {
-      throw Exception(
-          'Tried to add $value with a non-positive duration ($duration) to '
-          '$this');
+      throw NonPositiveDuration(value, duration);
     }
-    T? last = _values.last;
-    double dur = duration % _timeSignature.decimal;
+    T? last = _values.isEmpty ? null : _values.last;
     if (_values.isNotEmpty &&
         (value == last ||
             (value is Chord && last is Chord && value.equals(last)))) {
-      dur = (duration + _durations.last) % _timeSignature.decimal;
-      _checkValidDuration(last, dur);
+      double dur = (duration + _durations.last) % _timeSignature.decimal;
+      if (dur > 0) {
+        _minDuration = min(
+            _checkValidDuration(
+                value: value, duration: dur, overallDuration: _duration),
+            _minDuration);
+      }
       _durations.last += duration;
     } else {
-      _checkValidDuration(value, duration);
+      _checkValidDuration(
+          value: value, duration: duration, overallDuration: _duration);
       _values.add(value);
       _durations.add(duration);
     }
-    _minDuration = min((dur == 0 ? _minDuration : dur), _minDuration);
-    _duration += dur;
+    _duration += duration;
     updateFull();
   }
 
   void addAll(Progression<T> progression) {
-    double first = progression.durations.first;
-    double dur = first % _timeSignature.decimal;
-    T? value = progression.values.first;
-    if (_values.isNotEmpty &&
-        (progression.values.first == _values.last ||
-            (value is Chord &&
-                _values.last is Chord &&
-                value.equals(_values.last)))) {
-      dur = (first + _durations.last) % _timeSignature.decimal;
-      _checkValidDuration(value, dur);
-      _durations.last += progression.durations.first;
-      _durations.addAll(progression._durations.sublist(1));
-      _values.addAll(progression._values.sublist(1));
-      _duration += progression.duration - _durations.last;
-    } else {
-      _checkValidDuration(value, dur);
-      _values.addAll(progression._values);
-      _durations.addAll(progression._durations);
-      _duration += progression.duration;
+    bool fullBefore = _full;
+    // In case the last of the current progression is equal to the first
+    // of the added progression...
+    add(progression.values.first, progression.durations.first);
+    if (progression.length > 1) {
+      if (fullBefore) {
+        _minDuration = min(_minDuration, progression._minDuration);
+        _values.addAll(progression.values.sublist(1));
+        _durations.addAll(progression.durations.sublist(1));
+        _duration += progression._duration - progression.durations.first;
+        updateFull();
+      }
+      else {
+        for (int i = 1; i < progression.length; i++) {
+          add(progression.values[i], progression.durations[i]);
+        }
+      }
     }
-    _minDuration = min((dur == 0 ? _minDuration : dur),
-        min(progression._minDuration, _minDuration));
-    updateFull();
   }
 
   ProgressionEntry<T> removeAt(int index) {
@@ -325,15 +332,42 @@ class Progression<T> {
     }
   }
 
-  _checkValidDuration(T? value, double duration) {
+  /// Checks whether [duration] is valid and returns what the smallest
+  /// duration it can be is (for instance a dur of 1.0 added to an overall
+  /// duration of 0.5 in an even time signature will produce a dur of 0.5 in
+  /// it's start, which is the smallest it can be).
+  double _checkValidDuration({
+    required T? value,
+    required double duration,
+    required double overallDuration,
+  }) {
     if (duration < 0) {
-      throw Exception(
-          '$value, with a non-positive duration ($duration) was added to a '
-          'progression.');
-    } else if (!_timeSignature.validDuration(duration)) {
-      throw Exception(
-          '$value, with a non valid duration ($duration) was added to a '
-          'progression with a time signature of $_timeSignature.');
+      throw NonPositiveDuration(value, duration);
+    } else {
+      double left = overallDuration % _timeSignature.decimal;
+      double currentMinDuration = duration;
+      if (left != 0 && duration >= left) {
+        _assertValid(value: value, duration: left);
+        currentMinDuration = left;
+        duration -= left;
+      }
+      double end = duration % _timeSignature.decimal;
+      // Since if this is true the rest if valid...
+      if (end != 0) {
+        _assertValid(value: value, duration: end);
+        currentMinDuration = min(currentMinDuration, end);
+      }
+      return currentMinDuration;
+    }
+  }
+
+  void _assertValid({
+    required T? value,
+    required double duration,
+  }) {
+    if (!_timeSignature.validDuration(duration)) {
+      throw NonValidDuration(
+          value: value, duration: duration, timeSignature: _timeSignature);
     }
   }
 
@@ -360,4 +394,33 @@ class ProgressionEntry<T> {
 
   @override
   String toString() => '$value($duration)';
+}
+
+class NonPositiveDuration<T> implements Exception {
+  final T? value;
+  final double duration;
+
+  const NonPositiveDuration(this.value, this.duration);
+
+  @override
+  String toString() =>
+      '$value, with a non-positive duration ($duration) was added to a '
+      'progression.';
+}
+
+class NonValidDuration<T> implements Exception {
+  final T? value;
+  final double duration;
+  final TimeSignature timeSignature;
+
+  const NonValidDuration({
+    required this.value,
+    required this.duration,
+    required this.timeSignature,
+  });
+
+  @override
+  String toString() =>
+      '$value($duration), an invalid duration for a time signature of '
+      '$timeSignature was added to a progression.';
 }
