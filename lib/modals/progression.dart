@@ -215,8 +215,10 @@ class Progression<T> {
       }
       _durations.last += duration;
     } else {
-      _checkValidDuration(
-          value: value, duration: duration, overallDuration: _duration);
+      _minDuration = min(
+          _minDuration,
+          _checkValidDuration(
+              value: value, duration: duration, overallDuration: _duration));
       _values.add(value);
       _durations.add(duration);
     }
@@ -236,8 +238,7 @@ class Progression<T> {
         _durations.addAll(progression.durations.sublist(1));
         _duration += progression._duration - progression.durations.first;
         updateFull();
-      }
-      else {
+      } else {
         for (int i = 1; i < progression.length; i++) {
           add(progression.values[i], progression.durations[i]);
         }
