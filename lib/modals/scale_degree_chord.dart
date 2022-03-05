@@ -74,7 +74,7 @@ class ScaleDegreeChord {
       throw FormatException("invalid ScaleDegreeChord name: $chord");
     }
     // If the degree is lowercased (meaning the chord contains a minor triad.
-    ChordPattern _cPattern = ChordPattern.parse(match[2]!);
+    ChordPattern _cPattern = ChordPattern.parse(match[2]!.replaceAll('b', '♭'));
     if (match[1]!.toLowerCase() == match[1]) {
       // We don't want to change any of the generated chord patterns (for some
       // reason they aren't const so I can change them and screw up that entire
