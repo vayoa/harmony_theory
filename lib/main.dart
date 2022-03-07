@@ -4,6 +4,7 @@ import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/time_signature.dart';
 import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
+import 'package:thoery_test/modals/weights/important_chords_weight.dart';
 import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/new_rhythm_weight.dart';
 import 'package:thoery_test/state/krumhansl_schmuckler_scale_detection.dart';
@@ -15,7 +16,36 @@ import 'modals/chord_progression.dart';
 import 'modals/substitution.dart';
 
 void main() {
-  _test();
+  // _test();
+  final ChordProgression _base = ChordProgression.evenTime([
+    Chord.parse('C'),
+    Chord.parse('C'),
+    Chord.parse('C'),
+    Chord.parse('C'),
+    Chord.parse('Dm'),
+    Chord.parse('Dm'),
+    Chord.parse('Dm'),
+    Chord.parse('Dm'),
+    Chord.parse('G'),
+    Chord.parse('G'),
+    Chord.parse('G'),
+    Chord.parse('G'),
+    Chord.parse('Em'),
+    Chord.parse('Em'),
+    Chord.parse('Em'),
+    Chord.parse('Em'),
+    Chord.parse('C'),
+    Chord.parse('C'),
+    Chord.parse('C'),
+    Chord.parse('C'),
+  ]);
+
+  print(SubstitutionHandler.substituteBy(
+    base: _base,
+    bank: ProgressionBank(),
+    maxIterations: 50,
+    keepHarmonicFunction: true,
+  ));
 }
 
 void _testBaseClasses() {

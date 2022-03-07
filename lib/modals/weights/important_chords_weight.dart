@@ -78,7 +78,7 @@ class ImportantChordsWeight extends Weight {
       for (int i = 0; i < 2; i++) {
         bool stopNext = false;
         middleBase += i;
-        if (_isTonic(base[middleBase])) {
+        if (base.length < middleBase && _isTonic(base[middleBase])) {
           max++;
           int middleSub =
               progression.getIndexFromDuration(progression.duration / 2) + i;
