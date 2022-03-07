@@ -51,8 +51,12 @@ abstract class SubstitutionHandler {
     return _chords;
   }
 
-  static List<Substitution> getPossibleSubstitutions(
-      ScaleDegreeProgression base, ProgressionBank bank) {
+  static List<Substitution> _getPossibleSubstitutions(
+    ScaleDegreeProgression base, {
+    required ProgressionBank bank,
+    int start = 0,
+    int? end,
+  }) {
     final List<Substitution> substitutions = [];
     for (ScaleDegreeChord? chord in base.values) {
       if (chord != null) {
@@ -62,7 +66,7 @@ abstract class SubstitutionHandler {
         if (progressions != null && progressions.isNotEmpty) {
           for (ScaleDegreeProgression sub in progressions) {
             List<Substitution> possibleSubs =
-                base.getPossibleSubstitutions(sub);
+                base.getPossibleSubstitutions(sub, start: start, end: end);
             for (Substitution possibleSub in possibleSubs) {
               if (possibleSub.substitutedBase != base) {
                 substitutions.add(possibleSub);
@@ -77,12 +81,15 @@ abstract class SubstitutionHandler {
   }
 
   static List<Substitution> getRatedSubstitutions(
-    ScaleDegreeProgression base,
-    ProgressionBank bank, {
+    ScaleDegreeProgression base, {
+    required ProgressionBank bank,
     bool keepHarmonicFunction = false,
     ScaleDegreeProgression? harmonicFunctionBase,
+    int start = 0,
+    int? end,
   }) {
-    List<Substitution> substitutions = getPossibleSubstitutions(base, bank);
+    List<Substitution> substitutions =
+        _getPossibleSubstitutions(base, bank: bank, start: start, end: end);
     for (Substitution sub in substitutions) {
       sub.scoreWith(weights,
           keepHarmonicFunction: keepHarmonicFunction,
@@ -121,8 +128,8 @@ abstract class SubstitutionHandler {
     Scale scale = sAP.key;
     ScaleDegreeProgression baseProgression = sAP.value;
 
-    List<Substitution> rated = getRatedSubstitutions(baseProgression, bank,
-        keepHarmonicFunction: keepHarmonicFunction);
+    List<Substitution> rated = getRatedSubstitutions(baseProgression,
+        bank: bank, keepHarmonicFunction: keepHarmonicFunction);
 
     print('Suggestions:');
     String subs = '';
@@ -144,7 +151,8 @@ abstract class SubstitutionHandler {
     ScaleDegreeProgression baseProgression = sAP.value, prev = baseProgression;
     List<Substitution> rated;
     do {
-      rated = getRatedSubstitutions(prev, bank,
+      rated = getRatedSubstitutions(prev,
+          bank: bank,
           keepHarmonicFunction: keepHarmonicFunction,
           harmonicFunctionBase: baseProgression);
       prev = rated.first.substitutedBase;
@@ -167,7 +175,8 @@ abstract class SubstitutionHandler {
     List<Substitution> rated;
     bool again = true;
     do {
-      rated = getRatedSubstitutions(prev, bank,
+      rated = getRatedSubstitutions(prev,
+          bank: bank,
           keepHarmonicFunction: keepHarmonicFunction,
           harmonicFunctionBase: baseProgression);
       prev = rated.first.substitutedBase;

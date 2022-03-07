@@ -203,6 +203,7 @@ class Progression<T> {
       throw NonPositiveDuration(value, duration);
     }
     T? last = _values.isEmpty ? null : _values.last;
+    // TDC: Chord equal doesn't work...
     if (_values.isNotEmpty &&
         (value == last ||
             (value is Chord && last is Chord && value.equals(last)))) {

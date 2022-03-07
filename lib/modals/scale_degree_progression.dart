@@ -155,9 +155,14 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           THE V IN THE FIRST MEASURE AND THE V IN THE SECOND ONE, EVEN THOUGH
           THEY ARE REPRESENTED AS ONE VALUE WITH ONE DURATION!!!
    */
+
   /// Returns a list containing substitution match locations, where [sub] could
-  /// substitute the current progression (base).
-  List<SubstitutionMatch> getFittingMatchLocations(ScaleDegreeProgression sub) {
+  /// substitute the current progression (base) within the range of
+  /// [start] - [end] (end excluded).
+  /* TDC: Make sure the ranges work correctly without flagging legal
+          substitutions. */
+  List<SubstitutionMatch> getFittingMatchLocations(ScaleDegreeProgression sub,
+      {int start = 0, int? end}) {
     // Explanation to why this is done is below...
     // if the potential sub can't fit in the base progression...
     if (sub.duration > duration) return const [];
@@ -186,7 +191,9 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     // progression [1 2, 3, -, -] where 1 and 2 are 1/8 and 3 is a 1/4 would be
     // considered the same as a [1, 2, 3] where 1 and 2 are 1/4 and 3 is a 1/2.
 
-    for (var baseChordPos = 0; baseChordPos < length; baseChordPos++) {
+    end ??= length;
+
+    for (var baseChordPos = start; baseChordPos < end; baseChordPos++) {
       for (var subChordPos = 0; subChordPos < sub.length; subChordPos++) {
         // If the two chords are equal.
         // Or if we have a tonicization.
@@ -212,7 +219,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             // 0... (also there'll be an error with base[baseChordPos - 1] if we
             // don't check this...)
             if (baseChordPos != 0) {
-              for (var i = baseChordPos - 1; !enoughInLeft && i >= 0; i--) {
+              for (var i = baseChordPos - 1; !enoughInLeft && i >= start; i--) {
                 baseDurationLeft += durations[i];
                 enoughInLeft = baseDurationLeft >= neededDurationLeft;
               }
@@ -221,10 +228,10 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             // Continue on only if there's enough duration to fit sub in the
             // left side of base from baseChordPose...
             if (enoughInLeft) {
-              if (subChordPos != length - 1) {
+              if (subChordPos != end - 1) {
                 neededDurationRight = sub.sumDurations(subChordPos + 1) * ratio;
                 for (var i = baseChordPos + 1;
-                    !enoughInRight && i < length;
+                    !enoughInRight && i < end;
                     i++) {
                   baseDurationRight += durations[i];
                   enoughInRight = baseDurationRight >= neededDurationRight;
@@ -374,7 +381,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   }
 
   // TDC: Implement scale pattern matching!!
-  /// Returns a substituted [base] from the current progression if possible.
+  /// Returns a substituted [base] from the current progression within the
+  /// range [start] - [end] (end excluded) if possible.
   /// If not, returns [base].
   /* TODO: It doesn't make sense to call this from the sub on a base, switch
           it around...
@@ -386,8 +394,10 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           match, and suggest a ii7 V7 Imaj7. (THIS CAN NOW BE DONE WITH THE NEW
           WEAK EQUALITY FUNCTION...).
    */
-  List<Substitution> getPossibleSubstitutions(ScaleDegreeProgression sub) {
-    final List<SubstitutionMatch> matches = getFittingMatchLocations(sub);
+  List<Substitution> getPossibleSubstitutions(ScaleDegreeProgression sub,
+      {int start = 0, int? end}) {
+    final List<SubstitutionMatch> matches =
+        getFittingMatchLocations(sub, start: start, end: end);
     final List<Substitution> substitutions = [];
 
     /* FIXME: This gets computed twice (first time in
@@ -446,6 +456,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       }
     }
     // TODO: This makes sure the results will be unique, make it more efficient.
+    /* TDC: I'm not sure if this is the problem but even with this I'm still
+            getting a lot of equal results... */
     return substitutions.toSet().toList();
   }
 

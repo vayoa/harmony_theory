@@ -18,34 +18,40 @@ import 'modals/substitution.dart';
 void main() {
   // _test();
   final ChordProgression _base = ChordProgression.evenTime([
-    Chord.parse('C'),
-    Chord.parse('C'),
-    Chord.parse('C'),
-    Chord.parse('C'),
-    Chord.parse('Dm'),
-    Chord.parse('Dm'),
-    Chord.parse('Dm'),
-    Chord.parse('Dm'),
+    Chord.parse('Cm'),
+    Chord.parse('Cm'),
+    Chord.parse('Cm'),
+    Chord.parse('Cm'),
+    Chord.parse('Ddim'),
+    Chord.parse('Ddim'),
+    Chord.parse('Ddim'),
+    Chord.parse('Ddim'),
     Chord.parse('G'),
     Chord.parse('G'),
     Chord.parse('G'),
     Chord.parse('G'),
-    Chord.parse('Em'),
-    Chord.parse('Em'),
-    Chord.parse('Em'),
-    Chord.parse('Em'),
-    Chord.parse('C'),
-    Chord.parse('C'),
-    Chord.parse('C'),
-    Chord.parse('C'),
+    Chord.parse('Cm'),
+    Chord.parse('Cm'),
+    Chord.parse('Cm'),
+    Chord.parse('Cm'),
   ]);
 
-  print(SubstitutionHandler.substituteBy(
-    base: _base,
-    bank: ProgressionBank(),
-    maxIterations: 50,
-    keepHarmonicFunction: true,
-  ));
+  Scale scale = _base.krumhanslSchmucklerScales[0];
+
+  var b = ScaleDegreeProgression.fromChords(scale, _base);
+
+  print(b.inScale(scale));
+
+  var subs =
+      SubstitutionHandler.getRatedSubstitutions(b, bank: ProgressionBank());
+  for (var sub in subs) {
+    print(sub.substitutedBase);
+    int count = 0;
+    for (var other in subs) {
+      if (other.substitutedBase == sub.substitutedBase) count++;
+      assert(count < 2);
+    }
+  }
 }
 
 void _testBaseClasses() {
