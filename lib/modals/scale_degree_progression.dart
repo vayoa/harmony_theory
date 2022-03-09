@@ -83,7 +83,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             timeSignature: timeSignature);
 
   // TDC: Remove 'inMinor' and infer it from scale.
-  ScaleDegreeProgression.fromChords(Scale scale, ChordProgression chords,
+  ScaleDegreeProgression.fromChords(Scale scale, Progression<Chord> chords,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this(
             chords.values
@@ -230,9 +230,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             if (enoughInLeft) {
               if (subChordPos != end - 1) {
                 neededDurationRight = sub.sumDurations(subChordPos + 1) * ratio;
-                for (var i = baseChordPos + 1;
-                    !enoughInRight && i < end;
-                    i++) {
+                for (var i = baseChordPos + 1; !enoughInRight && i < end; i++) {
                   baseDurationRight += durations[i];
                   enoughInRight = baseDurationRight >= neededDurationRight;
                 }

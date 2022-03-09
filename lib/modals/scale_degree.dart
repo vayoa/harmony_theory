@@ -111,12 +111,12 @@ class ScaleDegree {
   }
 
   PitchClass inScale(Scale scale) {
+    int index = _degree;
     if (scale.isMinor) {
-      return PitchClass.fromSemitones(
-          scale.pitchClasses[(_degree - 5) % 7].integer + _accidentals);
+      index = (_degree - 5) % 7;
     }
     return PitchClass.fromSemitones(
-        scale.pitchClasses[_degree].integer + _accidentals);
+        scale.pitchClasses[index].integer + _accidentals);
   }
 
   /// Returns a new [ScaleDegree] that is [interval] far away from the current

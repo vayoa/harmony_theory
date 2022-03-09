@@ -13,45 +13,50 @@ import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:thoery_test/tests/krumhansl_schmuckler_test.dart';
 import 'package:tonic/tonic.dart';
 import 'modals/chord_progression.dart';
+import 'modals/scale_degree.dart';
 import 'modals/substitution.dart';
 
 void main() {
   // _test();
   final ChordProgression _base = ChordProgression.evenTime([
     Chord.parse('Cm'),
-    Chord.parse('Cm'),
-    Chord.parse('Cm'),
-    Chord.parse('Cm'),
-    Chord.parse('Ddim'),
-    Chord.parse('Ddim'),
-    Chord.parse('Ddim'),
-    Chord.parse('Ddim'),
+    Chord.parse('D#dim'),
+    Chord.parse('G#'),
+    Chord.parse('Bdim'),
+    Chord.parse('E'),
+    Chord.parse('A'),
+    Chord.parse('D'),
+    Chord.parse('Em'),
+    Chord.parse('A'),
+    Chord.parse('Dm'),
     Chord.parse('G'),
-    Chord.parse('G'),
-    Chord.parse('G'),
-    Chord.parse('G'),
-    Chord.parse('Cm'),
-    Chord.parse('Cm'),
-    Chord.parse('Cm'),
     Chord.parse('Cm'),
   ]);
 
-  Scale scale = _base.krumhanslSchmucklerScales[0];
+  Scale scale = Scale(
+      tonic: PitchClass.parse('C'), pattern: ScalePatternExtension.minorKey);
 
   var b = ScaleDegreeProgression.fromChords(scale, _base);
 
-  print(b.inScale(scale));
+  print(_base);
+  print('$b\n');
 
-  var subs =
-      SubstitutionHandler.getRatedSubstitutions(b, bank: ProgressionBank());
-  for (var sub in subs) {
-    print(sub.substitutedBase);
-    int count = 0;
-    for (var other in subs) {
-      if (other.substitutedBase == sub.substitutedBase) count++;
-      assert(count < 2);
-    }
-  }
+  var eb = Scale(
+      tonic: PitchClass.parse('Eb'), pattern: ScalePatternExtension.majorKey);
+
+  print(Pitch.parse('Eb'));
+
+
+  /* TDC: PitchClass considers Eb as D#, this exists in the Scale class which
+          creates problems for us (as well as in other places), fix this!!! */
+  print(eb.tonic.toPitch());
+
+  print(ScaleDegreeChord(eb, Chord.parse('D#dim')));
+
+  var degree = ScaleDegree.parse('i');
+
+  print(degree.inScale(eb));
+  print(Pitch.fromMidiNumber(0));
 }
 
 void _testBaseClasses() {
