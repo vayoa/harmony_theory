@@ -208,9 +208,12 @@ class Progression<T> {
       if (dur > 0) {
         _minDuration = min(
             _checkValidDuration(
-                value: value,
-                duration: dur,
-                overallDuration: _duration - durations.last),
+              value: value,
+              duration: dur,
+              // The overall duration is the progression's duration - the last
+              // one since they're the same...
+              overallDuration: _duration - durations.last,
+            ),
             _minDuration);
       }
       _durations.last += duration;
