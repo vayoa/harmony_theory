@@ -203,14 +203,14 @@ class Progression<T> {
       throw NonPositiveDuration(value, duration);
     }
     T? last = _values.isEmpty ? null : _values.last;
-    // TDC: Chord equal doesn't work...
-    if (_values.isNotEmpty &&
-        (value == last || _adjacentValuesEqual(value, last))) {
+    if (_values.isNotEmpty && _adjacentValuesEqual(value, last)) {
       double dur = (duration + _durations.last) % _timeSignature.decimal;
       if (dur > 0) {
         _minDuration = min(
             _checkValidDuration(
-                value: value, duration: dur, overallDuration: _duration),
+                value: value,
+                duration: dur,
+                overallDuration: _duration - durations.last),
             _minDuration);
       }
       _durations.last += duration;
@@ -344,16 +344,23 @@ class Progression<T> {
   }) {
     if (duration < 0) {
       throw NonPositiveDuration(value, duration);
+    } else if ((overallDuration % _timeSignature.decimal) + duration <=
+        _timeSignature.decimal) {
+      _assertValid(value: value, duration: duration);
+      return duration;
     } else {
-      double left = _timeSignature.decimal - (overallDuration % _timeSignature.decimal);
+      // The duration the current measure has left before being full.
+      double left =
+          _timeSignature.decimal - (overallDuration % _timeSignature.decimal);
       double currentMinDuration = duration;
-      if (left != 0 && duration >= left) {
+      // If left is 1.0 it's in fact 0.0 (since we have the whole measure left...).
+      if (left != 1 && duration >= left) {
         _assertValid(value: value, duration: left);
         currentMinDuration = left;
-        duration -= left;
       }
-      double end = duration % _timeSignature.decimal;
-      // Since if this is true the rest if valid...
+      // The duration that's left after the cut...
+      double end = (overallDuration + duration) % _timeSignature.decimal;
+      // Since if this is true the rest is valid...
       if (end != 0) {
         _assertValid(value: value, duration: end);
         currentMinDuration = min(currentMinDuration, end);
@@ -386,7 +393,8 @@ class Progression<T> {
       Progression(_values.sublist(start, end), _durations.sublist(start, end),
           timeSignature: _timeSignature);
 
-  Progression<T> replaceMeasure(int index, Progression<T> newMeasure, {List<Progression<T>>? measures}) {
+  Progression<T> replaceMeasure(int index, Progression<T> newMeasure,
+      {List<Progression<T>>? measures}) {
     measures ??= splitToMeasures();
     double measure = _timeSignature.decimal;
     Progression<T> start = Progression<T>.empty(timeSignature: _timeSignature);
