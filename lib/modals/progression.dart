@@ -386,6 +386,22 @@ class Progression<T> {
       Progression(_values.sublist(start, end), _durations.sublist(start, end),
           timeSignature: _timeSignature);
 
+  Progression<T> replaceMeasure(int index, Progression<T> newMeasure, {List<Progression<T>>? measures}) {
+    measures ??= splitToMeasures();
+    double measure = _timeSignature.decimal;
+    Progression<T> start = Progression<T>.empty(timeSignature: _timeSignature);
+    for (int i = 0; i < index; i++) {
+      start.addAll(measures[i]);
+    }
+    start.addAll(newMeasure);
+    if (index < measures.length - 1) {
+      for (int i = index + 1; i < measures.length; i++) {
+        start.addAll(measures[i]);
+      }
+    }
+    return start;
+  }
+
   static bool _adjacentValuesEqual<T>(T val, T next) =>
       val is Chord ? val.equals(next) : val == next;
 }
