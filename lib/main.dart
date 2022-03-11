@@ -29,6 +29,8 @@ void main() {
 
   print(Pitch.parse('C2') == Pitch.parse('C3'));
 
+  Chord c = Chord.parse('E');
+
   // _test();
   final ChordProgression _base = ChordProgression.evenTime([
     Chord.parse('Cm'),
@@ -39,7 +41,7 @@ void main() {
     Chord.parse('A'),
     Chord.parse('D'),
     Chord.parse('Em'),
-    Chord.parse('A'),
+    Chord.parse('Em'),
     Chord.parse('Dm'),
     Chord.parse('G'),
     Chord.parse('Cm'),

@@ -64,7 +64,8 @@ class Progression<T> {
         }
         // Fails if we made it to the last index or if adjacent values aren't
         // equal...
-        if (i < values.length - 1 && values[i] == values[i + 1]) {
+        if (i < values.length - 1 &&
+            _adjacentValuesEqual(values[i], values[i + 1])) {
           durSum += durations[i];
         } else {
           durSum += durations[i];
@@ -385,6 +386,9 @@ class Progression<T> {
   Progression<T> sublist(int start, [int? end]) =>
       Progression(_values.sublist(start, end), _durations.sublist(start, end),
           timeSignature: _timeSignature);
+
+  static bool _adjacentValuesEqual<T>(T val, T next) =>
+      val is Chord ? val.equals(next) : val == next;
 }
 
 class ProgressionEntry<T> {
