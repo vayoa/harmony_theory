@@ -345,7 +345,7 @@ class Progression<T> {
     if (duration < 0) {
       throw NonPositiveDuration(value, duration);
     } else {
-      double left = overallDuration % _timeSignature.decimal;
+      double left = _timeSignature.decimal - (overallDuration % _timeSignature.decimal);
       double currentMinDuration = duration;
       if (left != 0 && duration >= left) {
         _assertValid(value: value, duration: left);

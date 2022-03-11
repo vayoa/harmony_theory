@@ -18,21 +18,16 @@ import 'modals/scale_degree.dart';
 import 'modals/substitution.dart';
 
 void main() {
-  Chord c1 = Chord.parse('C2m'), c2 = Chord.parse('C0m');
+  // String str =
+  //     'G0 Major, C2 Minor, D2 Minor, C2 Minor, D0 Major, G0 Major, C0 Minor';
+  // List<Chord> chords =
+  //     str.split(',').map((e) => Chord.parse(e.trim())).toList();
+  // print(chords);
+  // print('');
+  // List<double> durations = [1.0, 0.5, 0.25, 1.25, 1.0, 1.0, 1.5];
+  // ChordProgression(chords: chords, durations: durations);
 
-  Pitch p1 = c1.root, p2 = c2.root;
-
-  print(p1.diatonicSemitones % 12);
-  print(p1.accidentalSemitones);
-  print('');
-  print(p2.diatonicSemitones % 12);
-  print(p2.accidentalSemitones);
-  print('');
-
-  print(c1.intervals == c2.intervals);
-  print(c1.equals(c2));
-
-  // _test();
+  _test();
   final ChordProgression _base = ChordProgression.evenTime([
     Chord.parse('Cm'),
     Chord.parse('D#dim'),
@@ -184,16 +179,16 @@ _test() {
       Chord.parse('G'),
       Chord.parse('C'),
       Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('Dm'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
+      // Chord.parse('C'),
+      // Chord.parse('Dm'),
+      // Chord.parse('G'),
+      // Chord.parse('C'),
+      // Chord.parse('G'),
+      // Chord.parse('C'),
+      // Chord.parse('G'),
+      // Chord.parse('C'),
+      // Chord.parse('G'),
+      // Chord.parse('C'),
     ],
     durations: [
       1 / 4 * 2,
