@@ -53,7 +53,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           durations: progression.durations,
           timeSignature: progression.timeSignature,
           duration: progression.duration,
-          full: progression.full,
         );
 
   ScaleDegreeProgression.evenTime(List<ScaleDegreeChord?> base,

@@ -17,6 +17,18 @@ import 'modals/scale_degree.dart';
 import 'modals/substitution.dart';
 
 void main() {
+
+  Pitch p1 = Pitch.parse('D-1'), p2  = Pitch.parse('B#');
+
+  print(p1.diatonicSemitones);
+  print(p1.accidentalSemitones);
+  print('');
+  print(p2.diatonicSemitones);
+  print(p2.accidentalSemitones);
+  print('');
+
+  print(Pitch.parse('C2') == Pitch.parse('C3'));
+
   // _test();
   final ChordProgression _base = ChordProgression.evenTime([
     Chord.parse('Cm'),

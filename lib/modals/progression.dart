@@ -93,12 +93,11 @@ class Progression<T> {
     required List<double> durations,
     required TimeSignature timeSignature,
     required double duration,
-    required bool full,
   })  : _values = values,
         _durations = durations,
         _timeSignature = timeSignature,
         _duration = duration,
-        _full = full;
+        _full = duration % timeSignature.decimal == 0;
 
   Progression.empty(
       {TimeSignature timeSignature = const TimeSignature.evenTime()})

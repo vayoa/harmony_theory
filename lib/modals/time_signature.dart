@@ -22,6 +22,9 @@ class TimeSignature {
   /// Constructs a 4/4 [TimeSignature] object.
   const TimeSignature.evenTime() : this(4, 4);
 
+  TimeSignature copy() => TimeSignature(numerator, denominator);
+
+
   // TDC: Check this!!
   /// Returns whether [duration] is valid for this TimeSignature or not.
   bool validDuration(double duration) => (duration % decimal == 0) ||
