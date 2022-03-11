@@ -23,7 +23,7 @@ class ChordProgression extends Progression<Chord> {
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : super.empty(timeSignature: timeSignature);
 
-  ChordProgression.fromProgression(Progression<Chord> progression)
+  ChordProgression.fromProgression(Progression<Chord?> progression)
       : super.raw(
           values: progression.values,
           durations: progression.durations,
