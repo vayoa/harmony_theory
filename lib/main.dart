@@ -18,7 +18,6 @@ import 'modals/scale_degree.dart';
 import 'modals/substitution.dart';
 
 void main() {
-
   print(Chord.parse('C2 Minor').equals(Chord.parse('C2 Major')));
 
   String str =
@@ -83,6 +82,7 @@ void _testBaseClasses() {
   var p = ScaleDegreeProgression.fromList(
     ['ii', 'V', 'V', 'I'],
     durations: [1, 2, 2.25, 1.25],
+    inMinor: false,
   );
 
   p.add(ScaleDegreeChord.majorTonicTriad, 1.75);
@@ -95,6 +95,7 @@ void _testBaseClasses() {
   var np = ScaleDegreeProgression.fromList(
     ['I', 'V'],
     durations: [1, 1.25],
+    inMinor: false,
   );
 
   print(np.values);
@@ -296,7 +297,8 @@ _basicMatchingTest({bool inputChords = false}) {
   // The conversion (happens now for ease of use but as stated earlier these
   // will be saved like this already).
   final List<ScaleDegreeProgression> _savedProgressions = _drySavedProgressions
-      .map((List<String> prog) => ScaleDegreeProgression.fromList(prog))
+      .map((List<String> prog) =>
+          ScaleDegreeProgression.fromList(prog, inMinor: false))
       .toList();
 
   /* TDC: I'm not sure if, for instance, a ii V I in a different rhythm than

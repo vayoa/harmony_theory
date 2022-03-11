@@ -33,14 +33,14 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   }
 
   ScaleDegreeProgression(List<ScaleDegreeChord?> base, List<double> durations,
-      {bool inMinor = false,
+      {required bool inMinor,
       TimeSignature timeSignature = const TimeSignature.evenTime()})
       : _inMinor = inMinor,
         super(_convertToMinor(inMinor, base), durations,
             timeSignature: timeSignature);
 
   ScaleDegreeProgression.empty(
-      {bool inMinor = false,
+      {required bool inMinor,
       TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this([], [], inMinor: inMinor, timeSignature: timeSignature);
 
@@ -56,7 +56,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         );
 
   ScaleDegreeProgression.evenTime(List<ScaleDegreeChord?> base,
-      {bool inMinor = false,
+      {required bool inMinor,
       TimeSignature timeSignature = const TimeSignature.evenTime()})
       : _inMinor = inMinor,
         super.evenTime(_convertToMinor(inMinor, base),
@@ -111,6 +111,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           .toList(),
       [...durations],
       timeSignature: timeSignature,
+      inMinor: _inMinor,
     );
   }
 
@@ -536,7 +537,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   }
 
   ScaleDegreeProgression get deriveTonicizations {
-    ScaleDegreeProgression progression = ScaleDegreeProgression.empty();
+    ScaleDegreeProgression progression =
+        ScaleDegreeProgression.empty(inMinor: _inMinor);
     Map<int, List<TonicizedScaleDegreeChord?>> tonicizations = {};
     for (int tonic = 0; tonic < length + 2; tonic++) {
       ScaleDegreeChord? tonicChord;
