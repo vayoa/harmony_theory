@@ -65,7 +65,7 @@ class Progression<T> {
         // Fails if we made it to the last index or if adjacent values aren't
         // equal...
         if (i < values.length - 1 &&
-            _adjacentValuesEqual(values[i], values[i + 1])) {
+            adjacentValuesEqual(values[i], values[i + 1])) {
           durSum += durations[i];
         } else {
           durSum += durations[i];
@@ -203,7 +203,7 @@ class Progression<T> {
       throw NonPositiveDuration(value, duration);
     }
     T? last = _values.isEmpty ? null : _values.last;
-    if (_values.isNotEmpty && _adjacentValuesEqual(value, last)) {
+    if (_values.isNotEmpty && adjacentValuesEqual(value, last)) {
       double dur = (duration + _durations.last) % _timeSignature.decimal;
       if (dur > 0) {
         _minDuration = min(
@@ -413,7 +413,7 @@ class Progression<T> {
     return start;
   }
 
-  static bool _adjacentValuesEqual<T>(T val, T next) =>
+  static bool adjacentValuesEqual<T>(T val, T next) =>
       val is Chord ? val.equals(next) : val == next;
 }
 
