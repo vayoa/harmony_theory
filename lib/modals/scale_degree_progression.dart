@@ -46,7 +46,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
 
   ScaleDegreeProgression.fromProgression(
       Progression<ScaleDegreeChord?> progression,
-      {bool inMinor = false})
+      {required bool inMinor})
       : _inMinor = inMinor,
         super.raw(
           values: progression.values,
