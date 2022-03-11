@@ -4,6 +4,9 @@ import 'package:thoery_test/modals/time_signature.dart';
 import 'package:thoery_test/state/krumhansl_schmuckler_scale_detection.dart';
 import 'package:tonic/tonic.dart';
 
+/* TDC: Since this doesn't have any additional data except methods, they might
+        deduct points for this not just being a collection of methods instead
+        of a whole object. */
 class ChordProgression extends Progression<Chord> {
   ChordProgression(
       {required List<Chord?> chords,
@@ -19,6 +22,14 @@ class ChordProgression extends Progression<Chord> {
   ChordProgression.empty(
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : super.empty(timeSignature: timeSignature);
+
+  ChordProgression.fromProgression(Progression<Chord> progression)
+      : super.raw(
+          values: progression.values,
+          durations: progression.durations,
+          timeSignature: progression.timeSignature,
+          duration: progression.duration,
+        );
 
   List<Scale> matchWithScales() {
     List<String> chordNames = values
