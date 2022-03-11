@@ -1,3 +1,4 @@
+import 'package:thoery_test/extensions/interval_extension.dart';
 import 'package:tonic/tonic.dart';
 
 extension ChordExtension on Chord {
@@ -8,11 +9,14 @@ extension ChordExtension on Chord {
   }
 
   equals(Object? other) {
-    if (Object is! Chord) return false;
-    Chord chord = other as Chord;
+    if (other is! Chord) return false;
+    Chord chord = other;
     Pitch oRoot = chord.root;
-    return pattern.intervals == chord.pattern.intervals &&
-        root.accidentalSemitones == oRoot.accidentalSemitones &&
-        root.diatonicSemitones % 12 == oRoot.diatonicSemitones % 12;
+    if (intervals.length != chord.intervals.length) return false;
+    for (int i = 0; i < intervals.length; i++) {
+      if (!intervals[i].equals(chord.intervals[i])) return false;
+    }
+    return root.accidentalSemitones == oRoot.accidentalSemitones &&
+        (root.diatonicSemitones % 12) == (oRoot.diatonicSemitones % 12);
   }
 }

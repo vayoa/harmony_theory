@@ -1,3 +1,4 @@
+import 'package:thoery_test/extensions/chord_extension.dart';
 import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/double_progression/double_progression.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
@@ -17,19 +18,19 @@ import 'modals/scale_degree.dart';
 import 'modals/substitution.dart';
 
 void main() {
+  Chord c1 = Chord.parse('C2m'), c2 = Chord.parse('C0m');
 
-  Pitch p1 = Pitch.parse('D-1'), p2  = Pitch.parse('B#');
+  Pitch p1 = c1.root, p2 = c2.root;
 
-  print(p1.diatonicSemitones);
+  print(p1.diatonicSemitones % 12);
   print(p1.accidentalSemitones);
   print('');
-  print(p2.diatonicSemitones);
+  print(p2.diatonicSemitones % 12);
   print(p2.accidentalSemitones);
   print('');
 
-  print(Pitch.parse('C2') == Pitch.parse('C3'));
-
-  Chord c = Chord.parse('E');
+  print(c1.intervals == c2.intervals);
+  print(c1.equals(c2));
 
   // _test();
   final ChordProgression _base = ChordProgression.evenTime([
@@ -59,7 +60,6 @@ void main() {
       tonic: PitchClass.parse('Eb'), pattern: ScalePatternExtension.majorKey);
 
   print(Pitch.parse('Eb'));
-
 
   /* TDC: PitchClass considers Eb as D#, this exists in the Scale class which
           creates problems for us (as well as in other places), fix this!!! */
