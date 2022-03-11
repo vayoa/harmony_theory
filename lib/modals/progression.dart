@@ -205,8 +205,7 @@ class Progression<T> {
     T? last = _values.isEmpty ? null : _values.last;
     // TDC: Chord equal doesn't work...
     if (_values.isNotEmpty &&
-        (value == last ||
-            (value is Chord && last is Chord && value.equals(last)))) {
+        (value == last || _adjacentValuesEqual(value, last))) {
       double dur = (duration + _durations.last) % _timeSignature.decimal;
       if (dur > 0) {
         _minDuration = min(
