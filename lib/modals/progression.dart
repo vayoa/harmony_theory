@@ -349,7 +349,7 @@ class Progression<T> {
       throw NonPositiveDuration(value, duration);
     } else if ((overallDuration % _timeSignature.decimal) + duration <=
         _timeSignature.decimal) {
-      _assertValid(value: value, duration: duration);
+      assertDurationValid(value: value, duration: duration);
       return duration;
     } else {
       // The duration the current measure has left before being full.
@@ -358,21 +358,21 @@ class Progression<T> {
       double currentMinDuration = duration;
       // If left is 1.0 it's in fact 0.0 (since we have the whole measure left...).
       if (left != 1 && duration >= left) {
-        _assertValid(value: value, duration: left);
+        assertDurationValid(value: value, duration: left);
         currentMinDuration = left;
       }
       // The duration that's left after the cut...
       double end = (overallDuration + duration) % _timeSignature.decimal;
       // Since if this is true the rest is valid...
       if (end != 0) {
-        _assertValid(value: value, duration: end);
+        assertDurationValid(value: value, duration: end);
         currentMinDuration = min(currentMinDuration, end);
       }
       return currentMinDuration;
     }
   }
 
-  void _assertValid({
+  void assertDurationValid({
     required T? value,
     required double duration,
   }) {
