@@ -19,4 +19,8 @@ extension ChordExtension on Chord {
     return root.accidentalSemitones == oRoot.accidentalSemitones &&
         (root.diatonicSemitones % 12) == (oRoot.diatonicSemitones % 12);
   }
+
+  static Chord parse(String name) =>
+      Chord.parse(name.replaceFirst(RegExp(r'm7$'), 'min7').replaceFirstMapped(
+          RegExp(r'^([A-G]b?)7$'), (match) => match.group(1)! + 'dom7'));
 }
