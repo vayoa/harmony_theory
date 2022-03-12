@@ -490,9 +490,11 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
 
   ChordProgression inScale(Scale scale) {
     ChordProgression _chords =
-        ChordProgression.empty(timeSignature: timeSignature);
+    ChordProgression.empty(timeSignature: timeSignature);
     for (var i = 0; i < length; i++) {
-      if (values[i] != null) {
+      if (values[i] == null) {
+        _chords.add(null, durations[i]);
+      } else {
         final ScaleDegreeChord scaleDegreeChord = values[i]!;
         _chords.add(
             Chord(

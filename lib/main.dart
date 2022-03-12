@@ -18,24 +18,7 @@ import 'modals/scale_degree.dart';
 import 'modals/substitution.dart';
 
 void main() {
-  print(Chord.parse('C2 Minor').equals(Chord.parse('C2 Major')));
-
-  String str =
-      'C0 Minor, D0 Major, G0 Major, C0 Minor, D0 Major, G0 Major, C0 Minor';
-  List<Chord> chords =
-      str.split(',').map((e) => Chord.parse(e.trim())).toList();
-  List<double> durations = [0.5, 0.5, 1.0, 2.0, 1.0, 1.0, 1.5];
-  ChordProgression cp = ChordProgression(chords: chords, durations: durations);
-  str = 'C2 Minor, C2 Major, C2 Minor';
-  chords = str.split(',').map((e) => Chord.parse(e.trim())).toList();
-  durations = [0.5, 0.25, 0.25];
-  ChordProgression cp2 = ChordProgression(chords: chords, durations: durations);
-  print(cp);
-  print(cp.values);
-  print(cp.durations);
-  print(cp2);
-  print(cp.replaceMeasure(6, cp2));
-  print('');
+  Chord c = Chord.parse('Ddom7');
 
   // _test();
   final ChordProgression _base = ChordProgression.evenTime([
