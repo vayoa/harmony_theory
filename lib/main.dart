@@ -18,7 +18,6 @@ import 'modals/scale_degree.dart';
 import 'modals/substitution.dart';
 
 void main() {
-  Chord c = Chord.parse('Ddom7');
 
   // _test();
   final ChordProgression _base = ChordProgression.evenTime([
@@ -174,16 +173,16 @@ _test() {
       Chord.parse('G'),
       Chord.parse('C'),
       Chord.parse('G'),
-      // Chord.parse('C'),
-      // Chord.parse('Dm'),
-      // Chord.parse('G'),
-      // Chord.parse('C'),
-      // Chord.parse('G'),
-      // Chord.parse('C'),
-      // Chord.parse('G'),
-      // Chord.parse('C'),
-      // Chord.parse('G'),
-      // Chord.parse('C'),
+      Chord.parse('C'),
+      Chord.parse('Dm'),
+      Chord.parse('G'),
+      Chord.parse('C'),
+      Chord.parse('G'),
+      Chord.parse('C'),
+      Chord.parse('G'),
+      Chord.parse('C'),
+      Chord.parse('G'),
+      Chord.parse('C'),
     ],
     durations: [
       1 / 4 * 2,
