@@ -70,25 +70,29 @@ class HarmonicFunctionWeight extends Weight {
               ' ${sorted[next]} points for'
                   ' ${progression[i]!} -> ${progression[i + 1]!} (now $score)\n';
         } else {
-          Interval between =
+          Interval upFromCurrent =
               progression[i + 1]!.rootDegree.from(progression[i]!.rootDegree);
-          if (between.equals(Interval.P4)) {
+          Interval downFromCurrent =
+              progression[i]!.rootDegree.from(progression[i + 1]!.rootDegree);
+          if (upFromCurrent.equals(Interval.P4)) {
             score += 2;
             details += 'Adding 2 points for'
-                ' ${progression[i]!} -> ${progression[i + 1]!} (a 4th apart, now $score)\n';
-          } else if (between.equals(Interval.m2) ||
-              between.equals(Interval.M2) ||
-              between.equals(Interval.m7) ||
-              between.equals(Interval.M7)) {
+                ' ${progression[i]!} -> ${progression[i + 1]!} (a 4th up, now $score)\n';
+          } else if (downFromCurrent.equals(Interval.P4)) {
             score += 1;
             details += 'Adding 1 point for'
-                ' ${progression[i]!} -> ${progression[i + 1]!} (a 2 apart, now $score)\n';
-          } else if (between.equals(Interval.M3) ||
-              between.equals(Interval.m3)) {
+                ' ${progression[i]!} -> ${progression[i + 1]!} (a 4th down, now $score)\n';
+          } else if (upFromCurrent.equals(Interval.m2) ||
+              upFromCurrent.equals(Interval.M2)) {
+            score += 1;
+            details += 'Adding 1 point for'
+                ' ${progression[i]!} -> ${progression[i + 1]!} (a 2nd up, now $score)\n';
+          } else if (upFromCurrent.equals(Interval.M3) ||
+              upFromCurrent.equals(Interval.m3)) {
             score -= 2;
             details += 'Deducting 2 points for '
                 '${progression[i]!} -> ${progression[i + 1]!} '
-                '(a 3 up that isn\'t a I - iii, now $score)\n';
+                '(a 3 up, now $score)\n';
           }
         }
       }
@@ -130,10 +134,10 @@ class HarmonicFunctionBank {
 
   static final Map<String, Map<int, List<String>>> _sortedFunctions = {
     'I': {
-      1: ['iii', 'III'],
+      1: ['iii', 'III', 'vi'],
     },
     'ii': {
-      // take down 1 point for ii - IV
+      -1: ['IV'],
       1: ['iii', 'vi', 'viidim'],
       3: ['V'],
     },
@@ -141,35 +145,45 @@ class HarmonicFunctionBank {
       3: ['V'],
     },
     'iii': {
-      -3: ['I'],
-      -1: ['viidim'],
-      2: ['ii', 'IV'],
+      -3: ['I', 'viidim'],
+      -1: ['V'],
+      1: ['ii'],
+      2: ['IV'],
     },
     'III': {
       2: ['IV'],
       3: ['vi'],
     },
-    'IV': {
+    'iv': {
       1: ['I'],
-      // TODO: Not sure about the score here, should be lower then a ii -> V.
+      2: ['V'],
+    },
+    'IV': {
+      -2: ['vi'],
+      1: ['I'],
       2: ['ii', 'V', 'viidim'],
     },
     'V': {
-      -1: ['iii'],
-      1: ['bVI', 'IV', 'ii'],
+      -1: ['iii', '-1'],
+      1: ['bVI'],
       2: ['vi'],
       3: ['I'],
     },
     'vi': {
       // TODO: Not sure about the score here, should be lower then a ii -> V.
-      1: ['IV', 'iii'],
-      2: ['ii', 'V'],
+      1: ['IV', 'iii', 'V', 'I'],
+      2: ['ii'],
     },
     'viidim': {
-      -2: ['viidim'],
-      -1: ['iv', 'IV', 'V'],
+      -3: ['ii', 'IV', 'iv', 'V'],
       1: ['iii'],
       3: ['I', 'III'],
+    },
+    'bVI': {
+      1: ['bVII', 'V'],
+    },
+    'bVII': {
+      2: ['I'],
     },
   };
 }

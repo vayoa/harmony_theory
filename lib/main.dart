@@ -19,6 +19,8 @@ import 'modals/substitution.dart';
 
 void main() {
 
+  print(ScaleDegree.tonic.from(ScaleDegree.parse('IV')));
+
   // _test();
   final ChordProgression _base = ChordProgression.evenTime([
     Chord.parse('Cm'),
