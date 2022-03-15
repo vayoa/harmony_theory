@@ -45,6 +45,8 @@ class ScaleDegree {
             intervalNumber: interval.number,
             intervalSemitones: interval.semitones);
 
+  /// A separate function from the default constructor to avoid
+  /// [Interval.fromSemitones] construction errors we don't care about.
   ScaleDegree.rawInterval({
     required ScalePattern scalePattern,
     required int intervalNumber,
@@ -79,9 +81,8 @@ class ScaleDegree {
     // TODO: Test offset handling.
     if (offsetStr.isNotEmpty) {
       if (offsetStr.startsWith(RegExp(r'[#b♯♭𝄪𝄫]'))) {
-        _accidentals = (offsetStr[0].allMatches(offsetStr).length *
-                (offsetStr[0].contains(RegExp(r'[b♭𝄫]')) ? -1 : 1)) %
-            12;
+        _accidentals = offsetStr[0].allMatches(offsetStr).length *
+                (offsetStr[0].contains(RegExp(r'[b♭𝄫]')) ? -1 : 1);
       } else {
         throw FormatException("invalid ScaleDegree name: $degree");
       }

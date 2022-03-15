@@ -19,7 +19,6 @@ import 'modals/scale_degree.dart';
 import 'modals/substitution.dart';
 
 void main() {
-
   // _test();
   final ChordProgression _base = ChordProgression.evenTime([
     Chord.parse('Cm'),
