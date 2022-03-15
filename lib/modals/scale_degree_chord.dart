@@ -206,12 +206,16 @@ class ScaleDegreeChord {
     }
   }
 
-  @override
-  String toString() {
-    String _rootDegreeStr = _rootDegree.toString();
+  String get rootDegreeString {
+    if (_pattern.intervals[1] == Interval.m3) {
+      return _rootDegree.toString().toLowerCase();
+    }
+    return _rootDegree.toString();
+  }
+
+  String get patternString {
     String _patternStr = _pattern.abbr;
     if (_pattern.intervals[1] == Interval.m3) {
-      _rootDegreeStr = _rootDegreeStr.toLowerCase();
       switch (_pattern.name) {
         case 'Minor':
           _patternStr = '';
@@ -220,7 +224,12 @@ class ScaleDegreeChord {
           _patternStr = '7';
       }
     }
-    return _rootDegreeStr + _patternStr;
+    return _patternStr;
+  }
+
+  @override
+  String toString() {
+    return rootDegreeString + patternString;
   }
 
   @override
