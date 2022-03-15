@@ -39,12 +39,28 @@ class ScaleDegree {
       : _degree = other._degree,
         _accidentals = other._accidentals;
 
-  ScaleDegree(ScalePattern scalePattern, Interval interval) {
-    final List<int> _semitones =
-        scalePattern.intervals.map<int>((e) => e.semitones).toList();
-    interval = Interval.fromSemitones(interval.semitones % 12);
-    _degree = interval.number - 1;
-    _accidentals = (interval.semitones - _semitones[_degree]) % 12;
+  ScaleDegree(ScalePattern scalePattern, Interval interval)
+      : this.rawInterval(
+            scalePattern: scalePattern,
+            intervalNumber: interval.number,
+            intervalSemitones: interval.semitones);
+
+  ScaleDegree.rawInterval({
+    required ScalePattern scalePattern,
+    required int intervalNumber,
+    required int intervalSemitones,
+  }) {
+    final List<int> _semitones;
+    if (scalePattern.isMinor) {
+      _semitones = ScalePatternExtension.minorKeySemitones;
+    } else {
+      _semitones = ScalePatternExtension.majorKeySemitones;
+    }
+    _degree = (intervalNumber - 1) % 7;
+    int accidentals = (intervalSemitones - _semitones[_degree]) % 12;
+    int down = (_semitones[_degree] - intervalSemitones) % 12;
+    if (down < accidentals) accidentals = -1 * down;
+    _accidentals = accidentals;
   }
 
   /// Returns a [ScaleDegree] from the given [Interval], based on a major scale!

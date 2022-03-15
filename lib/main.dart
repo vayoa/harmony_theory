@@ -12,6 +12,7 @@ import 'package:thoery_test/state/krumhansl_schmuckler_scale_detection.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:thoery_test/tests/krumhansl_schmuckler_test.dart';
+import 'package:thoery_test/tests/scale_degree_chord_test.dart';
 import 'package:tonic/tonic.dart';
 import 'modals/chord_progression.dart';
 import 'modals/scale_degree.dart';

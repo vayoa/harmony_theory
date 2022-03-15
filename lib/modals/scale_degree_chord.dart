@@ -1,3 +1,4 @@
+import 'package:thoery_test/extensions/chord_extension.dart';
 import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/extensions/interval_extension.dart';
@@ -52,8 +53,14 @@ class ScaleDegreeChord {
 
   ScaleDegreeChord(Scale scale, Chord chord) {
     _pattern = chord.pattern;
-    _rootDegree =
-        ScaleDegree(scale.pattern, chord.root - scale.tonic.toPitch());
+    Pitch cRoot = chord.root, tRoot = scale.tonic.toPitch();
+    int semitones = (cRoot.semitones - tRoot.semitones) % 12;
+    int number = 1 + cRoot.letterIndex - tRoot.letterIndex;
+    if (number <= 0) number += 7;
+    _rootDegree = ScaleDegree.rawInterval(
+        scalePattern: scale.pattern,
+        intervalNumber: number,
+        intervalSemitones: semitones);
   }
 
   ScaleDegreeChord.raw(ChordPattern pattern, ScaleDegree rootDegree)

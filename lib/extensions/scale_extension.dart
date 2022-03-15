@@ -9,7 +9,7 @@ extension ScaleExtension on Scale {
     return scaleTonic + ' ' + scalePattern;
   }
 
-  bool get isMinor => pattern.name == 'Natural Minor';
+  bool get isMinor => pattern.isMinor;
 
   bool equals(Scale other) =>
       tonic.integer == other.tonic.integer && pattern.equals(other.pattern);
@@ -22,6 +22,11 @@ extension ScalePatternExtension on ScalePattern {
   static final List<int> majorKeySemitones = majorKey.intervals
       .map<int>((Interval interval) => interval.semitones)
       .toList();
+  static final List<int> minorKeySemitones = minorKey.intervals
+      .map<int>((Interval interval) => interval.semitones)
+      .toList();
+
+  bool get isMinor => name == 'Natural Minor';
 
   String get shortName {
     switch (name) {

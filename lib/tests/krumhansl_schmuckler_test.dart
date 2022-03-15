@@ -2,7 +2,7 @@ import 'package:thoery_test/modals/chord_progression.dart';
 import 'package:tonic/tonic.dart';
 import 'package:thoery_test/extensions/scale_extension.dart';
 
-class KrumhanslSchmucklerTest {
+abstract class KrumhanslSchmucklerTest {
   static bool test([int precision = 2]) {
     assert(precision < 24);
     bool _californication = contains(
