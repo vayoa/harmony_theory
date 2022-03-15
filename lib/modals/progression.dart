@@ -230,20 +230,22 @@ class Progression<T> {
   }
 
   void addAll(Progression<T> progression) {
-    bool fullBefore = _full;
-    // In case the last of the current progression is equal to the first
-    // of the added progression...
-    add(progression.values.first, progression.durations.first);
-    if (progression.length > 1) {
-      if (fullBefore) {
-        _minDuration = min(_minDuration, progression._minDuration);
-        _values.addAll(progression.values.sublist(1));
-        _durations.addAll(progression.durations.sublist(1));
-        _duration += progression._duration - progression.durations.first;
-        updateFull();
-      } else {
-        for (int i = 1; i < progression.length; i++) {
-          add(progression.values[i], progression.durations[i]);
+    if (!progression.isEmpty) {
+      bool fullBefore = _full;
+      // In case the last of the current progression is equal to the first
+      // of the added progression...
+      add(progression.values.first, progression.durations.first);
+      if (progression.length > 1) {
+        if (fullBefore) {
+          _minDuration = min(_minDuration, progression._minDuration);
+          _values.addAll(progression.values.sublist(1));
+          _durations.addAll(progression.durations.sublist(1));
+          _duration += progression._duration - progression.durations.first;
+          updateFull();
+        } else {
+          for (int i = 1; i < progression.length; i++) {
+            add(progression.values[i], progression.durations[i]);
+          }
         }
       }
     }
