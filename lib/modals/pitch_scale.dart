@@ -1,3 +1,4 @@
+import 'package:thoery_test/extensions/pitch_extension.dart';
 import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:tonic/tonic.dart';
 
@@ -21,4 +22,21 @@ class PitchScale {
 
   List<Pitch> get pitches =>
       intervals.map((interval) => tonic + interval).toList();
+
+  bool get isMinor => pattern.isMinor;
+
+  String get getCommonName {
+    final String scalePattern =
+        pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
+    return tonic.commonName + ' ' + scalePattern;
+  }
+
+  operator ==(Object other) =>
+      other is PitchScale &&
+      tonic.octavelessEqual(other.tonic) &&
+      pattern.equals(other.pattern);
+
+  @override
+  int get hashCode => Object.hash(Object.hashAll(pattern.intervals),
+      tonic.accidentalsString, tonic.semitones % 12);
 }

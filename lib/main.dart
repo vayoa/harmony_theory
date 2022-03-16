@@ -242,7 +242,7 @@ _basicMatchingTest({bool inputChords = false}) {
   // Detect the base progressions' scale
   final List<PitchScale> _possibleScales =
       _baseChordProgression.matchWithScales();
-  print('Scale Found: ${_possibleScales[0].getCommonName()}.');
+  print('Scale Found: ${_possibleScales[0].getCommonName}.');
 
   // Convert the base progression to roman numerals, we used the most probable
   // scale that was detected (which would be the first in the list).

@@ -4,19 +4,6 @@ import 'package:thoery_test/extensions/interval_extension.dart';
 
 import '../modals/pitch_scale.dart';
 
-extension ScaleExtension on PitchScale {
-  String getCommonName() {
-    final String scalePattern =
-        pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
-    return tonic.commonName + ' ' + scalePattern;
-  }
-
-  bool get isMinor => pattern.isMinor;
-
-  bool equals(PitchScale other) =>
-      tonic.octavelessEqual(other.tonic) && pattern.equals(other.pattern);
-}
-
 extension ScalePatternExtension on ScalePattern {
   static final ScalePattern majorKey =
       ScalePattern.findByName('Diatonic Major');
