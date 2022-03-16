@@ -1,5 +1,6 @@
 import 'package:thoery_test/extensions/chord_extension.dart';
 import 'package:thoery_test/extensions/scale_extension.dart';
+import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/extensions/interval_extension.dart';
 import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
@@ -51,7 +52,7 @@ class ScaleDegreeChord {
     'Dominant 7th',
   ];
 
-  ScaleDegreeChord(Scale scale, Chord chord) {
+  ScaleDegreeChord(PitchScale scale, Chord chord) {
     _pattern = chord.pattern;
     Pitch cRoot = chord.root, tRoot = scale.tonic.toPitch();
     int semitones = (cRoot.semitones - tRoot.semitones) % 12;
@@ -233,6 +234,9 @@ class ScaleDegreeChord {
     }
     return _patternStr;
   }
+
+  Chord inScale(PitchScale scale) =>
+      Chord(pattern: _pattern, root: _rootDegree.inScale(scale));
 
   @override
   String toString() {

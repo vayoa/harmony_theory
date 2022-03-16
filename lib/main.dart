@@ -1,18 +1,9 @@
-import 'package:thoery_test/extensions/chord_extension.dart';
 import 'package:thoery_test/extensions/scale_extension.dart';
-import 'package:thoery_test/modals/double_progression/double_progression.dart';
+import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/time_signature.dart';
-import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
-import 'package:thoery_test/modals/weights/important_chords_weight.dart';
-import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
-import 'package:thoery_test/modals/weights/new_rhythm_weight.dart';
-import 'package:thoery_test/state/krumhansl_schmuckler_scale_detection.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
-import 'package:thoery_test/tests/krumhansl_schmuckler_test.dart';
-import 'package:thoery_test/tests/scale_degree_chord_test.dart';
 import 'package:tonic/tonic.dart';
 import 'modals/chord_progression.dart';
 import 'modals/scale_degree.dart';
@@ -35,29 +26,22 @@ void main() {
     Chord.parse('Cm'),
   ]);
 
-  Scale scale = Scale(
-      tonic: PitchClass.parse('C'), pattern: ScalePatternExtension.minorKey);
+  PitchScale scale = PitchScale(
+      tonic: Pitch.parse('C'), pattern: ScalePatternExtension.minorKey);
 
   var b = ScaleDegreeProgression.fromChords(scale, _base);
 
   print(_base);
   print('$b\n');
 
-  var eb = Scale(
-      tonic: PitchClass.parse('Eb'), pattern: ScalePatternExtension.majorKey);
-
-  print(Pitch.parse('Eb'));
-
-  /* TDC: PitchClass considers Eb as D#, this exists in the Scale class which
-          creates problems for us (as well as in other places), fix this!!! */
-  print(eb.tonic.toPitch());
+  Pitch tonic = Pitch.parse('E');
+  var eb = PitchScale(tonic: tonic, pattern: ScalePatternExtension.majorKey);
 
   print(ScaleDegreeChord(eb, Chord.parse('D#dim')));
 
-  var degree = ScaleDegree.parse('i');
+  var degree = ScaleDegree.parse('VII');
 
   print(degree.inScale(eb));
-  print(Pitch.fromMidiNumber(0));
 }
 
 void _testBaseClasses() {
@@ -255,7 +239,8 @@ _basicMatchingTest({bool inputChords = false}) {
   print('Your Progression:\n$_baseChordProgression.');
 
   // Detect the base progressions' scale
-  final List<Scale> _possibleScales = _baseChordProgression.matchWithScales();
+  final List<PitchScale> _possibleScales =
+      _baseChordProgression.matchWithScales();
   print('Scale Found: ${_possibleScales[0].getCommonName()}.');
 
   // Convert the base progression to roman numerals, we used the most probable

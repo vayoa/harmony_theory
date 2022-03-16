@@ -4,6 +4,8 @@ import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/chord_progression.dart';
 import 'package:tonic/tonic.dart';
 
+import '../modals/pitch_scale.dart';
+
 class KrumhanslSchmucklerScaleDetection {
   static initialize() {
     if (!_initialized) {
@@ -37,6 +39,21 @@ class KrumhanslSchmucklerScaleDetection {
 
   static late final double majorAverage;
   static late final double minorAverage;
+
+  static final List<Pitch> tonics = [
+    Pitch.parse('C'),
+    Pitch.parse('C#'),
+    Pitch.parse('D'),
+    Pitch.parse('Eb'),
+    Pitch.parse('E'),
+    Pitch.parse('F'),
+    Pitch.parse('F#'),
+    Pitch.parse('G'),
+    Pitch.parse('Ab'),
+    Pitch.parse('A'),
+    Pitch.parse('Bb'),
+    Pitch.parse('B'),
+  ];
 
   /// We're using the Bellman-Budge chord-based profiles...
   static const List<double> CMajorKeyProfile = [
@@ -108,25 +125,27 @@ class KrumhanslSchmucklerScaleDetection {
   }
 
   /// Where indices above 11 are minor scales...
-  static Scale fromIndex(int index) => Scale(
+  static PitchScale fromIndex(int index) => PitchScale(
       pattern: index > 11
           ? ScalePatternExtension.minorKey
           : ScalePatternExtension.majorKey,
-      tonic: PitchClass.fromSemitones(index % 12));
+      tonic: tonics[index % 12]);
 
-  static List<Scale> correlate(List<double> input) {
+  static List<PitchScale> correlate(List<double> input) {
     List<double> correlations =
         KrumhanslSchmucklerScaleDetection.correlations(input);
-    List<MapEntry<double, Scale>> entries = [
+    List<MapEntry<double, PitchScale>> entries = [
       for (int i = 0; i < correlations.length; i++)
         MapEntry(correlations[i], fromIndex(i))
     ];
-    entries.sort((MapEntry<double, Scale> a, MapEntry<double, Scale> b) =>
-        -1 * a.key.compareTo(b.key));
-    return [for (MapEntry<double, Scale> entry in entries) entry.value];
+    entries.sort(
+        (MapEntry<double, PitchScale> a, MapEntry<double, PitchScale> b) =>
+            -1 * a.key.compareTo(b.key));
+    return [for (MapEntry<double, PitchScale> entry in entries) entry.value];
   }
 
-  static List<Scale> correlateChordProgression(ChordProgression progression) {
+  static List<PitchScale> correlateChordProgression(
+      ChordProgression progression) {
     return correlate(progression.krumhanslSchmucklerInput);
   }
 }

@@ -1,11 +1,12 @@
 import 'package:thoery_test/extensions/interval_extension.dart';
+import 'package:thoery_test/extensions/pitch_extension.dart';
 import 'package:tonic/tonic.dart';
 
 extension ChordExtension on Chord {
   String getCommonName() {
     String abbr = pattern.abbr;
     if (abbr == 'min7') abbr = 'm7';
-    return root.pitchClass.toString() + abbr;
+    return root.commonName + abbr;
   }
 
   equals(Object? other) {

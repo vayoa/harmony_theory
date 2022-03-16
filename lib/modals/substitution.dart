@@ -1,3 +1,4 @@
+import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/substitution_match.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
@@ -84,7 +85,7 @@ class Substitution {
   int get hashCode => substitutedBase.hashCode;
 
   @override
-  String toString({Scale? scale, bool detailed = false}) {
+  String toString({PitchScale? scale, bool detailed = false}) {
     return '-- $originalSubstitution --\n'
             '$substitutedBase' +
         (scale == null ? ': ' : ' ->\n${substitutedBase.inScale(scale)}:') +

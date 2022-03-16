@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:thoery_test/extensions/scale_extension.dart';
+import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
@@ -82,7 +83,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             timeSignature: timeSignature);
 
   // TDC: Remove 'inMinor' and infer it from scale.
-  ScaleDegreeProgression.fromChords(Scale scale, Progression<Chord> chords,
+  ScaleDegreeProgression.fromChords(PitchScale scale, Progression<Chord> chords,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this(
             chords.values
@@ -488,20 +489,14 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     throw UnimplementedError();
   }
 
-  ChordProgression inScale(Scale scale) {
+  ChordProgression inScale(PitchScale scale) {
     ChordProgression _chords =
-    ChordProgression.empty(timeSignature: timeSignature);
+        ChordProgression.empty(timeSignature: timeSignature);
     for (var i = 0; i < length; i++) {
       if (values[i] == null) {
         _chords.add(null, durations[i]);
       } else {
-        final ScaleDegreeChord scaleDegreeChord = values[i]!;
-        _chords.add(
-            Chord(
-              pattern: scaleDegreeChord.pattern,
-              root: scaleDegreeChord.rootDegree.inScale(scale).toPitch(),
-            ),
-            durations[i]);
+        _chords.add(values[i]!.inScale(scale), durations[i]);
       }
     }
     return _chords;

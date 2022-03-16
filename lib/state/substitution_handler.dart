@@ -16,6 +16,8 @@ import 'package:thoery_test/modals/weights/weight.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:tonic/tonic.dart';
 
+import '../modals/pitch_scale.dart';
+
 abstract class SubstitutionHandler {
   static const List<Weight> weights = [
     InScaleWeight(),
@@ -99,9 +101,9 @@ abstract class SubstitutionHandler {
     return substitutions;
   }
 
-  static MapEntry<Scale, ScaleDegreeProgression> getAndPrintBase(
+  static MapEntry<PitchScale, ScaleDegreeProgression> getAndPrintBase(
       ChordProgression base,
-      {Scale? scale}) {
+      {PitchScale? scale}) {
     print('Your Progression:\n$base.');
 
     // Detect the base progressions' scale
@@ -126,7 +128,7 @@ abstract class SubstitutionHandler {
       base = inputChords();
     }
     var sAP = getAndPrintBase(base!);
-    Scale scale = sAP.key;
+    PitchScale scale = sAP.key;
     ScaleDegreeProgression baseProgression = sAP.value;
 
     List<Substitution> rated = getRatedSubstitutions(baseProgression,
@@ -148,7 +150,7 @@ abstract class SubstitutionHandler {
     bool keepHarmonicFunction = false,
     int start = 0,
     int? end,
-    Scale? scale,
+    PitchScale? scale,
   }) {
     var sAP = getAndPrintBase(base, scale: scale);
     scale = sAP.key;
@@ -178,7 +180,7 @@ abstract class SubstitutionHandler {
     bool keepHarmonicFunction = false,
     int start = 0,
     int? end,
-    Scale? scale,
+    PitchScale? scale,
   }) {
     var sAP = getAndPrintBase(base, scale: scale);
     scale = sAP.key;

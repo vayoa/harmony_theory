@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:thoery_test/extensions/scale_extension.dart';
+import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
 
@@ -82,7 +83,7 @@ class ScaleDegree {
     if (offsetStr.isNotEmpty) {
       if (offsetStr.startsWith(RegExp(r'[#b♯♭𝄪𝄫]'))) {
         _accidentals = offsetStr[0].allMatches(offsetStr).length *
-                (offsetStr[0].contains(RegExp(r'[b♭𝄫]')) ? -1 : 1);
+            (offsetStr[0].contains(RegExp(r'[b♭𝄫]')) ? -1 : 1);
       } else {
         throw FormatException("invalid ScaleDegree name: $degree");
       }
@@ -128,13 +129,14 @@ class ScaleDegree {
     return tonic.add(from(ScaleDegree.tonic));
   }
 
-  PitchClass inScale(Scale scale) {
+  Pitch inScale(PitchScale scale) {
     int index = _degree;
-    if (scale.isMinor) {
-      index = (_degree - 5) % 7;
-    }
-    return PitchClass.fromSemitones(
-        scale.pitchClasses[index].integer + _accidentals);
+    if (scale.isMinor) index = (_degree - 5) % 7;
+    Pitch diatonic = scale.tonic + scale.intervals[index];
+    return Pitch(
+        chromaticIndex:
+            (diatonic.semitones - diatonic.accidentalSemitones) % 12,
+        accidentalSemitones: diatonic.accidentalSemitones + _accidentals);
   }
 
   /// Returns a new [ScaleDegree] that is [interval] far away from the current

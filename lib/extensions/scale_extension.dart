@@ -1,18 +1,20 @@
+import 'package:thoery_test/extensions/pitch_extension.dart';
 import 'package:tonic/tonic.dart';
 import 'package:thoery_test/extensions/interval_extension.dart';
 
-extension ScaleExtension on Scale {
+import '../modals/pitch_scale.dart';
+
+extension ScaleExtension on PitchScale {
   String getCommonName() {
-    final String scaleTonic = tonic.toString();
     final String scalePattern =
         pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
-    return scaleTonic + ' ' + scalePattern;
+    return tonic.commonName + ' ' + scalePattern;
   }
 
   bool get isMinor => pattern.isMinor;
 
-  bool equals(Scale other) =>
-      tonic.integer == other.tonic.integer && pattern.equals(other.pattern);
+  bool equals(PitchScale other) =>
+      tonic.octavelessEqual(other.tonic) && pattern.equals(other.pattern);
 }
 
 extension ScalePatternExtension on ScalePattern {

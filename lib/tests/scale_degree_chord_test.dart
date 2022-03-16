@@ -1,23 +1,29 @@
 import 'dart:math';
 
+import 'package:thoery_test/extensions/chord_extension.dart';
 import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:tonic/tonic.dart';
 
+import '../modals/pitch_scale.dart';
 import '../modals/scale_degree_chord.dart';
 
 abstract class ScaleDegreeChordTest {
   static bool test() {
+    print('-- Regular --');
     List<Pitch> _possiblePitches = possiblePitches;
+    Map<PitchScale, List<ScaleDegreeChord>> reverse = {};
     for (Pitch pitch in _possiblePitches) {
-      Scale scale = Scale(
-          tonic: pitch.toPitchClass(), pattern: ScalePatternExtension.majorKey);
+      PitchScale scale =
+          PitchScale(tonic: pitch, pattern: ScalePatternExtension.majorKey);
       for (int i = 0; i < 2; i++) {
         List<String> inScale = [];
+        List<ScaleDegreeChord> chords = [];
         for (int j = 0; j < _possiblePitches.length; j++) {
           Pitch converted = _possiblePitches[j];
           String name = '${converted.letterName}${converted.accidentalsString}';
           try {
-            inScale.add('$name: ${ScaleDegreeChord(scale, Chord.parse(name))}');
+            chords.add(ScaleDegreeChord(scale, Chord.parse(name)));
+            inScale.add('$name: ${chords.last}');
           } catch (e) {
             print('$converted in ${scale.getCommonName()} failed:');
             Pitch cRoot = converted, tRoot = scale.tonic.toPitch();
@@ -29,11 +35,21 @@ abstract class ScaleDegreeChordTest {
           }
         }
         print(
-            '${pitch.letterName}${pitch.accidentalsString}${i == 0 ? '' : 'm'}: $inScale');
-        scale = Scale(
-            tonic: pitch.toPitchClass(),
-            pattern: ScalePatternExtension.minorKey);
+            '${pitch.letterName}${pitch.accidentalsString}${i == 0 ? '' : 'm'}'
+            ': $inScale');
+        reverse[scale] = chords;
+        scale =
+            PitchScale(tonic: pitch, pattern: ScalePatternExtension.minorKey);
       }
+    }
+    print('\n-- Reversed --');
+    for (MapEntry<PitchScale, List<ScaleDegreeChord>> entry
+        in reverse.entries) {
+      List<String> chords = entry.value
+          .map((ScaleDegreeChord sdc) =>
+              '$sdc: ${sdc.inScale(entry.key).getCommonName()}')
+          .toList();
+      print('${entry.key.getCommonName()}: $chords');
     }
     return true;
   }
