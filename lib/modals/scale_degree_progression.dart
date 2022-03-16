@@ -448,6 +448,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             substitutedBase: substitution,
             base: this,
             match: match,
+            firstChangedIndex: left,
+            lastChangedIndex: right,
           ),
         );
       } catch (e) {
