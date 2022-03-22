@@ -32,6 +32,12 @@ abstract class SubstitutionHandler {
   static const KeepHarmonicFunctionWeight keepHarmonicFunction =
       KeepHarmonicFunctionWeight();
 
+  /* TODO: Find a better way to access weights by name (or provide the weight
+          object in SubstitutionScore. */
+  static final Map<String, Weight> weightsMap = {
+    for (Weight weight in weights) weight.name: weight
+  };
+
   static ChordProgression inputChords() {
     ChordProgression _chords = ChordProgression.empty();
     print("Please enter your chords (enter 's' to stop and '-' for a rest):");
