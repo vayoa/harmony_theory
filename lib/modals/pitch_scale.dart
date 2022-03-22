@@ -18,6 +18,9 @@ class PitchScale {
                 ? ScalePatternExtension.minorKey
                 : ScalePatternExtension.majorKey);
 
+  PitchScale get switchPattern =>
+      PitchScale.common(tonic: tonic, minor: !isMinor);
+
   List<Interval> get intervals => pattern.intervals;
 
   List<Pitch> get pitches =>
@@ -25,7 +28,7 @@ class PitchScale {
 
   bool get isMinor => pattern.isMinor;
 
-  String get getCommonName {
+  String get commonName {
     final String scalePattern =
         pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
     return tonic.commonName + ' ' + scalePattern;

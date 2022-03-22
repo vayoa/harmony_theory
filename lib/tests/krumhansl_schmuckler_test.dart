@@ -11,14 +11,14 @@ abstract class KrumhanslSchmucklerTest {
         californication.krumhanslSchmucklerScales;
     bool _californication = contains(
         _californicationResults.sublist(0, precision), californicationScale);
-    print('Californication - ${californicationScale.getCommonName}:'
-        '\n${_californicationResults.map((e) => e.getCommonName).toList()}');
+    print('Californication - ${californicationScale.commonName}:'
+        '\n${_californicationResults.map((e) => e.commonName).toList()}');
     List<PitchScale> _yonatanHakatanResults =
         yonatanHakatan.krumhanslSchmucklerScales;
     bool _yonatanHakatan = contains(
         _yonatanHakatanResults.sublist(0, precision), yonatanHakatanScale);
-    print('Yonatan Hakatan - ${yonatanHakatanScale.getCommonName}:'
-        '\n${_yonatanHakatanResults.map((e) => e.getCommonName).toList()}');
+    print('Yonatan Hakatan - ${yonatanHakatanScale.commonName}:'
+        '\n${_yonatanHakatanResults.map((e) => e.commonName).toList()}');
     return _californication && _yonatanHakatan;
   }
 
