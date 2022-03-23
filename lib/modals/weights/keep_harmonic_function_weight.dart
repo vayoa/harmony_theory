@@ -3,6 +3,8 @@ import 'package:thoery_test/modals/weights/weight.dart';
 
 import '../scale_degree_chord.dart';
 
+
+// TDC: This needs to be built in instead of a weight...
 class KeepHarmonicFunctionWeight extends Weight {
   const KeepHarmonicFunctionWeight({
     this.keepHarmonicFunctionAmount = 5,

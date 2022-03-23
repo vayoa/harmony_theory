@@ -1,3 +1,4 @@
+import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/substitution_match.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
@@ -10,28 +11,37 @@ class Substitution {
   final ScaleDegreeProgression base;
   SubstitutionScore score;
   final SubstitutionMatch? match;
+  final int firstChangedIndex;
+  final int lastChangedIndex;
 
   double get rating => score.score;
 
-  Substitution(
-      {required this.substitutedBase,
-      required this.originalSubstitution,
-      required this.base,
-      SubstitutionScore? score,
-      this.match})
-      : score = score ?? SubstitutionScore.empty();
+  Substitution({
+    required this.substitutedBase,
+    required this.originalSubstitution,
+    required this.base,
+    required this.firstChangedIndex,
+    required this.lastChangedIndex,
+    SubstitutionScore? score,
+    this.match,
+  }) : score = score ?? SubstitutionScore.empty();
 
-  Substitution copyWith(
-          {ScaleDegreeProgression? substitutedBase,
-          ScaleDegreeProgression? originalSubstitution,
-          ScaleDegreeProgression? base,
-          SubstitutionScore? score,
-          SubstitutionMatch? match}) =>
+  Substitution copyWith({
+    ScaleDegreeProgression? substitutedBase,
+    ScaleDegreeProgression? originalSubstitution,
+    ScaleDegreeProgression? base,
+    int? firstChangedIndex,
+    int? lastChangedIndex,
+    SubstitutionScore? score,
+    SubstitutionMatch? match,
+  }) =>
       Substitution(
         substitutedBase: substitutedBase ?? this.substitutedBase,
         originalSubstitution: originalSubstitution ?? this.originalSubstitution,
         base: base ?? this.base,
         score: score ?? this.score,
+        firstChangedIndex: firstChangedIndex ?? this.firstChangedIndex,
+        lastChangedIndex: lastChangedIndex ?? this.lastChangedIndex,
         match: match ?? this.match,
       );
 
@@ -84,7 +94,7 @@ class Substitution {
   int get hashCode => substitutedBase.hashCode;
 
   @override
-  String toString({Scale? scale, bool detailed = false}) {
+  String toString({PitchScale? scale, bool detailed = false}) {
     return '-- $originalSubstitution --\n'
             '$substitutedBase' +
         (scale == null ? ': ' : ' ->\n${substitutedBase.inScale(scale)}:') +
@@ -95,7 +105,7 @@ class Substitution {
         (scale == null ? '' : ' ->\n${base.inScale(scale)}') +
         '.\n'
             '${score.toString(detailed)}\n'
-            'Details: $match';
+            'Details: $match Changed Range: $firstChangedIndex - ${lastChangedIndex + 1}.';
   }
 
   int compareTo(Substitution other) => score.compareTo(other.score);

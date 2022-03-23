@@ -16,15 +16,13 @@ class HarmonicFunctionWeight extends Weight {
           scoringStage: ScoringStage.afterSubstitution,
         );
 
-  static const int maxFunctionImportance = 3;
-
   static final HarmonicFunctionBank _harmonicFunctionBank =
       HarmonicFunctionBank();
 
   // TODO: Check this with yuval
   // Int values range from 1 - maxFunctionImportance.
   // Boolean is true if we're in minor.
-  static Map<int, Map<bool, Map<int, int>>> get sortedFunctions =>
+  static Map<int, Map<int, int>> get sortedFunctions =>
       _harmonicFunctionBank.sortedFunctions;
 
   // TODO: Write this better...
@@ -53,6 +51,7 @@ class HarmonicFunctionWeight extends Weight {
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
   }) {
+    int maxImportance = HarmonicFunctionBank.maxFunctionImportance;
     int score = 0, count = 0;
     String details = '';
     for (int i = 0; i < progression.length - 1; i++) {
@@ -62,125 +61,136 @@ class HarmonicFunctionWeight extends Weight {
             prepareForCheck(progression[i]!, progression[i + 1]!).weakHash;
         int next =
             prepareForCheck(progression[i + 1]!, progression[i]!).weakHash;
-        if (sortedFunctions.containsKey(weakHash)) {
-          Map<bool, Map<int, int>> sortedMode = sortedFunctions[weakHash]!;
-          Map<int, int> sorted;
-          // If no minor functions, choose major functions...
-          if (!sortedMode.containsKey(true)) {
-            sorted = sortedMode[false]!;
-          } else {
-            sorted = sortedMode[progression.inMinor]!;
-          }
-          if (sorted[next] != null) {
-            score += sorted[next]!;
-            details += 'Adding ${sorted[next]} points for'
-                ' ${progression[i]!} -> ${progression[i + 1]!} (now $score)\n';
-          }
+        if (sortedFunctions.containsKey(weakHash) &&
+            sortedFunctions[weakHash]![next] != null) {
+          Map<int, int> sorted = sortedFunctions[weakHash]!;
+          score += sorted[next]!;
+          String verb = sorted[next]! > 0 ? 'Adding' : 'Deducting';
+          details += verb +
+              ' ${sorted[next]} points for'
+                  ' ${progression[i]!} -> ${progression[i + 1]!} (now $score)\n';
         } else {
-          Interval between =
+          Interval upFromCurrent =
               progression[i + 1]!.rootDegree.from(progression[i]!.rootDegree);
-          if (between.equals(Interval.P4)) {
+          Interval downFromCurrent =
+              progression[i]!.rootDegree.from(progression[i + 1]!.rootDegree);
+          if (upFromCurrent.equals(Interval.P4)) {
             score += 2;
             details += 'Adding 2 points for'
-                ' ${progression[i]!} -> ${progression[i + 1]!} (a 4th apart, now $score)\n';
-          } else if (between.equals(Interval.m2) ||
-              between.equals(Interval.M2) ||
-              between.equals(Interval.m7) ||
-              between.equals(Interval.M7)) {
+                ' ${progression[i]!} -> ${progression[i + 1]!} (a 4th up, now $score)\n';
+          } else if (downFromCurrent.equals(Interval.P4)) {
             score += 1;
             details += 'Adding 1 point for'
-                ' ${progression[i]!} -> ${progression[i + 1]!} (a 2 apart, now $score)\n';
+                ' ${progression[i]!} -> ${progression[i + 1]!} (a 4th down, now $score)\n';
+          } else if (upFromCurrent.equals(Interval.m2) ||
+              upFromCurrent.equals(Interval.M2)) {
+            score += 1;
+            details += 'Adding 1 point for'
+                ' ${progression[i]!} -> ${progression[i + 1]!} (a 2nd up, now $score)\n';
+          } else if (upFromCurrent.equals(Interval.M3) ||
+              upFromCurrent.equals(Interval.m3)) {
+            score -= 2;
+            details += 'Deducting 2 points for '
+                '${progression[i]!} -> ${progression[i + 1]!} '
+                '(a 3 up, now $score)\n';
           }
         }
       }
     }
+    int minPoints = count * -1 * maxImportance,
+        maxPoints = count * maxImportance;
     return Score(
-      score: score / (count * maxFunctionImportance),
+      score: (score + maxPoints) / (2 * maxPoints),
       details: details +
-          'Out of max ${count * maxFunctionImportance} points this progression'
-              ' got $score.\n',
+          'Between a minimum of $minPoints points and a maximum of $maxPoints '
+              'points this progression got $score.\n',
     );
   }
 }
 
 class HarmonicFunctionBank {
+  static const int maxFunctionImportance = 3;
+
   HarmonicFunctionBank() {
     sortedFunctions = {};
-    for (MapEntry<String, Map<bool, Map<int, List<String>>>> chord
+    for (MapEntry<String, Map<int, List<String>>> chord
         in _sortedFunctions.entries) {
       int chordWeakHash = ScaleDegreeChord.parse(chord.key).weakHash;
       if (!sortedFunctions.containsKey(chordWeakHash)) {
         sortedFunctions[chordWeakHash] = {};
       }
-      for (MapEntry<bool, Map<int, List<String>>> mode in chord.value.entries) {
-        if (!chord.value.containsKey(mode)) {
-          sortedFunctions[chordWeakHash]![mode.key] = {};
-        }
-        for (MapEntry<int, List<String>> scored in mode.value.entries) {
-          for (String next in scored.value) {
-            sortedFunctions[chordWeakHash]![mode.key]![
-                ScaleDegreeChord.parse(next).weakHash] = scored.key;
+      for (MapEntry<int, List<String>> scored in chord.value.entries) {
+        assert(scored.key <= maxFunctionImportance &&
+            scored.key >= -1 * maxFunctionImportance);
+        for (String next in scored.value) {
+          try {
+          sortedFunctions[chordWeakHash]![
+              ScaleDegreeChord.parse(next).weakHash] = scored.key;
+          }
+          catch (e) {
+            print(chord.value.entries);
+            rethrow;
           }
         }
       }
     }
   }
 
-  late Map<int, Map<bool, Map<int, int>>> sortedFunctions;
+  late Map<int, Map<int, int>> sortedFunctions;
 
-  static final Map<String, Map<bool, Map<int, List<String>>>> _sortedFunctions =
-      {
+  static final Map<String, Map<int, List<String>>> _sortedFunctions = {
+    'I': {
+      1: ['iii', 'III', 'vi'],
+    },
     'ii': {
-      false: {
-        1: ['IV', 'iii', 'vi', 'viidim'],
-        3: ['V'],
-      },
+      -1: ['IV'],
+      1: ['iii', 'vi', 'viidim'],
+      3: ['V'],
     },
     'iidim': {
-      false: {
-        3: ['V'],
-      },
+      3: ['V'],
     },
     'iii': {
-      false: {
-        2: ['ii', 'IV'],
-      },
+      -3: ['I', 'viidim'],
+      -1: ['V'],
+      1: ['ii'],
+      2: ['IV'],
     },
     'III': {
-      false: {
-        2: ['IV'],
-        3: ['vi'],
-      }
+      2: ['IV'],
+      3: ['vi'],
+    },
+    'iv': {
+      1: ['I'],
+      2: ['V'],
     },
     'IV': {
-      false: {
-        1: ['I'],
-        // TODO: Not sure about the score here, should be lower then a ii -> V.
-        2: ['ii', 'V'],
-      },
-      true: {
-        2: ['viidim'],
-      },
+      -2: ['vi'],
+      1: ['I'],
+      2: ['ii', 'V', 'viidim'],
     },
     'V': {
-      false: {
-        1: ['bVI'],
-        2: ['vi'],
-        3: ['I'],
-      },
+      -2: ['viidim'],
+      -1: ['ii', 'iii'],
+      1: ['bVI'],
+      2: ['vi'],
+      3: ['I'],
     },
     'vi': {
-      false: {
-        // TODO: Not sure about the score here, should be lower then a ii -> V.
-        1: ['IV', 'ii', 'iii'],
-        2: ['V'],
-      },
+      // TODO: Not sure about the score here, should be lower then a ii -> V.
+      1: ['IV', 'iii', 'V', 'I'],
+      2: ['ii'],
     },
     'viidim': {
-      false: {
-        1: ['iii'],
-        3: ['I', 'III'],
-      },
+      -3: ['ii', 'IV', 'iv', 'V'],
+      1: ['iii'],
+      3: ['I', 'III'],
+    },
+    'bVI': {
+      1: ['bVII', 'V'],
+    },
+    'bVII': {
+      2: ['I'],
     },
   };
 }

@@ -16,6 +16,8 @@ import 'package:thoery_test/modals/weights/weight.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:tonic/tonic.dart';
 
+import '../modals/pitch_scale.dart';
+
 abstract class SubstitutionHandler {
   static const List<Weight> weights = [
     InScaleWeight(),
@@ -29,6 +31,12 @@ abstract class SubstitutionHandler {
 
   static const KeepHarmonicFunctionWeight keepHarmonicFunction =
       KeepHarmonicFunctionWeight();
+
+  /* TODO: Find a better way to access weights by name (or provide the weight
+          object in SubstitutionScore. */
+  static final Map<String, Weight> weightsMap = {
+    for (Weight weight in weights) weight.name: weight
+  };
 
   static ChordProgression inputChords() {
     ChordProgression _chords = ChordProgression.empty();
@@ -51,8 +59,12 @@ abstract class SubstitutionHandler {
     return _chords;
   }
 
-  static List<Substitution> getPossibleSubstitutions(
-      ScaleDegreeProgression base, ProgressionBank bank) {
+  static List<Substitution> _getPossibleSubstitutions(
+    ScaleDegreeProgression base, {
+    required ProgressionBank bank,
+    int start = 0,
+    int? end,
+  }) {
     final List<Substitution> substitutions = [];
     for (ScaleDegreeChord? chord in base.values) {
       if (chord != null) {
@@ -62,7 +74,7 @@ abstract class SubstitutionHandler {
         if (progressions != null && progressions.isNotEmpty) {
           for (ScaleDegreeProgression sub in progressions) {
             List<Substitution> possibleSubs =
-                base.getPossibleSubstitutions(sub);
+                base.getPossibleSubstitutions(sub, start: start, end: end);
             for (Substitution possibleSub in possibleSubs) {
               if (possibleSub.substitutedBase != base) {
                 substitutions.add(possibleSub);
@@ -77,12 +89,15 @@ abstract class SubstitutionHandler {
   }
 
   static List<Substitution> getRatedSubstitutions(
-    ScaleDegreeProgression base,
-    ProgressionBank bank, {
+    ScaleDegreeProgression base, {
+    required ProgressionBank bank,
     bool keepHarmonicFunction = false,
     ScaleDegreeProgression? harmonicFunctionBase,
+    int start = 0,
+    int? end,
   }) {
-    List<Substitution> substitutions = getPossibleSubstitutions(base, bank);
+    List<Substitution> substitutions =
+        _getPossibleSubstitutions(base, bank: bank, start: start, end: end);
     for (Substitution sub in substitutions) {
       sub.scoreWith(weights,
           keepHarmonicFunction: keepHarmonicFunction,
@@ -92,20 +107,21 @@ abstract class SubstitutionHandler {
     return substitutions;
   }
 
-  static MapEntry<Scale, ScaleDegreeProgression> getAndPrintBase(
-      ChordProgression base) {
+  static MapEntry<PitchScale, ScaleDegreeProgression> getAndPrintBase(
+      ChordProgression base,
+      {PitchScale? scale}) {
     print('Your Progression:\n$base.');
 
     // Detect the base progressions' scale
-    final List<Scale> _possibleScales = base.krumhanslSchmucklerScales;
-    print('Scale Found: ${_possibleScales[0].getCommonName()}.');
+    scale ??= base.krumhanslSchmucklerScales.first;
+    print('Scale Found: ${scale.commonName}.');
 
     // Convert the base progression to roman numerals, we used the most probable
     // scale that was detected (which would be the first in the list).
     final ScaleDegreeProgression baseProgression =
-        ScaleDegreeProgression.fromChords(_possibleScales[0], base);
+        ScaleDegreeProgression.fromChords(scale, base);
     print('In Roman Numerals: $baseProgression.\n');
-    return MapEntry(_possibleScales[0], baseProgression);
+    return MapEntry(scale, baseProgression);
   }
 
   static List<Substitution> test(
@@ -118,11 +134,11 @@ abstract class SubstitutionHandler {
       base = inputChords();
     }
     var sAP = getAndPrintBase(base!);
-    Scale scale = sAP.key;
+    PitchScale scale = sAP.key;
     ScaleDegreeProgression baseProgression = sAP.value;
 
-    List<Substitution> rated = getRatedSubstitutions(baseProgression, bank,
-        keepHarmonicFunction: keepHarmonicFunction);
+    List<Substitution> rated = getRatedSubstitutions(baseProgression,
+        bank: bank, keepHarmonicFunction: keepHarmonicFunction);
 
     print('Suggestions:');
     String subs = '';
@@ -138,15 +154,23 @@ abstract class SubstitutionHandler {
     required ProgressionBank bank,
     required int maxIterations,
     bool keepHarmonicFunction = false,
+    int start = 0,
+    int? end,
+    PitchScale? scale,
   }) {
-    var sAP = getAndPrintBase(base);
-    Scale scale = sAP.key;
+    var sAP = getAndPrintBase(base, scale: scale);
+    scale = sAP.key;
     ScaleDegreeProgression baseProgression = sAP.value, prev = baseProgression;
     List<Substitution> rated;
     do {
-      rated = getRatedSubstitutions(prev, bank,
-          keepHarmonicFunction: keepHarmonicFunction,
-          harmonicFunctionBase: baseProgression);
+      rated = getRatedSubstitutions(
+        prev,
+        bank: bank,
+        keepHarmonicFunction: keepHarmonicFunction,
+        harmonicFunctionBase: baseProgression,
+        start: start,
+        end: end,
+      );
       prev = rated.first.substitutedBase;
       maxIterations--;
     } while (maxIterations > 0);
@@ -160,16 +184,24 @@ abstract class SubstitutionHandler {
     required ProgressionBank bank,
     int? maxIterations,
     bool keepHarmonicFunction = false,
+    int start = 0,
+    int? end,
+    PitchScale? scale,
   }) {
-    var sAP = getAndPrintBase(base);
-    Scale scale = sAP.key;
+    var sAP = getAndPrintBase(base, scale: scale);
+    scale = sAP.key;
     ScaleDegreeProgression baseProgression = sAP.value, prev = baseProgression;
     List<Substitution> rated;
     bool again = true;
     do {
-      rated = getRatedSubstitutions(prev, bank,
-          keepHarmonicFunction: keepHarmonicFunction,
-          harmonicFunctionBase: baseProgression);
+      rated = getRatedSubstitutions(
+        prev,
+        bank: bank,
+        keepHarmonicFunction: keepHarmonicFunction,
+        harmonicFunctionBase: baseProgression,
+        start: start,
+        end: end,
+      );
       prev = rated.first.substitutedBase;
       if (maxIterations != null) {
         maxIterations--;

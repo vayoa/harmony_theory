@@ -1,19 +1,8 @@
+import 'package:thoery_test/extensions/pitch_extension.dart';
 import 'package:tonic/tonic.dart';
 import 'package:thoery_test/extensions/interval_extension.dart';
 
-extension ScaleExtension on Scale {
-  String getCommonName() {
-    final String scaleTonic = tonic.toString();
-    final String scalePattern =
-        pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
-    return scaleTonic + ' ' + scalePattern;
-  }
-
-  bool get isMinor => pattern.name == 'Natural Minor';
-
-  bool equals(Scale other) =>
-      tonic.integer == other.tonic.integer && pattern.equals(other.pattern);
-}
+import '../modals/pitch_scale.dart';
 
 extension ScalePatternExtension on ScalePattern {
   static final ScalePattern majorKey =
@@ -22,6 +11,11 @@ extension ScalePatternExtension on ScalePattern {
   static final List<int> majorKeySemitones = majorKey.intervals
       .map<int>((Interval interval) => interval.semitones)
       .toList();
+  static final List<int> minorKeySemitones = minorKey.intervals
+      .map<int>((Interval interval) => interval.semitones)
+      .toList();
+
+  bool get isMinor => name == 'Natural Minor';
 
   String get shortName {
     switch (name) {

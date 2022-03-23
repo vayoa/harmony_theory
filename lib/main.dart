@@ -1,20 +1,82 @@
 import 'package:thoery_test/extensions/scale_extension.dart';
-import 'package:thoery_test/modals/double_progression/double_progression.dart';
+import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
-import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
-import 'package:thoery_test/modals/weights/new_rhythm_weight.dart';
-import 'package:thoery_test/state/krumhansl_schmuckler_scale_detection.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:thoery_test/tests/krumhansl_schmuckler_test.dart';
 import 'package:tonic/tonic.dart';
 import 'modals/chord_progression.dart';
+import 'modals/scale_degree.dart';
 import 'modals/substitution.dart';
 
 void main() {
-  _test();
+  // _test();
+  final ChordProgression _base = ChordProgression.evenTime([
+    Chord.parse('Cm'),
+    Chord.parse('D#dim'),
+    Chord.parse('G#'),
+    Chord.parse('Bdim'),
+    Chord.parse('E'),
+    Chord.parse('A'),
+    Chord.parse('D'),
+    Chord.parse('Em'),
+    Chord.parse('Em'),
+    Chord.parse('Dm'),
+    Chord.parse('G'),
+    Chord.parse('Cm'),
+  ]);
+
+  PitchScale scale = PitchScale(
+      tonic: Pitch.parse('C'), pattern: ScalePatternExtension.minorKey);
+
+  var b = ScaleDegreeProgression.fromChords(scale, _base);
+
+  print(_base);
+  print('$b\n');
+
+  Pitch tonic = Pitch.parse('E');
+  var eb = PitchScale(tonic: tonic, pattern: ScalePatternExtension.majorKey);
+
+  print(ScaleDegreeChord(eb, Chord.parse('D#dim')));
+
+  var degree = ScaleDegree.parse('VII');
+
+  print(degree.inScale(eb));
+}
+
+void _testBaseClasses() {
+  var p = ScaleDegreeProgression.fromList(
+    ['ii', 'V', 'V', 'I'],
+    durations: [1, 2, 2.25, 1.25],
+    inMinor: false,
+  );
+
+  p.add(ScaleDegreeChord.majorTonicTriad, 1.75);
+
+  print(p.values);
+  print(p.durations);
+  print(p.minDuration);
+  print('${p.duration}\n');
+
+  var np = ScaleDegreeProgression.fromList(
+    ['I', 'V'],
+    durations: [1, 1.25],
+    inMinor: false,
+  );
+
+  print(np.values);
+  print(np.durations);
+  print(np.minDuration);
+  print(np.duration);
+  print('${np.duration}\n');
+
+  p.addAll(np);
+
+  print(p.values);
+  print(p.durations);
+  print(p.minDuration);
+  print(p.duration);
 }
 
 _test() {
@@ -133,7 +195,6 @@ _test() {
   //   bank: bank,
   // );
 
-
   Substitution sub = SubstitutionHandler.substituteBy(
     base: base,
     bank: bank,
@@ -179,8 +240,9 @@ _basicMatchingTest({bool inputChords = false}) {
   print('Your Progression:\n$_baseChordProgression.');
 
   // Detect the base progressions' scale
-  final List<Scale> _possibleScales = _baseChordProgression.matchWithScales();
-  print('Scale Found: ${_possibleScales[0].getCommonName()}.');
+  final List<PitchScale> _possibleScales =
+      _baseChordProgression.matchWithScales();
+  print('Scale Found: ${_possibleScales[0].commonName}.');
 
   // Convert the base progression to roman numerals, we used the most probable
   // scale that was detected (which would be the first in the list).
@@ -203,7 +265,8 @@ _basicMatchingTest({bool inputChords = false}) {
   // The conversion (happens now for ease of use but as stated earlier these
   // will be saved like this already).
   final List<ScaleDegreeProgression> _savedProgressions = _drySavedProgressions
-      .map((List<String> prog) => ScaleDegreeProgression.fromList(prog))
+      .map((List<String> prog) =>
+          ScaleDegreeProgression.fromList(prog, inMinor: false))
       .toList();
 
   /* TDC: I'm not sure if, for instance, a ii V I in a different rhythm than

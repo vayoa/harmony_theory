@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:thoery_test/extensions/scale_extension.dart';
+import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
@@ -33,31 +34,30 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   }
 
   ScaleDegreeProgression(List<ScaleDegreeChord?> base, List<double> durations,
-      {bool inMinor = false,
+      {required bool inMinor,
       TimeSignature timeSignature = const TimeSignature.evenTime()})
       : _inMinor = inMinor,
         super(_convertToMinor(inMinor, base), durations,
             timeSignature: timeSignature);
 
   ScaleDegreeProgression.empty(
-      {bool inMinor = false,
+      {required bool inMinor,
       TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this([], [], inMinor: inMinor, timeSignature: timeSignature);
 
   ScaleDegreeProgression.fromProgression(
       Progression<ScaleDegreeChord?> progression,
-      {bool inMinor = false})
+      {required bool inMinor})
       : _inMinor = inMinor,
         super.raw(
           values: progression.values,
           durations: progression.durations,
           timeSignature: progression.timeSignature,
           duration: progression.duration,
-          full: progression.full,
         );
 
   ScaleDegreeProgression.evenTime(List<ScaleDegreeChord?> base,
-      {bool inMinor = false,
+      {required bool inMinor,
       TimeSignature timeSignature = const TimeSignature.evenTime()})
       : _inMinor = inMinor,
         super.evenTime(_convertToMinor(inMinor, base),
@@ -83,7 +83,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             timeSignature: timeSignature);
 
   // TDC: Remove 'inMinor' and infer it from scale.
-  ScaleDegreeProgression.fromChords(Scale scale, ChordProgression chords,
+  ScaleDegreeProgression.fromChords(PitchScale scale, Progression<Chord> chords,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this(
             chords.values
@@ -112,6 +112,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           .toList(),
       [...durations],
       timeSignature: timeSignature,
+      inMinor: _inMinor,
     );
   }
 
@@ -144,9 +145,25 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   }
 
   // TDC: Implement scale pattern matching!!
+  /* TDC: SUPPORT THE NEW DURATION REFACTOR: MEASURES AREN'T CUT SO A VALUE
+          COULD HAVE A DURATION OF 1.25 FOR INSTANCE. WE NEED TO MATCH THAT
+          VALUE FOR 1.0 AS WELL AS 0.25 IF IT'S SKIPPING A MEASURE!!!
+          |
+          EXAMPLE:
+          [I, V, I]
+          [0.5, 1.0, 0.5]
+          WILL LOOK LIKE THIS | I V | V I |, WE NEED TO GENERATE MATCHES FOR
+          THE V IN THE FIRST MEASURE AND THE V IN THE SECOND ONE, EVEN THOUGH
+          THEY ARE REPRESENTED AS ONE VALUE WITH ONE DURATION!!!
+   */
+
   /// Returns a list containing substitution match locations, where [sub] could
-  /// substitute the current progression (base).
-  List<SubstitutionMatch> getFittingMatchLocations(ScaleDegreeProgression sub) {
+  /// substitute the current progression (base) within the range of
+  /// [start] - [end] (end excluded).
+  /* TDC: Make sure the ranges work correctly without flagging legal
+          substitutions. */
+  List<SubstitutionMatch> getFittingMatchLocations(ScaleDegreeProgression sub,
+      {int start = 0, int? end}) {
     // Explanation to why this is done is below...
     // if the potential sub can't fit in the base progression...
     if (sub.duration > duration) return const [];
@@ -175,7 +192,9 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     // progression [1 2, 3, -, -] where 1 and 2 are 1/8 and 3 is a 1/4 would be
     // considered the same as a [1, 2, 3] where 1 and 2 are 1/4 and 3 is a 1/2.
 
-    for (var baseChordPos = 0; baseChordPos < length; baseChordPos++) {
+    end ??= length;
+
+    for (var baseChordPos = start; baseChordPos < end; baseChordPos++) {
       for (var subChordPos = 0; subChordPos < sub.length; subChordPos++) {
         // If the two chords are equal.
         // Or if we have a tonicization.
@@ -201,7 +220,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             // 0... (also there'll be an error with base[baseChordPos - 1] if we
             // don't check this...)
             if (baseChordPos != 0) {
-              for (var i = baseChordPos - 1; !enoughInLeft && i >= 0; i--) {
+              for (var i = baseChordPos - 1; !enoughInLeft && i >= start; i--) {
                 baseDurationLeft += durations[i];
                 enoughInLeft = baseDurationLeft >= neededDurationLeft;
               }
@@ -210,11 +229,9 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             // Continue on only if there's enough duration to fit sub in the
             // left side of base from baseChordPose...
             if (enoughInLeft) {
-              if (subChordPos != length - 1) {
+              if (subChordPos != end - 1) {
                 neededDurationRight = sub.sumDurations(subChordPos + 1) * ratio;
-                for (var i = baseChordPos + 1;
-                    !enoughInRight && i < length;
-                    i++) {
+                for (var i = baseChordPos + 1; !enoughInRight && i < end; i++) {
                   baseDurationRight += durations[i];
                   enoughInRight = baseDurationRight >= neededDurationRight;
                 }
@@ -363,7 +380,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   }
 
   // TDC: Implement scale pattern matching!!
-  /// Returns a substituted [base] from the current progression if possible.
+  /// Returns a substituted [base] from the current progression within the
+  /// range [start] - [end] (end excluded) if possible.
   /// If not, returns [base].
   /* TODO: It doesn't make sense to call this from the sub on a base, switch
           it around...
@@ -375,8 +393,10 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           match, and suggest a ii7 V7 Imaj7. (THIS CAN NOW BE DONE WITH THE NEW
           WEAK EQUALITY FUNCTION...).
    */
-  List<Substitution> getPossibleSubstitutions(ScaleDegreeProgression sub) {
-    final List<SubstitutionMatch> matches = getFittingMatchLocations(sub);
+  List<Substitution> getPossibleSubstitutions(ScaleDegreeProgression sub,
+      {int start = 0, int? end}) {
+    final List<SubstitutionMatch> matches =
+        getFittingMatchLocations(sub, start: start, end: end);
     final List<Substitution> substitutions = [];
 
     /* FIXME: This gets computed twice (first time in
@@ -389,48 +409,56 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       /* TODO: We don't have to compute the relative straight away (we can just
                 multiply the sum by the ratio like we do in
                 getFittingMatchLocations()...), convert it. */
-      final ScaleDegreeProgression relativeMatch =
-          SubstitutionMatch.getSubstitution(
-              progression: sub,
-              type: match.type,
-              addSeventh: match.withSeventh,
-              ratio: durations[baseChord] / sub.durations[chord],
-              tonic: this[match.baseIndex]);
-      // The duration from the beginning of sub to matching chord in sub.
-      double d1 = -1 * relativeMatch.sumDurations(0, chord);
-      // First index that could be changed.
-      int left = getIndexFromDuration(d1, from: baseChord);
-      // The duration from the matching chord in sub to the end of sub, without
-      // the duration of the matching chord itself.
-      double d2 = relativeMatch.sumDurations(chord);
-      // Last index to change...
-      int right = getIndexFromDuration(d2, from: baseChord);
-      ScaleDegreeProgression substitution =
-          ScaleDegreeProgression.fromProgression(sublist(0, left),
-              inMinor: _inMinor);
-      // TDC: This won't support empty chord spaces...
-      double bd1 = -1 * sumDurations(left, baseChord);
-      double bd2 = sumDurations(baseChord, right + 1);
-      if (bd1 - d1 != 0) {
-        substitution.add(this[left], -1 * (bd1 - d1));
+      try {
+        final ScaleDegreeProgression relativeMatch =
+            SubstitutionMatch.getSubstitution(
+                progression: sub,
+                type: match.type,
+                addSeventh: match.withSeventh,
+                ratio: durations[baseChord] / sub.durations[chord],
+                tonic: this[match.baseIndex]);
+        // The duration from the beginning of sub to matching chord in sub.
+        double d1 = -1 * relativeMatch.sumDurations(0, chord);
+        // First index that could be changed.
+        int left = getIndexFromDuration(d1, from: baseChord);
+        // The duration from the matching chord in sub to the end of sub, without
+        // the duration of the matching chord itself.
+        double d2 = relativeMatch.sumDurations(chord);
+        // Last index to change...
+        int right = getIndexFromDuration(d2, from: baseChord);
+        ScaleDegreeProgression substitution =
+            ScaleDegreeProgression.fromProgression(sublist(0, left),
+                inMinor: _inMinor);
+        // TDC: This won't support empty chord spaces...
+        double bd1 = -1 * sumDurations(left, baseChord);
+        double bd2 = sumDurations(baseChord, right + 1);
+        if (bd1 - d1 != 0) {
+          substitution.add(this[left], -1 * (bd1 - d1));
+        }
+        substitution.addAll(fillWith(substitution.duration, relativeMatch));
+        if (bd2 - d2 != 0) {
+          substitution.add(this[right], bd2 - d2);
+        }
+        if (right + 1 != length) {
+          substitution.addAll(sublist(right + 1));
+        }
+        substitutions.add(
+          Substitution(
+            originalSubstitution: sub,
+            substitutedBase: substitution,
+            base: this,
+            match: match,
+            firstChangedIndex: left,
+            lastChangedIndex: right,
+          ),
+        );
+      } catch (e) {
+        if (e is! NonValidDuration) rethrow;
       }
-      substitution.addAll(fillWith(substitution.duration, relativeMatch));
-      if (bd2 - d2 != 0) {
-        substitution.add(this[right], bd2 - d2);
-      }
-      if (right + 1 != length) {
-        substitution.addAll(sublist(right + 1));
-      }
-      substitutions.add(
-        Substitution(
-          originalSubstitution: sub,
-          substitutedBase: substitution,
-          base: this,
-          match: match,
-        ),
-      );
     }
     // TODO: This makes sure the results will be unique, make it more efficient.
+    /* TDC: I'm not sure if this is the problem but even with this I'm still
+            getting a lot of equal results... */
     return substitutions.toSet().toList();
   }
 
@@ -463,20 +491,14 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     throw UnimplementedError();
   }
 
-  ChordProgression inScale(Scale scale) {
+  ChordProgression inScale(PitchScale scale) {
     ChordProgression _chords =
         ChordProgression.empty(timeSignature: timeSignature);
     for (var i = 0; i < length; i++) {
       if (values[i] == null) {
         _chords.add(null, durations[i]);
       } else {
-        final ScaleDegreeChord scaleDegreeChord = values[i]!;
-        _chords.add(
-            Chord(
-              pattern: scaleDegreeChord.pattern,
-              root: scaleDegreeChord.rootDegree.inScale(scale).toPitch(),
-            ),
-            durations[i]);
+        _chords.add(values[i]!.inScale(scale), durations[i]);
       }
     }
     return _chords;
@@ -514,7 +536,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   }
 
   ScaleDegreeProgression get deriveTonicizations {
-    ScaleDegreeProgression progression = ScaleDegreeProgression.empty();
+    ScaleDegreeProgression progression =
+        ScaleDegreeProgression.empty(inMinor: _inMinor);
     Map<int, List<TonicizedScaleDegreeChord?>> tonicizations = {};
     for (int tonic = 0; tonic < length + 2; tonic++) {
       ScaleDegreeChord? tonicChord;

@@ -53,11 +53,9 @@ class NewRhythmWeight extends Weight {
               progression.timeSignature.decimal);
     }
     for (int i = 0; i < progression.length; i++) {
-      double dur = progression.durations[i], mult = dur / step;
+      double dur = progression.durations[i];
       // TODO: Optimize...
-      //  Log2...
-      double l = log(mult) / ln2;
-      if (l.truncate() != l) {
+      if (!progression.timeSignature.validDuration(dur)) {
         return Score(
           score: 0.0,
           details: "Progression has a $dur in it, which isn't a multiple of 2 "

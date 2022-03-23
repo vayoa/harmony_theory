@@ -1,9 +1,13 @@
 import 'package:thoery_test/extensions/chord_extension.dart';
+import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/time_signature.dart';
 import 'package:thoery_test/state/krumhansl_schmuckler_scale_detection.dart';
 import 'package:tonic/tonic.dart';
 
+/* TDC: Since this doesn't have any additional data except methods, they might
+        deduct points for this not just being a collection of methods instead
+        of a whole object. */
 class ChordProgression extends Progression<Chord> {
   ChordProgression(
       {required List<Chord?> chords,
@@ -20,7 +24,15 @@ class ChordProgression extends Progression<Chord> {
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : super.empty(timeSignature: timeSignature);
 
-  List<Scale> matchWithScales() {
+  ChordProgression.fromProgression(Progression<Chord?> progression)
+      : super.raw(
+          values: progression.values,
+          durations: progression.durations,
+          timeSignature: progression.timeSignature,
+          duration: progression.duration,
+        );
+
+  List<PitchScale> matchWithScales() {
     List<String> chordNames = values
         .map((Chord? chord) => chord == null ? 'null' : chord.getCommonName())
         .toList();
@@ -65,19 +77,19 @@ class ChordProgression extends Progression<Chord> {
 
     /*FIXME: We should cast as soon as we add. This is a prototype anyways so
            it doesn't matter. */
-    List<Scale> scales = [];
+    List<PitchScale> scales = [];
     for (String scale in stringScales) {
       final List<String> parts = scale.split(' ');
       parts[1] = parts[1] == 'Major' ? 'Diatonic Major' : 'Natural Minor';
-      scales.add(Scale(
+      scales.add(PitchScale(
         pattern: ScalePattern.findByName(parts[1]),
-        tonic: PitchClass.parse(parts[0]),
+        tonic: Pitch.parse(parts[0]),
       ));
     }
     return scales;
   }
 
-  List<Scale> get krumhanslSchmucklerScales {
+  List<PitchScale> get krumhanslSchmucklerScales {
     KrumhanslSchmucklerScaleDetection.initialize();
     return KrumhanslSchmucklerScaleDetection.correlateChordProgression(this);
   }

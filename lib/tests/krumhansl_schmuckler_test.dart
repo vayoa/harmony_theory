@@ -2,25 +2,29 @@ import 'package:thoery_test/modals/chord_progression.dart';
 import 'package:tonic/tonic.dart';
 import 'package:thoery_test/extensions/scale_extension.dart';
 
-class KrumhanslSchmucklerTest {
+import '../modals/pitch_scale.dart';
+
+abstract class KrumhanslSchmucklerTest {
   static bool test([int precision = 2]) {
     assert(precision < 24);
+    List<PitchScale> _californicationResults =
+        californication.krumhanslSchmucklerScales;
     bool _californication = contains(
-        californication.krumhanslSchmucklerScales.sublist(0, precision),
-        Scale(
-            pattern: ScalePatternExtension.minorKey,
-            tonic: PitchClass.parse('A')));
+        _californicationResults.sublist(0, precision), californicationScale);
+    print('Californication - ${californicationScale.commonName}:'
+        '\n${_californicationResults.map((e) => e.commonName).toList()}');
+    List<PitchScale> _yonatanHakatanResults =
+        yonatanHakatan.krumhanslSchmucklerScales;
     bool _yonatanHakatan = contains(
-        yonatanHakatan.krumhanslSchmucklerScales.sublist(0, precision),
-        Scale(
-            pattern: ScalePatternExtension.majorKey,
-            tonic: PitchClass.parse('C')));
+        _yonatanHakatanResults.sublist(0, precision), yonatanHakatanScale);
+    print('Yonatan Hakatan - ${yonatanHakatanScale.commonName}:'
+        '\n${_yonatanHakatanResults.map((e) => e.commonName).toList()}');
     return _californication && _yonatanHakatan;
   }
 
-  static bool contains(List<Scale> scales, Scale value) {
-    for (Scale scale in scales) {
-      if (scale.equals(value)) return true;
+  static bool contains(List<PitchScale> scales, PitchScale value) {
+    for (PitchScale scale in scales) {
+      if (scale == value) return true;
     }
     return false;
   }
@@ -47,26 +51,29 @@ class KrumhanslSchmucklerTest {
       Chord.parse('C'),
     ],
     durations: [
-      1 / 4,
-      1 / 4,
-      1 / 4,
-      1 / 4,
-      1 / 4,
-      1 / 4,
-      1 / 8,
-      1 / 8,
-      1 / 4,
-      1 / 4,
-      1 / 4,
-      1 / 4,
-      1 / 4,
-      1 / 4,
-      1 / 4,
-      1 / 8,
-      1 / 8,
-      1 / 4,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 8 * 2,
+      1 / 8 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 8 * 2,
+      1 / 8 * 2,
+      1 / 4 * 2,
     ],
   );
+
+  static final yonatanHakatanScale = PitchScale(
+      pattern: ScalePatternExtension.majorKey, tonic: Pitch.parse('C'));
 
   static ChordProgression californication = ChordProgression(
     chords: [
@@ -90,4 +97,7 @@ class KrumhanslSchmucklerTest {
       1 / 4,
     ],
   );
+
+  static final californicationScale = PitchScale(
+      pattern: ScalePatternExtension.minorKey, tonic: Pitch.parse('A'));
 }

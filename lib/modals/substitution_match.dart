@@ -48,7 +48,9 @@ class SubstitutionMatch {
           return progression.addSeventh(ratio: ratio);
         } else {
           return ScaleDegreeProgression.fromProgression(
-              progression.relativeRhythmTo(ratio));
+            progression.relativeRhythmTo(ratio),
+            inMinor: progression.inMinor,
+          );
         }
       case SubstitutionMatchType.tonicization:
         return progression.tonicizedFor(

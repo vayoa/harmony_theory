@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:thoery_test/extensions/scale_extension.dart';
+import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
 
@@ -39,12 +40,30 @@ class ScaleDegree {
       : _degree = other._degree,
         _accidentals = other._accidentals;
 
-  ScaleDegree(ScalePattern scalePattern, Interval interval) {
-    final List<int> _semitones =
-        scalePattern.intervals.map<int>((e) => e.semitones).toList();
-    interval = Interval.fromSemitones(interval.semitones % 12);
-    _degree = interval.number - 1;
-    _accidentals = (interval.semitones - _semitones[_degree]) % 12;
+  ScaleDegree(ScalePattern scalePattern, Interval interval)
+      : this.rawInterval(
+            scalePattern: scalePattern,
+            intervalNumber: interval.number,
+            intervalSemitones: interval.semitones);
+
+  /// A separate function from the default constructor to avoid
+  /// [Interval.fromSemitones] construction errors we don't care about.
+  ScaleDegree.rawInterval({
+    required ScalePattern scalePattern,
+    required int intervalNumber,
+    required int intervalSemitones,
+  }) {
+    final List<int> _semitones;
+    if (scalePattern.isMinor) {
+      _semitones = ScalePatternExtension.minorKeySemitones;
+    } else {
+      _semitones = ScalePatternExtension.majorKeySemitones;
+    }
+    _degree = (intervalNumber - 1) % 7;
+    int accidentals = (intervalSemitones - _semitones[_degree]) % 12;
+    int down = (_semitones[_degree] - intervalSemitones) % 12;
+    if (down < accidentals) accidentals = -1 * down;
+    _accidentals = accidentals;
   }
 
   /// Returns a [ScaleDegree] from the given [Interval], based on a major scale!
@@ -63,9 +82,8 @@ class ScaleDegree {
     // TODO: Test offset handling.
     if (offsetStr.isNotEmpty) {
       if (offsetStr.startsWith(RegExp(r'[#b♯♭𝄪𝄫]'))) {
-        _accidentals = (offsetStr[0].allMatches(offsetStr).length *
-                (offsetStr[0].contains(RegExp(r'[b♭𝄫]')) ? -1 : 1)) %
-            12;
+        _accidentals = offsetStr[0].allMatches(offsetStr).length *
+            (offsetStr[0].contains(RegExp(r'[b♭𝄫]')) ? -1 : 1);
       } else {
         throw FormatException("invalid ScaleDegree name: $degree");
       }
@@ -77,6 +95,7 @@ class ScaleDegree {
   static final tonic = ScaleDegree.parse('I');
   static final V = ScaleDegree.parse('V');
   static final vii = ScaleDegree.parse('vii');
+  static final vi = ScaleDegree.parse('vi');
 
   // TODO: This only works for major based modes...,
   /// Returns a new [ScaleDegree] converted from the [fromMode] mode to [toMode]
@@ -110,13 +129,14 @@ class ScaleDegree {
     return tonic.add(from(ScaleDegree.tonic));
   }
 
-  PitchClass inScale(Scale scale) {
-    if (scale.isMinor) {
-      return PitchClass.fromSemitones(
-          scale.pitchClasses[(_degree - 5) % 7].integer + _accidentals);
-    }
-    return PitchClass.fromSemitones(
-        scale.pitchClasses[_degree].integer + _accidentals);
+  Pitch inScale(PitchScale scale) {
+    int index = _degree;
+    if (scale.isMinor) index = (_degree - 5) % 7;
+    Pitch diatonic = scale.tonic + scale.intervals[index];
+    return Pitch(
+        chromaticIndex:
+            (diatonic.semitones - diatonic.accidentalSemitones) % 12,
+        accidentalSemitones: diatonic.accidentalSemitones + _accidentals);
   }
 
   /// Returns a new [ScaleDegree] that is [interval] far away from the current

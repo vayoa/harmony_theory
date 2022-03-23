@@ -13,7 +13,7 @@ class ProgressionBank {
       _bankList.addAll(additionalProgressions);
     }
 
-  // TODO: Make sure no two same hashes are in a list in _groupedBank.
+    // TODO: Make sure no two same hashes are in a list in _groupedBank.
     for (ScaleDegreeProgression progression in _bankList) {
       int hash = progression.hashCode;
       _bank[hash] = progression;
@@ -96,14 +96,37 @@ class ProgressionBank {
     ScaleDegreeProgression.fromList(['ii', 'V', 'I']),
     ScaleDegreeProgression.fromList(['ii', 'V', 'I'],
         durations: [1 / 4, 1 / 4, 1 / 2]),
-    ScaleDegreeProgression.fromList(['ii', 'v', 'V', 'I'],
-        durations: [1 / 8, 1 / 8, 1 / 8, 1 / 2]),
+    ScaleDegreeProgression.fromList(['viidim', 'iii', 'III', 'vi'],
+        durations: [1 / 4, 1 / 4, 1 / 4, 1 / 4]),
     ScaleDegreeProgression.fromList(['iidim', 'V', 'I']),
+    ScaleDegreeProgression.fromList(['iim7b5', 'V', 'I']),
+    ScaleDegreeProgression.fromList(['iim7b5', 'V7', 'Imaj7']),
     // IV V I
     ScaleDegreeProgression.fromList(['IV', 'V', 'I']),
     ScaleDegreeProgression.fromList(['IV', 'iv', 'I']),
     // IV I
     ScaleDegreeProgression.fromList(['IV', 'I']),
     ScaleDegreeProgression.fromList(['iv', 'I']),
+    // Added
+    ScaleDegreeProgression.fromList(['iii', 'III', 'vi']),
+    ScaleDegreeProgression.fromList(['iii', 'III', 'vi', 'vi']),
+    ScaleDegreeProgression.fromList(['iim7b5', 'I']),
+    ScaleDegreeProgression.fromList(['iidim', 'I']),
+    ScaleDegreeProgression.fromList(['IV', 'II', 'V', 'III', 'vi']),
+    ScaleDegreeProgression.fromList(['vi', 'III', 'V', 'II', 'IV']),
+    ScaleDegreeProgression.fromList(['bVII', 'V', 'I']),
+    ScaleDegreeProgression.fromList(['bVI', 'IV', 'bVII', 'V', 'I']),
+    ScaleDegreeProgression.fromList(['I', 'IV', 'I']),
+    ScaleDegreeProgression.fromList(['I', 'iv', 'I']),
+    ScaleDegreeProgression.fromList(['bII', 'V', 'I']),
+    ScaleDegreeProgression.fromList(['bVII', 'VIIdim7', 'I']),
+    ScaleDegreeProgression.fromList(['VIIdim7', 'I']),
+    ScaleDegreeProgression.fromList(['bII7', 'I']),
+    ScaleDegreeProgression.fromList(['iimin7', 'bII7', 'I']),
+    ScaleDegreeProgression.fromList(['iim7b5', 'bII7', 'I']),
+    ScaleDegreeProgression.fromList(['bVI', 'bVII', 'I']),
+    ScaleDegreeProgression.fromList(['bVII', 'I']),
+    ScaleDegreeProgression.fromList(['Vaug', 'I']),
+    ScaleDegreeProgression.fromList(['iv', 'V', 'I']),
   ];
 }

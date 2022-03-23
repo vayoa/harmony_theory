@@ -78,7 +78,7 @@ class ImportantChordsWeight extends Weight {
       for (int i = 0; i < 2; i++) {
         bool stopNext = false;
         middleBase += i;
-        if (_isTonic(base[middleBase])) {
+        if (base.length < middleBase && _isTonic(base[middleBase])) {
           max++;
           int middleSub =
               progression.getIndexFromDuration(progression.duration / 2) + i;
@@ -109,12 +109,17 @@ class ImportantChordsWeight extends Weight {
         if (stopNext) stop = true;
       }
     }
-    return Score(score: 1.0 - (points / max), details: details);
+    double finalScore = 1.0;
+    if (max != 0) {
+      finalScore -= (points / max);
+    }
+    return Score(score: finalScore, details: details);
   }
 
   //TODO: Maybe change this and the explanation above.
   bool _isTonic(ScaleDegreeChord? chord) =>
       chord != null &&
-      chord.rootDegree == ScaleDegree.tonic &&
+      (chord.rootDegree == ScaleDegree.tonic ||
+          chord.rootDegree == ScaleDegree.vi) &&
       chord.canBeTonic;
 }
