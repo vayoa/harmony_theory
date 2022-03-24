@@ -3,6 +3,9 @@ import 'package:thoery_test/extensions/chord_extension.dart';
 import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
 
+import 'absolute_durations.dart';
+import 'exceptions.dart';
+
 /// Describes a progression of any sort - a set of values, each with a duration.
 ///
 /// The durations have to be all valid ([TimeSignature.validDuration]).
@@ -16,9 +19,9 @@ class Progression<T> {
   late final List<T?> _values;
 
   List<T?> get values => _values;
-  final List<double> _durations;
+  late final AbsoluteDurations _durations;
 
-  List<double> get durations => _durations;
+  AbsoluteDurations get durations => _durations;
 
   final TimeSignature _timeSignature;
 
@@ -30,10 +33,8 @@ class Progression<T> {
   /// its [_timeSignature].
   bool get full => duration % _timeSignature.decimal == 0;
 
-  double _duration = 0.0;
-
   /// The overall duration of the [Progression].
-  double get duration => _duration;
+  double get duration => _durations.realLast;
 
   /// The number of measures the [Progression] takes.
   int get measureCount => (duration / _timeSignature.decimal).ceil();
@@ -46,19 +47,27 @@ class Progression<T> {
   /// since 1.25 - [TimeSignature.decimal] is 0.25...
   double get minDuration => _minDuration;
 
-  /// Creates a new [Progression] object, where all durations are positive
-  /// and smaller than 1 (if an element in [durations] isn't, we split it).
-  Progression(List<T?> values, List<double> durations,
-      {TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : assert(values.length == durations.length),
-        _timeSignature = timeSignature,
-        _values = [],
-        _durations = [] {
+  /// Internal constructor.
+  /// [timeSignature] is [TimeSignature.evenTime()] by default.
+  /// [ratio] would be multiplied for all durations (1.0 by default).
+  /// [absolute] determines whether [durations] is absolute.
+  Progression._internal(
+    List<T?> values,
+    List<double> durations, {
+    TimeSignature? timeSignature,
+    bool absolute = false,
+    double? ratio,
+  })  : assert(values.length == durations.length),
+        _timeSignature = timeSignature ?? const TimeSignature.evenTime(),
+        _values = [] {
+    ratio ??= 1.0;
+    List<double> _durations = [];
     if (values.isNotEmpty) {
       double overallDuration = 0.0;
       double durSum = 0.0;
       for (int i = 0; i < values.length; i++) {
-        if (durations[i] <= 0) {
+        double relativeDur = durations[i] * ratio;
+        if (relativeDur <= 0) {
           throw Exception('A non-positive duration at index $i'
               ' (${_values[i]} -> ${_durations[i]})');
         }
@@ -66,9 +75,9 @@ class Progression<T> {
         // equal...
         if (i < values.length - 1 &&
             adjacentValuesEqual(values[i], values[i + 1])) {
-          durSum += durations[i];
+          durSum += relativeDur;
         } else {
-          durSum += durations[i];
+          durSum += relativeDur;
           T? val = values[i];
           _minDuration = min(
               _checkValidDuration(
@@ -77,54 +86,63 @@ class Progression<T> {
                   overallDuration: overallDuration),
               _minDuration);
           overallDuration += durSum;
-          _durations.add(durSum);
+          _durations.add(absolute ? durSum : overallDuration);
           _values.add(val);
           durSum = 0;
         }
       }
-      _duration = overallDuration;
-      updateFull();
     }
+    this._durations = AbsoluteDurations(_durations);
   }
+
+  /// Creates a new [Progression] object, where all durations are positive
+  /// and smaller than 1 (if an element in [durations] isn't, we split it).
+  Progression(List<T?> values, List<double> durations,
+      {TimeSignature? timeSignature, double? ratio})
+      : this._internal(values, durations,
+            timeSignature: timeSignature, ratio: ratio, absolute: false);
+
+  Progression.real(List<T?> values, List<double> durations,
+      {TimeSignature? timeSignature, double? ratio})
+      : this._internal(values, durations,
+            timeSignature: timeSignature, ratio: ratio, absolute: true);
 
   /// Doesn't check for duplicates or full and just sets the values for the
   /// fields.
   Progression.raw({
     required List<T?> values,
-    required List<double> durations,
+    required AbsoluteDurations durations,
     required TimeSignature timeSignature,
-    required double duration,
   })  : _values = values,
         _durations = durations,
         _timeSignature = timeSignature,
-        _duration = duration,
-        _full = duration % timeSignature.decimal == 0;
+        _full = durations.realLast % timeSignature.decimal == 0;
 
-  Progression.empty(
-      {TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : this([], [], timeSignature: timeSignature);
+  Progression.empty({TimeSignature? timeSignature})
+      : this.real([], [], timeSignature: timeSignature);
 
   Progression.evenTime(List<T?> base,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : this(
+      : this.real(
             base,
-            List.generate(
-                base.length, (index) => 1 / timeSignature.denominator),
+            List.generate(base.length,
+                (index) => (index + 1) * (1 / timeSignature.denominator)),
             timeSignature: timeSignature);
 
   bool updateFull() {
-    _full = _duration % _timeSignature.decimal == 0;
+    _full = _durations.realLast % _timeSignature.decimal == 0;
     return _full;
   }
 
   /// Sums [durations] from [start] to [end], not including [end].
   double sumDurations([int start = 0, int? end]) {
     assert(end == null || start <= end);
-    if (start == 0 && end == null) return _duration;
-    end ??= length;
-    return _durations.sublist(start, end).fold(0, (prev, e) => prev + e);
+    if (start == 0 && end == null) return duration;
+    end ??= length - 1;
+    return _durations.real(end - start);
   }
 
+  // ADC: Convert to absolute durations!
   /// Returns a list index such that the duration from that index to [from] is
   /// [duration]. Negative [durations] also work.
   /// If no such index exits, returns -1.
@@ -155,18 +173,20 @@ class Progression<T> {
   /// [Progression] p.durations => [1/4, 1/4, 1/4, 1/4].
   /// p.relativeTo(0.5).durations => [1/8, 1/8, 1/8, 1/8].
   Progression<T> relativeRhythmTo(double ratio) {
-    return Progression(
+    return Progression.real(
       _values,
-      _durations.map((double duration) => duration * ratio).toList(),
+      _durations.realDurations,
       timeSignature: _timeSignature,
+      ratio: ratio,
     );
   }
 
+  // ADC: Convert for absolute durations!!!
   /// Use this only for printing purposes as it can split a chord that goes
   /// over one measures into two chords (thus ruining the original progression).
   List<Progression<T>> splitToMeasures({TimeSignature? timeSignature}) {
     timeSignature ??= _timeSignature;
-    if (_duration < _timeSignature.decimal) return [this];
+    if (duration < _timeSignature.decimal) return [this];
     final List<Progression<T>> measures = [];
     Progression<T> currentMeasure =
         Progression.empty(timeSignature: timeSignature);
@@ -212,7 +232,7 @@ class Progression<T> {
               duration: dur,
               // The overall duration is the progression's duration - the last
               // one since they're the same...
-              overallDuration: _duration - durations.last,
+              overallDuration: duration - durations.last,
             ),
             _minDuration);
       }
@@ -221,11 +241,10 @@ class Progression<T> {
       _minDuration = min(
           _minDuration,
           _checkValidDuration(
-              value: value, duration: duration, overallDuration: _duration));
+              value: value, duration: duration, overallDuration: duration));
       _values.add(value);
       _durations.add(duration);
     }
-    _duration += duration;
     updateFull();
   }
 
@@ -239,8 +258,7 @@ class Progression<T> {
         if (fullBefore) {
           _minDuration = min(_minDuration, progression._minDuration);
           _values.addAll(progression.values.sublist(1));
-          _durations.addAll(progression.durations.sublist(1));
-          _duration += progression._duration - progression.durations.first;
+          _durations.addAll(progression.durations, from: 1);
           updateFull();
         } else {
           for (int i = 1; i < progression.length; i++) {
@@ -251,16 +269,10 @@ class Progression<T> {
     }
   }
 
-  ProgressionEntry<T> removeAt(int index) {
-    T? val = _values.removeAt(index);
-    double dur = _durations.removeAt(index);
-    return ProgressionEntry(value: val, duration: dur);
-  }
-
   @override
   bool operator ==(Object other) {
     if (other is! Progression<T> ||
-        _duration != other._duration ||
+        duration != other.duration ||
         length != other.length) {
       return false;
     }
@@ -273,8 +285,7 @@ class Progression<T> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(Object.hashAll(_values), Object.hashAll(_durations));
+  int get hashCode => Object.hash(Object.hashAll(_values), _durations);
 
   String valueFormat(T? value) =>
       value == null ? 'null' : notNullValueFormat(value);
@@ -318,7 +329,7 @@ class Progression<T> {
         }
       }
       if (!_full) {
-        final double rhythmLeft = timeSignature.decimal - _duration;
+        final double rhythmLeft = timeSignature.decimal - duration;
         if (rhythmLeft <= step) {
           output += '-, ';
         } else {
@@ -338,6 +349,39 @@ class Progression<T> {
     }
   }
 
+  int get length => _values.length;
+
+  T? operator [](int index) => _values[index];
+
+  void operator []=(int index, T value) {
+    _values[index] = value;
+  }
+
+  bool get isEmpty => _values.isEmpty;
+
+  /* TDC: Optimize! We go through durations twice (durations.sublist and the
+          constructor...). */
+  Progression<T> sublist(int start, [int? end]) => Progression.real(
+      _values.sublist(start, end), _durations.sublist(start, end).realDurations,
+      timeSignature: _timeSignature);
+
+  Progression<T> replaceMeasure(int index, Progression<T> newMeasure,
+      {List<Progression<T>>? measures}) {
+    measures ??= splitToMeasures();
+    double measure = _timeSignature.decimal;
+    Progression<T> start = Progression<T>.empty(timeSignature: _timeSignature);
+    for (int i = 0; i < index; i++) {
+      start.addAll(measures[i]);
+    }
+    start.addAll(newMeasure);
+    if (index < measures.length - 1) {
+      for (int i = index + 1; i < measures.length; i++) {
+        start.addAll(measures[i]);
+      }
+    }
+    return start;
+  }
+
   /// Checks whether [duration] is valid and returns what the smallest
   /// duration it can be is (for instance a dur of 1.0 added to an overall
   /// duration of 0.5 in an even time signature will produce a dur of 0.5 in
@@ -347,16 +391,15 @@ class Progression<T> {
     required double duration,
     required double overallDuration,
   }) {
+    double decimal = _timeSignature.decimal;
     if (duration < 0) {
       throw NonPositiveDuration(value, duration);
-    } else if ((overallDuration % _timeSignature.decimal) + duration <=
-        _timeSignature.decimal) {
+    } else if ((overallDuration % decimal) + duration <= decimal) {
       assertDurationValid(value: value, duration: duration);
       return duration;
     } else {
       // The duration the current measure has left before being full.
-      double left =
-          _timeSignature.decimal - (overallDuration % _timeSignature.decimal);
+      double left = decimal - (overallDuration % decimal);
       double currentMinDuration = duration;
       // If left is 1.0 it's in fact 0.0 (since we have the whole measure left...).
       if (left != 1 && duration >= left) {
@@ -364,7 +407,7 @@ class Progression<T> {
         currentMinDuration = left;
       }
       // The duration that's left after the cut...
-      double end = (overallDuration + duration) % _timeSignature.decimal;
+      double end = (overallDuration + duration) % decimal;
       // Since if this is true the rest is valid...
       if (end != 0) {
         assertDurationValid(value: value, duration: end);
@@ -384,37 +427,6 @@ class Progression<T> {
     }
   }
 
-  int get length => _values.length;
-
-  T? operator [](int index) => _values[index];
-
-  void operator []=(int index, T value) {
-    _values[index] = value;
-  }
-
-  bool get isEmpty => _values.isEmpty;
-
-  Progression<T> sublist(int start, [int? end]) =>
-      Progression(_values.sublist(start, end), _durations.sublist(start, end),
-          timeSignature: _timeSignature);
-
-  Progression<T> replaceMeasure(int index, Progression<T> newMeasure,
-      {List<Progression<T>>? measures}) {
-    measures ??= splitToMeasures();
-    double measure = _timeSignature.decimal;
-    Progression<T> start = Progression<T>.empty(timeSignature: _timeSignature);
-    for (int i = 0; i < index; i++) {
-      start.addAll(measures[i]);
-    }
-    start.addAll(newMeasure);
-    if (index < measures.length - 1) {
-      for (int i = index + 1; i < measures.length; i++) {
-        start.addAll(measures[i]);
-      }
-    }
-    return start;
-  }
-
   static bool adjacentValuesEqual<T>(T val, T next) =>
       val is Chord ? val.equals(next) : val == next;
 }
@@ -427,33 +439,4 @@ class ProgressionEntry<T> {
 
   @override
   String toString() => '$value($duration)';
-}
-
-class NonPositiveDuration<T> implements Exception {
-  final T? value;
-  final double duration;
-
-  const NonPositiveDuration(this.value, this.duration);
-
-  @override
-  String toString() =>
-      '$value, with a non-positive duration ($duration) was added to a '
-      'progression.';
-}
-
-class NonValidDuration<T> implements Exception {
-  final T? value;
-  final double duration;
-  final TimeSignature timeSignature;
-
-  const NonValidDuration({
-    required this.value,
-    required this.duration,
-    required this.timeSignature,
-  });
-
-  @override
-  String toString() =>
-      '$value($duration), an invalid duration for a time signature of '
-      '$timeSignature was added to a progression.';
 }

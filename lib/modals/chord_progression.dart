@@ -29,7 +29,6 @@ class ChordProgression extends Progression<Chord> {
           values: progression.values,
           durations: progression.durations,
           timeSignature: progression.timeSignature,
-          duration: progression.duration,
         );
 
   List<PitchScale> matchWithScales() {

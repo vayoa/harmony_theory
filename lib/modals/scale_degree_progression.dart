@@ -11,6 +11,7 @@ import 'package:thoery_test/modals/time_signature.dart';
 import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
 import 'chord_progression.dart';
+import 'exceptions.dart';
 
 // TODO: Support uneven time signatures, in constructors and in the enter class.
 
@@ -53,7 +54,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           values: progression.values,
           durations: progression.durations,
           timeSignature: progression.timeSignature,
-          duration: progression.duration,
         );
 
   ScaleDegreeProgression.evenTime(List<ScaleDegreeChord?> base,
@@ -83,16 +83,20 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             timeSignature: timeSignature);
 
   // TDC: Remove 'inMinor' and infer it from scale.
+  // TDC: I changed it to raw, make sure it works!!.
   ScaleDegreeProgression.fromChords(PitchScale scale, Progression<Chord> chords,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : this(
-            chords.values
+      : this.fromProgression(
+          Progression<ScaleDegreeChord>.raw(
+            values: chords.values
                 .map((Chord? chord) =>
                     chord == null ? null : ScaleDegreeChord(scale, chord))
                 .toList(),
-            chords.durations,
-            inMinor: scale.isMinor,
-            timeSignature: timeSignature);
+            durations: chords.durations,
+            timeSignature: timeSignature,
+          ),
+          inMinor: scale.isMinor,
+        );
 
   /// While the individual [ScaleDegreeChord] in the progression are represented
   /// in the major scale. The overall progression could still be in the minor
@@ -100,18 +104,22 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   bool get inMinor => _inMinor;
 
   // TDC: Make this work only for minor/major...
+  // TODO: This might not work now, check (only if you're using it...)!
   /// Returns a new [ScaleDegreeChord] converted from [fromMode] mode to
   /// [toMode] mode.
   /// If [fromMode] isn't specified it is based on [_inMinor].
   /// Ionian's (Major) mode number is 0 and so on...
   ScaleDegreeProgression modeShift({int? fromMode, required int toMode}) {
     fromMode ??= _inMinor ? 5 : 0;
-    return ScaleDegreeProgression(
-      values
-          .map((ScaleDegreeChord? chord) => chord?.modeShift(fromMode!, toMode))
-          .toList(),
-      [...durations],
-      timeSignature: timeSignature,
+    return ScaleDegreeProgression.fromProgression(
+      Progression<ScaleDegreeChord>.raw(
+        values: values
+            .map((ScaleDegreeChord? chord) =>
+                chord?.modeShift(fromMode!, toMode))
+            .toList(),
+        durations: durations,
+        timeSignature: timeSignature,
+      ),
       inMinor: _inMinor,
     );
   }

@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'exceptions.dart';
+
 /// Represents a musical time signature.
 class TimeSignature {
   /// Represents the time signature's numerator (number of beats in one bar).
