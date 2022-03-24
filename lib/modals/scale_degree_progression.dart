@@ -54,6 +54,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           values: progression.values,
           durations: progression.durations,
           timeSignature: progression.timeSignature,
+          hasNull: progression.hasNull,
         );
 
   ScaleDegreeProgression.evenTime(List<ScaleDegreeChord?> base,
@@ -94,6 +95,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
                 .toList(),
             durations: chords.durations,
             timeSignature: timeSignature,
+            hasNull: chords.hasNull,
           ),
           inMinor: scale.isMinor,
         );
@@ -119,6 +121,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             .toList(),
         durations: durations,
         timeSignature: timeSignature,
+        hasNull: hasNull,
       ),
       inMinor: _inMinor,
     );
@@ -170,6 +173,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   /// [start] - [end] (end excluded).
   /* TDC: Make sure the ranges work correctly without flagging legal
           substitutions. */
+  // ADC: Convert!!
   List<SubstitutionMatch> getFittingMatchLocations(ScaleDegreeProgression sub,
       {int start = 0, int? end}) {
     // Explanation to why this is done is below...
@@ -475,6 +479,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   /// current one, a [durationBefore] duration away from the start.
   ScaleDegreeProgression fillWith(
       double durationBefore, ScaleDegreeProgression relativeSubSection) {
+    if (!relativeSubSection.hasNull) return relativeSubSection;
     double sum = 0.0;
     ScaleDegreeProgression filled = ScaleDegreeProgression.empty(
         inMinor: relativeSubSection.inMinor,

@@ -55,7 +55,7 @@ class AbsoluteDurations {
 
   set last(double duration) {
     assert(length > 0);
-    if (length < 2) {
+    if (length == 1) {
       _real[0] = duration;
     } else {
       _real[length - 1] = _real[length - 2] + duration;
@@ -77,9 +77,8 @@ class AbsoluteDurations {
   }
 
   void addAll(AbsoluteDurations other, {int from = 0}) {
-    final double sum = last;
     for (int i = from; i < other.length; i++) {
-      _real.add(sum + other[i]);
+      _real.add(_real.last + other[i]);
     }
   }
 
@@ -91,4 +90,14 @@ class AbsoluteDurations {
 
   @override
   int get hashCode => Object.hashAll(_real);
+
+  @override
+  String toString() {
+    String output = '[';
+    for (int i = 0; i < length - 1; i++) {
+      output += '${this[i]}, ';
+    }
+    if (isNotEmpty) output += last.toString();
+    return output + ']';
+  }
 }

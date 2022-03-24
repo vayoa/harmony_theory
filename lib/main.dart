@@ -7,11 +7,12 @@ import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:thoery_test/tests/krumhansl_schmuckler_test.dart';
 import 'package:tonic/tonic.dart';
 import 'modals/chord_progression.dart';
+import 'modals/progression.dart';
 import 'modals/scale_degree.dart';
 import 'modals/substitution.dart';
 
 void main() {
-  // _test();
+  _test();
   final ChordProgression _base = ChordProgression.evenTime([
     Chord.parse('Cm'),
     Chord.parse('D#dim'),
@@ -56,7 +57,6 @@ void _testBaseClasses() {
 
   print(p.values);
   print(p.durations);
-  print(p.minDuration);
   print('${p.duration}\n');
 
   var np = ScaleDegreeProgression.fromList(
@@ -67,7 +67,6 @@ void _testBaseClasses() {
 
   print(np.values);
   print(np.durations);
-  print(np.minDuration);
   print(np.duration);
   print('${np.duration}\n');
 
@@ -75,7 +74,6 @@ void _testBaseClasses() {
 
   print(p.values);
   print(p.durations);
-  print(p.minDuration);
   print(p.duration);
 }
 

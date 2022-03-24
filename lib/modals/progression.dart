@@ -27,47 +27,41 @@ class Progression<T> {
 
   TimeSignature get timeSignature => _timeSignature;
 
-  bool _full = false;
+  bool _full;
 
   /// Whether the [Progression] leaves no empty spaces in a measure, based on
   /// its [_timeSignature].
   bool get full => duration % _timeSignature.decimal == 0;
 
   /// The overall duration of the [Progression].
-  double get duration => _durations.realLast;
+  double get duration => durations.isEmpty ? 0.0 : _durations.realLast;
 
   /// The number of measures the [Progression] takes.
   int get measureCount => (duration / _timeSignature.decimal).ceil();
 
-  double _minDuration = double.infinity;
+  /// Whether the progression has a null value.
+  bool _hasNull;
 
-  /// The minimum duration in the progression.
-  /// If there's a value with a duration of 1.25 in a 4/4 time signature, and
-  /// no other duration is smaller than 0.25, that will be the minimum duration
-  /// since 1.25 - [TimeSignature.decimal] is 0.25...
-  double get minDuration => _minDuration;
+  bool get hasNull => _hasNull;
 
-  /// Internal constructor.
+  /// Creates a new [Progression] object, where all durations are positive
+  /// and smaller than 1 (if an element in [durations] isn't, we split it).
   /// [timeSignature] is [TimeSignature.evenTime()] by default.
   /// [ratio] would be multiplied for all durations (1.0 by default).
-  /// [absolute] determines whether [durations] is absolute.
-  Progression._internal(
-    List<T?> values,
-    List<double> durations, {
-    TimeSignature? timeSignature,
-    bool absolute = false,
-    double? ratio,
-  })  : assert(values.length == durations.length),
+  Progression(List<T?> values, List<double> durations,
+      {TimeSignature? timeSignature, double? ratio})
+      : assert(values.length == durations.length),
         _timeSignature = timeSignature ?? const TimeSignature.evenTime(),
+        _full = false,
+        _hasNull = false,
         _values = [] {
     ratio ??= 1.0;
-    List<double> _durations = [];
+    List<double> _durationList = [];
     if (values.isNotEmpty) {
       double overallDuration = 0.0;
       double durSum = 0.0;
       for (int i = 0; i < values.length; i++) {
-        double relativeDur = durations[i] * ratio;
-        if (relativeDur <= 0) {
+        if (durations[i] <= 0) {
           throw Exception('A non-positive duration at index $i'
               ' (${_values[i]} -> ${_durations[i]})');
         }
@@ -75,37 +69,86 @@ class Progression<T> {
         // equal...
         if (i < values.length - 1 &&
             adjacentValuesEqual(values[i], values[i + 1])) {
-          durSum += relativeDur;
+          durSum += durations[i];
         } else {
-          durSum += relativeDur;
+          durSum = (durSum + durations[i]) * ratio;
           T? val = values[i];
-          _minDuration = min(
-              _checkValidDuration(
-                  value: val,
-                  duration: durSum,
-                  overallDuration: overallDuration),
-              _minDuration);
+          _checkValidDuration(
+              value: val, duration: durSum, overallDuration: overallDuration);
+          if (!_hasNull) _hasNull = values[i] == null;
           overallDuration += durSum;
-          _durations.add(absolute ? durSum : overallDuration);
+          _durationList.add(overallDuration);
           _values.add(val);
           durSum = 0;
         }
       }
     }
-    this._durations = AbsoluteDurations(_durations);
+    _durations = AbsoluteDurations(_durationList);
+    updateFull();
   }
 
-  /// Creates a new [Progression] object, where all durations are positive
-  /// and smaller than 1 (if an element in [durations] isn't, we split it).
-  Progression(List<T?> values, List<double> durations,
-      {TimeSignature? timeSignature, double? ratio})
-      : this._internal(values, durations,
-            timeSignature: timeSignature, ratio: ratio, absolute: false);
+  // Since sublist is used a lot, I made this one function for a light
+  // optimization instead of sublisting the values and the durations and then
+  // going through them again in the constructor...
+  /// Constructs a progression where [durations] is a list of absolute durations.
+  /// [timeSignature] is [TimeSignature.evenTime()] by default.
+  /// [ratio] would be multiplied for all durations (1.0 by default).
+  /// [start] and [end] determine the range of the list to be converted (end is
+  /// excluded...).
+  /// [durationDiff] will be deducted from each duration.
+  Progression._absoluteInternal(
+    List<T?> values,
+    List<double> durations, {
+    TimeSignature? timeSignature,
+    double? ratio,
+    int start = 0,
+    int? end,
+    double durationDiff = 0.0,
+  })  : assert(values.length == durations.length),
+        _timeSignature = timeSignature ?? const TimeSignature.evenTime(),
+        _hasNull = false,
+        _full = false,
+        _values = [] {
+    ratio ??= 1.0;
+    end ??= values.length;
+    List<double> _durationList = [];
+    if (values.isNotEmpty) {
+      double previousDuration = 0.0;
+      for (int i = start; i < end; i++) {
+        if (durations[i] <= 0) {
+          throw Exception('A non-positive duration at index $i'
+              ' (${_values[i]} -> ${_durations[i]})');
+        }
+        // Skips the current value if its index is smaller than the last index
+        // and it's equal to the chord that comes after it.
+        if (!(i < values.length - 1 &&
+            adjacentValuesEqual(values[i], values[i + 1]))) {
+          double nonAbsoluteDuration =
+              (durations[i] * ratio) - previousDuration - durationDiff;
+          T? val = values[i];
+          double relativeDur = nonAbsoluteDuration * ratio;
+          _checkValidDuration(
+              value: val,
+              duration: nonAbsoluteDuration,
+              overallDuration: previousDuration);
+          if (!_hasNull) _hasNull = values[i] == null;
+          previousDuration += nonAbsoluteDuration;
+          _durationList.add(previousDuration);
+          _values.add(val);
+        }
+      }
+    }
+    _durations = AbsoluteDurations(_durationList);
+    updateFull();
+  }
 
-  Progression.real(List<T?> values, List<double> durations,
+  /// Constructs a progression where [durations] is a list of absolute durations.
+  /// [timeSignature] is [TimeSignature.evenTime()] by default.
+  /// [ratio] would be multiplied for all durations (1.0 by default).
+  Progression.absolute(List<T?> values, List<double> durations,
       {TimeSignature? timeSignature, double? ratio})
-      : this._internal(values, durations,
-            timeSignature: timeSignature, ratio: ratio, absolute: true);
+      : this._absoluteInternal(values, durations,
+            timeSignature: timeSignature, ratio: ratio);
 
   /// Doesn't check for duplicates or full and just sets the values for the
   /// fields.
@@ -113,33 +156,40 @@ class Progression<T> {
     required List<T?> values,
     required AbsoluteDurations durations,
     required TimeSignature timeSignature,
+    required bool hasNull,
   })  : _values = values,
         _durations = durations,
         _timeSignature = timeSignature,
-        _full = durations.realLast % timeSignature.decimal == 0;
+        _hasNull = hasNull,
+        _full = durations.isEmpty
+            ? true
+            : durations.realLast % timeSignature.decimal == 0;
 
   Progression.empty({TimeSignature? timeSignature})
-      : this.real([], [], timeSignature: timeSignature);
+      : this.absolute([], [], timeSignature: timeSignature);
 
   Progression.evenTime(List<T?> base,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : this.real(
+      : this.absolute(
             base,
             List.generate(base.length,
                 (index) => (index + 1) * (1 / timeSignature.denominator)),
             timeSignature: timeSignature);
 
   bool updateFull() {
-    _full = _durations.realLast % _timeSignature.decimal == 0;
+    _full = duration % _timeSignature.decimal == 0;
     return _full;
   }
 
   /// Sums [durations] from [start] to [end], not including [end].
+  /// If [start] == [end], returns 0.0.
   double sumDurations([int start = 0, int? end]) {
-    assert(end == null || start <= end);
+    assert(start >= 0 && (end == null || (end <= length && start <= end)));
     if (start == 0 && end == null) return duration;
-    end ??= length - 1;
-    return _durations.real(end - start);
+    end ??= length;
+    // This is done like this since every element includes its own duration...
+    return (end == 0 ? 0.0 : _durations.real(end - 1)) -
+        (start == 0 ? 0.0 : _durations.real(start - 1));
   }
 
   // ADC: Convert to absolute durations!
@@ -173,7 +223,7 @@ class Progression<T> {
   /// [Progression] p.durations => [1/4, 1/4, 1/4, 1/4].
   /// p.relativeTo(0.5).durations => [1/8, 1/8, 1/8, 1/8].
   Progression<T> relativeRhythmTo(double ratio) {
-    return Progression.real(
+    return Progression.absolute(
       _values,
       _durations.realDurations,
       timeSignature: _timeSignature,
@@ -226,25 +276,23 @@ class Progression<T> {
     if (_values.isNotEmpty && adjacentValuesEqual(value, last)) {
       double dur = (duration + _durations.last) % _timeSignature.decimal;
       if (dur > 0) {
-        _minDuration = min(
-            _checkValidDuration(
-              value: value,
-              duration: dur,
-              // The overall duration is the progression's duration - the last
-              // one since they're the same...
-              overallDuration: duration - durations.last,
-            ),
-            _minDuration);
+        _checkValidDuration(
+          value: value,
+          duration: dur,
+          // The overall duration is the progression's duration - the last
+          // one since they're the same...
+          overallDuration: duration - durations.last,
+        );
+        if (!_hasNull) _hasNull = value == null;
       }
       _durations.last += duration;
     } else {
-      _minDuration = min(
-          _minDuration,
-          _checkValidDuration(
-              value: value, duration: duration, overallDuration: duration));
+      _checkValidDuration(
+          value: value, duration: duration, overallDuration: duration);
       _values.add(value);
       _durations.add(duration);
     }
+    if (!_hasNull) _hasNull = value == null;
     updateFull();
   }
 
@@ -256,7 +304,6 @@ class Progression<T> {
       add(progression.values.first, progression.durations.first);
       if (progression.length > 1) {
         if (fullBefore) {
-          _minDuration = min(_minDuration, progression._minDuration);
           _values.addAll(progression.values.sublist(1));
           _durations.addAll(progression.durations, from: 1);
           updateFull();
@@ -266,6 +313,7 @@ class Progression<T> {
           }
         }
       }
+      if (!_hasNull && progression._hasNull) _hasNull = true;
     }
   }
 
@@ -273,7 +321,8 @@ class Progression<T> {
   bool operator ==(Object other) {
     if (other is! Progression<T> ||
         duration != other.duration ||
-        length != other.length) {
+        length != other.length ||
+        _hasNull != other._hasNull) {
       return false;
     }
     for (int i = 0; i < length; i++) {
@@ -359,16 +408,16 @@ class Progression<T> {
 
   bool get isEmpty => _values.isEmpty;
 
-  /* TDC: Optimize! We go through durations twice (durations.sublist and the
-          constructor...). */
-  Progression<T> sublist(int start, [int? end]) => Progression.real(
-      _values.sublist(start, end), _durations.sublist(start, end).realDurations,
-      timeSignature: _timeSignature);
+  Progression<T> sublist(int start, [int? end]) =>
+      Progression._absoluteInternal(_values, _durations.realDurations,
+          timeSignature: _timeSignature,
+          start: start,
+          end: end,
+          durationDiff: start == 0 ? 0.0 : durations.realDurations[start - 1]);
 
   Progression<T> replaceMeasure(int index, Progression<T> newMeasure,
       {List<Progression<T>>? measures}) {
     measures ??= splitToMeasures();
-    double measure = _timeSignature.decimal;
     Progression<T> start = Progression<T>.empty(timeSignature: _timeSignature);
     for (int i = 0; i < index; i++) {
       start.addAll(measures[i]);
@@ -382,11 +431,8 @@ class Progression<T> {
     return start;
   }
 
-  /// Checks whether [duration] is valid and returns what the smallest
-  /// duration it can be is (for instance a dur of 1.0 added to an overall
-  /// duration of 0.5 in an even time signature will produce a dur of 0.5 in
-  /// it's start, which is the smallest it can be).
-  double _checkValidDuration({
+  /// Checks whether [duration] is valid.
+  void _checkValidDuration({
     required T? value,
     required double duration,
     required double overallDuration,
@@ -396,7 +442,6 @@ class Progression<T> {
       throw NonPositiveDuration(value, duration);
     } else if ((overallDuration % decimal) + duration <= decimal) {
       assertDurationValid(value: value, duration: duration);
-      return duration;
     } else {
       // The duration the current measure has left before being full.
       double left = decimal - (overallDuration % decimal);
@@ -413,7 +458,6 @@ class Progression<T> {
         assertDurationValid(value: value, duration: end);
         currentMinDuration = min(currentMinDuration, end);
       }
-      return currentMinDuration;
     }
   }
 
