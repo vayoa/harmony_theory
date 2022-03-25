@@ -192,28 +192,80 @@ class Progression<T> {
         (start == 0 ? 0.0 : _durations.real(start - 1));
   }
 
-  // ADC: Convert to absolute durations!
+  /* TDC: This function makes absolutely no sense and is not consistent.
+          Look at all of its uses and try to fit getPlayingIndex() in there
+          instead.
+  */
   /// Returns a list index such that the duration from that index to [from] is
   /// [duration]. Negative [durations] also work.
   /// If no such index exits, returns -1.
   int getIndexFromDuration(double duration, {int from = 0}) {
-    if (duration == 0) return from;
-    double sum = 0;
-    if (duration.isNegative) {
-      duration = -1 * duration;
-      for (var i = from - 1; i >= 0; i--) {
-        sum += _durations[i];
-        if (sum >= duration) return i;
-      }
-    } else {
-      for (var i = from; i < length; i++) {
-        if (sum >= duration) return i;
-        sum += _durations[i];
-      }
-      /* FIXME: Write this better (we check this afterwards but there's
-                probably a way to do it in the loop...)*/
-      if (sum >= duration) return length - 1;
+    if (duration > this.duration) {
+      return -1;
     }
+    int playing = getPlayingIndex(duration, from: from);
+    if (duration < 0) return playing;
+    double diff = 0.0;
+    if (from != 0) diff = _durations.real(from - 1);
+    if (duration + diff == this.duration) {
+      return length - 1;
+    }
+    if (playing == length - 1 ||
+        (duration == _durations.real(playing) - _durations[playing] - diff)) {
+      return playing;
+    }
+    return playing + 1;
+  }
+
+  /// Returns the index of the "playing" value at [duration] from the index
+  /// [from] (INCLUDED!!! see examples), which is 0 by default.
+  /// If no such index exists, returns -1.
+  ///
+  /// [duration] can also be negative.
+  ///
+  /// Complexity: O(log(n)).
+  ///
+  /// Examples:
+  ///
+  /// Progression - [I(0.5), V(0.5)].
+  /// duration: 0.4 -> 0.
+  /// duration: 0.5 -> 1.
+  /// duration: 0.9 -> 1.
+  /// duration: 1.0 -> -1.
+  /// duration: 0.2, from: 1 -> 1.
+  int getPlayingIndex(double duration, {int from = 0}) {
+    int l = from, r = length - 1;
+    double diff = 0.0;
+    if (l != 0) diff = _durations.real(l - 1);
+    if (duration < 0) {
+      l = 0;
+      r = from;
+      duration = diff + duration;
+      // We got out of bounds (from the left)...
+      if (duration < 0.0) return -1;
+      diff = 0.0;
+    }
+    // Diff is to allow the algorithm to start from a different index.
+    // Regular binary search structure but instead of stopping when the value
+    // is duration we stop either when it's equal to duration (see example)
+    // or when it's bigger and the duration before is smaller or equal.
+    while (l <= r) {
+      int m = l + (r - l) ~/ 2;
+      double current = _durations.real(m) - diff;
+      if (current == duration) {
+        // If m is the last index, no such playing value exists, otherwise
+        // return the next m.
+        return m < length - 1 ? m + 1 : -1;
+      } else if (current > duration) {
+        // since the next line has m - 1...
+        if (m == 0) return 0;
+        if (_durations.real(m - 1) - diff <= duration) return m;
+        r = m - 1;
+      } else {
+        l = m + 1;
+      }
+    }
+    // This is needed because the start could be different than 0...
     return -1;
   }
 
@@ -326,7 +378,8 @@ class Progression<T> {
       return false;
     }
     for (int i = 0; i < length; i++) {
-      if (this[i] != other[i] || _durations.real(i) != other._durations.real(i)) {
+      if (this[i] != other[i] ||
+          _durations.real(i) != other._durations.real(i)) {
         return false;
       }
     }
