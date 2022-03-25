@@ -246,7 +246,7 @@ class ScaleDegreeChord {
   @override
   bool operator ==(Object other) =>
       other is ScaleDegreeChord &&
-      (other._pattern == _pattern && other._rootDegree == _rootDegree);
+      (other._pattern.equals(_pattern) && other._rootDegree == _rootDegree);
 
   @override
   int get hashCode => Object.hash(_pattern.fullName, _rootDegree);

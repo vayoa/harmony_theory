@@ -392,6 +392,12 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   }
 
   // TDC: Implement scale pattern matching!!
+  /* TDC: Returns a lot of duplicates (that we filter with the toSet() method
+          in the end.
+          Figure out a way to optimize this filtering... (The problem could be
+          in getFittingMatchLocations...).
+   */
+  // TDC: Implement weight scoring in this function so we won't have to loop again.
   /// Returns a substituted [base] from the current progression within the
   /// range [start] - [end] (end excluded) if possible.
   /// If not, returns [base].

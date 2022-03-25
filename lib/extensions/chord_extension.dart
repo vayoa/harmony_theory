@@ -2,6 +2,21 @@ import 'package:thoery_test/extensions/interval_extension.dart';
 import 'package:thoery_test/extensions/pitch_extension.dart';
 import 'package:tonic/tonic.dart';
 
+extension ChordPatternExtension on ChordPattern {
+  equals(Object? other) {
+    if (other is ChordPattern) {
+      if (name == other.name && fullName == other.fullName) return true;
+      if (intervals.length == other.intervals.length) {
+        for (int i = 0; i < intervals.length; i++) {
+          if (!intervals[i].equals(other.intervals[i])) return false;
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
 extension ChordExtension on Chord {
   String getCommonName() {
     String abbr = pattern.abbr;
@@ -13,12 +28,11 @@ extension ChordExtension on Chord {
     if (other is! Chord) return false;
     Chord chord = other;
     Pitch oRoot = chord.root;
-    if (intervals.length != chord.intervals.length) return false;
-    for (int i = 0; i < intervals.length; i++) {
-      if (!intervals[i].equals(chord.intervals[i])) return false;
+    if (root.accidentalSemitones == oRoot.accidentalSemitones &&
+        (root.diatonicSemitones % 12) == (oRoot.diatonicSemitones % 12)) {
+      return pattern.equals(chord.pattern);
     }
-    return root.accidentalSemitones == oRoot.accidentalSemitones &&
-        (root.diatonicSemitones % 12) == (oRoot.diatonicSemitones % 12);
+    return false;
   }
 
   static Chord parse(String name) =>

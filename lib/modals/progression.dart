@@ -326,7 +326,7 @@ class Progression<T> {
       return false;
     }
     for (int i = 0; i < length; i++) {
-      if (this[i] != other[i] || _durations[i] != other._durations[i]) {
+      if (this[i] != other[i] || _durations.real(i) != other._durations.real(i)) {
         return false;
       }
     }
