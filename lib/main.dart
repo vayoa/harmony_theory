@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
@@ -7,8 +5,8 @@ import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:tonic/tonic.dart';
+
 import 'modals/chord_progression.dart';
-import 'modals/progression.dart';
 import 'modals/scale_degree.dart';
 import 'modals/substitution.dart';
 

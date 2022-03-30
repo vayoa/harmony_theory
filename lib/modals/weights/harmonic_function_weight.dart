@@ -1,7 +1,6 @@
 import 'package:thoery_test/extensions/interval_extension.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
-import 'package:thoery_test/modals/weights/in_scale_weight.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
 import 'package:tonic/tonic.dart';
 
