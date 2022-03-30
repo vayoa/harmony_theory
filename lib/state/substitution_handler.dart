@@ -64,15 +64,17 @@ abstract class SubstitutionHandler {
     int? end,
   }) {
     final List<Substitution> substitutions = [];
-    for (ScaleDegreeChord? chord in base.values) {
+    end ??= base.length;
+    for (int i = start; i < end; i++) {
+      ScaleDegreeChord? chord = base[i];
       if (chord != null) {
-        // TODO: Implement tonicization optimization.
+        // TDC: Implement tonicization optimization.
         List<ScaleDegreeProgression>? progressions =
-            bank.getByGroup(chord, false);
+            bank.getByGroup(chord: chord, withTonicization: false);
         if (progressions != null && progressions.isNotEmpty) {
           for (ScaleDegreeProgression sub in progressions) {
-            List<Substitution> possibleSubs =
-                base.getPossibleSubstitutions(sub, start: start, end: end);
+            List<Substitution> possibleSubs = base.getPossibleSubstitutions(sub,
+                start: start, end: end, forIndex: i);
             for (Substitution possibleSub in possibleSubs) {
               if (possibleSub.substitutedBase != base) {
                 substitutions.add(possibleSub);
@@ -82,18 +84,27 @@ abstract class SubstitutionHandler {
         }
       }
     }
-    // TODO: Optimize...
+    // We do this here since it's more efficient...
+    List<ScaleDegreeProgression> tonicizations = ProgressionBank.tonicizations;
+    for (ScaleDegreeProgression sub in tonicizations) {
+      List<Substitution> possibleSubs =
+          base.getPossibleSubstitutions(sub, start: start, end: end);
+      for (Substitution possibleSub in possibleSubs) {
+        if (possibleSub.substitutedBase != base) {
+          substitutions.add(possibleSub);
+        }
+      }
+    }
+    // TDC: Optimize...
     return substitutions.toSet().toList();
   }
 
-  static List<Substitution> getRatedSubstitutions(
-    ScaleDegreeProgression base, {
-    required ProgressionBank bank,
-    bool keepHarmonicFunction = false,
-    ScaleDegreeProgression? harmonicFunctionBase,
-    int start = 0,
-    int? end,
-  }) {
+  static List<Substitution> getRatedSubstitutions(ScaleDegreeProgression base,
+      {required ProgressionBank bank,
+      bool keepHarmonicFunction = false,
+      ScaleDegreeProgression? harmonicFunctionBase,
+      int start = 0,
+      int? end}) {
     List<Substitution> substitutions =
         _getPossibleSubstitutions(base, bank: bank, start: start, end: end);
     for (Substitution sub in substitutions) {

@@ -123,14 +123,8 @@ class HarmonicFunctionBank {
         assert(scored.key <= maxFunctionImportance &&
             scored.key >= -1 * maxFunctionImportance);
         for (String next in scored.value) {
-          try {
           sortedFunctions[chordWeakHash]![
               ScaleDegreeChord.parse(next).weakHash] = scored.key;
-          }
-          catch (e) {
-            print(chord.value.entries);
-            rethrow;
-          }
         }
       }
     }

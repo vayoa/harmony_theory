@@ -171,14 +171,15 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   /// Returns a list containing substitution match locations, where [sub] could
   /// substitute the current progression (base) within the range of
   /// [start] - [end] (end excluded).
+  /// [forIndex], if not null, will search only for substitutions containing
+  /// that index.
   /* TDC: Make sure the ranges work correctly without flagging legal
           substitutions. */
   // ADC: Convert!!
   List<SubstitutionMatch> getFittingMatchLocations(ScaleDegreeProgression sub,
-      {int start = 0, int? end}) {
+      {int start = 0, int? end, int? forIndex}) {
     // Explanation to why this is done is below...
     // if the potential sub can't fit in the base progression...
-    if (sub.duration > duration) return const [];
 
     // List containing lists of match locations (first element is location in
     // base and second is location here).
@@ -205,8 +206,13 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     // considered the same as a [1, 2, 3] where 1 and 2 are 1/4 and 3 is a 1/2.
 
     end ??= length;
+    int loopStart = start, loopEnd = end;
+    if (forIndex != null) {
+      loopStart = forIndex;
+      loopEnd = forIndex + 1;
+    }
 
-    for (var baseChordPos = start; baseChordPos < end; baseChordPos++) {
+    for (var baseChordPos = loopStart; baseChordPos < loopEnd; baseChordPos++) {
       for (var subChordPos = 0; subChordPos < sub.length; subChordPos++) {
         // If the two chords are equal.
         // Or if we have a tonicization.
@@ -412,9 +418,9 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           WEAK EQUALITY FUNCTION...).
    */
   List<Substitution> getPossibleSubstitutions(ScaleDegreeProgression sub,
-      {int start = 0, int? end}) {
-    final List<SubstitutionMatch> matches =
-        getFittingMatchLocations(sub, start: start, end: end);
+      {int start = 0, int? end, int? forIndex}) {
+    final List<SubstitutionMatch> matches = getFittingMatchLocations(sub,
+        start: start, end: end, forIndex: forIndex);
     final List<Substitution> substitutions = [];
 
     /* FIXME: This gets computed twice (first time in

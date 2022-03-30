@@ -1,12 +1,25 @@
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 
+// TDC: Decide if this stays static or not, since it has a constructor...
 class ProgressionBank {
   static final Map<int, ScaleDegreeProgression> _bank = {};
 
   /// Notice: if the major tonic is in the last place it will be saved in a
   /// different group then if it's in any other place (for tonicization).
   static final Map<int, List<int>> _groupedBank = {};
+
+  static final int tonicizationHash =
+      Object.hash(ScaleDegreeChord.majorTonicTriad.weakHash, true);
+
+  /// Returns all saved progressions that have a
+  /// [ScaleDegreeChord.majorTonicTriad] as their last chord.
+  static List<ScaleDegreeProgression> get tonicizations {
+    if (_groupedBank.containsKey(tonicizationHash)) {
+      return [for (int hash in _groupedBank[tonicizationHash]!) _bank[hash]!];
+    }
+    return const [];
+  }
 
   ProgressionBank([List<ScaleDegreeProgression>? additionalProgressions]) {
     if (additionalProgressions != null && additionalProgressions.isNotEmpty) {
@@ -66,21 +79,17 @@ class ProgressionBank {
     return weakHash;
   }
 
-  /// If [chord] is a major tonic and [last] is false, all saved progressions
-  /// with a major tonic (including one that have them as their last chords)
-  /// will be returned.
-  List<ScaleDegreeProgression>? getByGroup(ScaleDegreeChord chord,
-      [bool last = false]) {
-    List<int>? hashes = _groupedBank[weakHashWithPlace(chord, last)];
+  /// Returns all saved progressions from [_bank] containing the
+  /// [ScaleDegreeChord.weakHash] of [chord].
+  /// If [withTonicization] is true, returns also all saved progressions that
+  /// have a [ScaleDegreeChord.majorTonicTriad] as their last chord.
+  List<ScaleDegreeProgression>? getByGroup(
+      {required ScaleDegreeChord chord, required bool withTonicization}) {
+    List<int>? hashes = _groupedBank[weakHashWithPlace(chord, false)];
     if (hashes != null) {
-      hashes = [...hashes];
-      // TODO: Optimize...
-      int weakHash = chord.weakHash;
-      if (!last && weakHash == ScaleDegreeChord.majorTonicTriad.weakHash) {
-        List<int>? otherTonic = _groupedBank[Object.hash(weakHash, true)];
-        if (otherTonic != null && otherTonic.isNotEmpty) {
-          hashes.addAll(otherTonic);
-        }
+      if (withTonicization && _groupedBank.containsKey(tonicizationHash)) {
+        // TODO: Optimize...
+        hashes.addAll(_groupedBank[tonicizationHash]!);
       }
       return [for (int hash in hashes) _bank[hash]!];
     }

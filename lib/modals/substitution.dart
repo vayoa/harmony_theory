@@ -10,7 +10,7 @@ class Substitution {
   final ScaleDegreeProgression originalSubstitution;
   final ScaleDegreeProgression base;
   SubstitutionScore score;
-  final SubstitutionMatch? match;
+  final SubstitutionMatch match;
   final int firstChangedIndex;
   final int lastChangedIndex;
 
@@ -22,8 +22,8 @@ class Substitution {
     required this.base,
     required this.firstChangedIndex,
     required this.lastChangedIndex,
+    required this.match,
     SubstitutionScore? score,
-    this.match,
   }) : score = score ?? SubstitutionScore.empty();
 
   Substitution copyWith({
