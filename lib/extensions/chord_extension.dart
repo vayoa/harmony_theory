@@ -18,7 +18,7 @@ extension ChordPatternExtension on ChordPattern {
 }
 
 extension ChordExtension on Chord {
-  String getCommonName() {
+  String get commonName {
     String abbr = pattern.abbr;
     if (abbr == 'min7') abbr = 'm7';
     return root.commonName + abbr;
@@ -35,7 +35,8 @@ extension ChordExtension on Chord {
     return false;
   }
 
-  static Chord parse(String name) =>
-      Chord.parse(name.replaceFirst(RegExp(r'm7$'), 'min7').replaceFirstMapped(
-          RegExp(r'^([A-G]b?)7$'), (match) => match.group(1)! + 'dom7'));
+  static Chord parse(String name) {
+    name = name.replaceAll('b', '♭');
+    return Chord.parse(name.replaceFirst(RegExp(r'((?<!di)m7$)'), 'min7'));
+  }
 }

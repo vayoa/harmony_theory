@@ -414,7 +414,7 @@ class Progression<T> {
         /* FIXME: This is written badly but I can't think of another way to
                   make it work */
         final String valueFormatted =
-            val is Chord ? val.getCommonName() : valueFormat(_values[i]);
+            val is Chord ? val.commonName : valueFormat(_values[i]);
         final String formatted = valueFormatted +
             (durationFormatted.isEmpty ? '' : '($durationFormatted)');
         double curDuration = _durations[i];

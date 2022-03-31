@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:thoery_test/extensions/chord_extension.dart';
 import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:tonic/tonic.dart';
@@ -47,7 +45,7 @@ abstract class ScaleDegreeChordTest {
         in reverse.entries) {
       List<String> chords = entry.value
           .map((ScaleDegreeChord sdc) =>
-              '$sdc: ${sdc.inScale(entry.key).getCommonName()}')
+              '$sdc: ${sdc.inScale(entry.key).commonName}')
           .toList();
       print('${entry.key.commonName}: $chords');
     }
