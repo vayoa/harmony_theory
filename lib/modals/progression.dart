@@ -74,7 +74,7 @@ class Progression<T> {
         } else {
           durSum = (durSum + durations[i]) * ratio;
           T? val = values[i];
-          _checkValidDuration(
+          checkValidDuration(
               value: val, duration: durSum, overallDuration: overallDuration);
           if (!_hasNull) _hasNull = values[i] == null;
           overallDuration += durSum;
@@ -128,7 +128,7 @@ class Progression<T> {
               (durations[i] * ratio) - previousDuration - durationDiff;
           T? val = values[i];
           double relativeDur = nonAbsoluteDuration * ratio;
-          _checkValidDuration(
+          checkValidDuration(
               value: val,
               duration: nonAbsoluteDuration,
               overallDuration: previousDuration);
@@ -329,7 +329,7 @@ class Progression<T> {
     if (_values.isNotEmpty && adjacentValuesEqual(value, last)) {
       double dur = (duration + _durations.last) % _timeSignature.decimal;
       if (dur > 0) {
-        _checkValidDuration(
+        checkValidDuration(
           value: value,
           duration: dur,
           // The overall duration is the progression's duration - the last
@@ -340,7 +340,7 @@ class Progression<T> {
       }
       _durations.last += duration;
     } else {
-      _checkValidDuration(
+      checkValidDuration(
           value: value, duration: duration, overallDuration: this.duration);
       _values.add(value);
       _durations.add(duration);
@@ -486,7 +486,7 @@ class Progression<T> {
   }
 
   /// Checks whether [duration] is valid.
-  void _checkValidDuration({
+  void checkValidDuration({
     required T? value,
     required double duration,
     required double overallDuration,
