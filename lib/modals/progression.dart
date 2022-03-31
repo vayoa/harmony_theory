@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import 'package:thoery_test/extensions/chord_extension.dart';
 import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
@@ -340,7 +341,7 @@ class Progression<T> {
       _durations.last += duration;
     } else {
       _checkValidDuration(
-          value: value, duration: duration, overallDuration: duration);
+          value: value, duration: duration, overallDuration: this.duration);
       _values.add(value);
       _durations.add(duration);
     }
