@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
@@ -10,6 +9,7 @@ import 'package:thoery_test/modals/substitution_match.dart';
 import 'package:thoery_test/modals/time_signature.dart';
 import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
+
 import 'chord_progression.dart';
 import 'exceptions.dart';
 
@@ -178,9 +178,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   // ADC: Convert!!
   List<SubstitutionMatch> getFittingMatchLocations(ScaleDegreeProgression sub,
       {int start = 0, int? end, int? forIndex}) {
-    // Explanation to why this is done is below...
-    // if the potential sub can't fit in the base progression...
-
     // List containing lists of match locations (first element is location in
     // base and second is location here).
     final List<SubstitutionMatch> matches = [];
