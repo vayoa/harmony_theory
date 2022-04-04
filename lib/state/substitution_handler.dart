@@ -122,7 +122,7 @@ abstract class SubstitutionHandler {
 
     // Detect the base progressions' scale
     scale ??= base.krumhanslSchmucklerScales.first;
-    print('Scale Found: ${scale.commonName}.');
+    print('Scale Found: $scale.');
 
     // Convert the base progression to roman numerals, we used the most probable
     // scale that was detected (which would be the first in the list).

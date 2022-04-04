@@ -18,11 +18,6 @@ import 'exceptions.dart';
 /// A class representing a harmonic progression, built by [ScaleDegreeChord].
 /// The mode of the progression will always be Ionian (Major).
 class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
-  /// While the individual [ScaleDegreeChord] in the progression are represented
-  /// in the major scale. The overall progression could still be in the minor
-  /// scale.
-  final bool _inMinor;
-
   //TDC: Might be too destructive to base...
   static List<ScaleDegreeChord?> _convertToMinor(
       bool inMinor, List<ScaleDegreeChord?> base) {
@@ -35,22 +30,16 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   }
 
   ScaleDegreeProgression(List<ScaleDegreeChord?> base, List<double> durations,
-      {required bool inMinor,
-      TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : _inMinor = inMinor,
-        super(_convertToMinor(inMinor, base), durations,
-            timeSignature: timeSignature);
+      {TimeSignature timeSignature = const TimeSignature.evenTime()})
+      : super(base, durations, timeSignature: timeSignature);
 
   ScaleDegreeProgression.empty(
-      {required bool inMinor,
-      TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : this([], [], inMinor: inMinor, timeSignature: timeSignature);
+      {TimeSignature timeSignature = const TimeSignature.evenTime()})
+      : this([], [], timeSignature: timeSignature);
 
   ScaleDegreeProgression.fromProgression(
-      Progression<ScaleDegreeChord?> progression,
-      {required bool inMinor})
-      : _inMinor = inMinor,
-        super.raw(
+      Progression<ScaleDegreeChord?> progression)
+      : super.raw(
           values: progression.values,
           durations: progression.durations,
           timeSignature: progression.timeSignature,
@@ -58,11 +47,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         );
 
   ScaleDegreeProgression.evenTime(List<ScaleDegreeChord?> base,
-      {required bool inMinor,
-      TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : _inMinor = inMinor,
-        super.evenTime(_convertToMinor(inMinor, base),
-            timeSignature: timeSignature);
+      {TimeSignature timeSignature = const TimeSignature.evenTime()})
+      : super.evenTime(base, timeSignature: timeSignature);
 
   /// Gets a list of [String] each representing a ScaleDegreeChord and returns
   /// a new [ScaleDegreeProgression].
@@ -70,7 +56,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   ScaleDegreeProgression.fromList(
     List<String?> base, {
     List<double>? durations,
-    bool inMinor = false,
     TimeSignature timeSignature = const TimeSignature.evenTime(),
   }) : this(
             base
@@ -80,7 +65,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             durations ??
                 List.generate(
                     base.length, (index) => 1 / timeSignature.denominator),
-            inMinor: inMinor,
             timeSignature: timeSignature);
 
   // TDC: Remove 'inMinor' and infer it from scale.
@@ -97,13 +81,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             timeSignature: timeSignature,
             hasNull: chords.hasNull,
           ),
-          inMinor: scale.isMinor,
         );
-
-  /// While the individual [ScaleDegreeChord] in the progression are represented
-  /// in the major scale. The overall progression could still be in the minor
-  /// scale.
-  bool get inMinor => _inMinor;
 
   // TDC: Make this work only for minor/major...
   // TODO: This might not work now, check (only if you're using it...)!
@@ -111,27 +89,27 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   /// [toMode] mode.
   /// If [fromMode] isn't specified it is based on [_inMinor].
   /// Ionian's (Major) mode number is 0 and so on...
-  ScaleDegreeProgression modeShift({int? fromMode, required int toMode}) {
-    fromMode ??= _inMinor ? 5 : 0;
-    return ScaleDegreeProgression.fromProgression(
-      Progression<ScaleDegreeChord>.raw(
-        values: values
-            .map((ScaleDegreeChord? chord) =>
-                chord?.modeShift(fromMode!, toMode))
-            .toList(),
-        durations: durations,
-        timeSignature: timeSignature,
-        hasNull: hasNull,
-      ),
-      inMinor: _inMinor,
-    );
-  }
+  // ScaleDegreeProgression modeShift({int? fromMode, required int toMode}) {
+  //   fromMode ??= _inMinor ? 5 : 0;
+  //   return ScaleDegreeProgression.fromProgression(
+  //     Progression<ScaleDegreeChord>.raw(
+  //       values: values
+  //           .map((ScaleDegreeChord? chord) =>
+  //               chord?.modeShift(fromMode!, toMode))
+  //           .toList(),
+  //       durations: durations,
+  //       timeSignature: timeSignature,
+  //       hasNull: hasNull,
+  //     ),
+  //     inMinor: _inMinor,
+  //   );
+  // }
 
   /* TDC: Not sure if this is the best way to do it and if it's even
           important... */
   ScaleDegreeProgression addSeventh({double ratio = 1.0}) {
-    ScaleDegreeProgression converted = ScaleDegreeProgression.empty(
-        timeSignature: timeSignature, inMinor: _inMinor);
+    ScaleDegreeProgression converted =
+        ScaleDegreeProgression.empty(timeSignature: timeSignature);
     for (int i = 0; i < length; i++) {
       if (values[i] != null) {
         converted.add(values[i]!.addSeventh(), durations[i] * ratio);
@@ -142,8 +120,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
 
   ScaleDegreeProgression tonicizedFor(ScaleDegreeChord tonic,
       {bool addSeventh = false, double ratio = 1.0}) {
-    ScaleDegreeProgression converted = ScaleDegreeProgression.empty(
-        timeSignature: timeSignature, inMinor: _inMinor);
+    ScaleDegreeProgression converted =
+        ScaleDegreeProgression.empty(timeSignature: timeSignature);
     for (int i = 0; i < length; i++) {
       ScaleDegreeChord? convertedChord;
       if (values[i] != null) {
@@ -448,8 +426,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         // Last index to change...
         int right = getIndexFromDuration(d2, from: baseChord);
         ScaleDegreeProgression substitution =
-            ScaleDegreeProgression.fromProgression(sublist(0, left),
-                inMinor: _inMinor);
+            ScaleDegreeProgression.fromProgression(sublist(0, left));
         // TDC: This won't support empty chord spaces...
         double bd1 = -1 * sumDurations(left, baseChord);
         double bd2 = sumDurations(baseChord, right + 1);
@@ -491,7 +468,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     if (!relativeSubSection.hasNull) return relativeSubSection;
     double sum = 0.0;
     ScaleDegreeProgression filled = ScaleDegreeProgression.empty(
-        inMinor: relativeSubSection.inMinor,
         timeSignature: relativeSubSection.timeSignature);
     for (int i = 0; i < relativeSubSection.length; i++) {
       ScaleDegreeChord? filler = relativeSubSection[i];
@@ -558,8 +534,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   }
 
   ScaleDegreeProgression get deriveTonicizations {
-    ScaleDegreeProgression progression =
-        ScaleDegreeProgression.empty(inMinor: _inMinor);
+    ScaleDegreeProgression progression = ScaleDegreeProgression.empty();
     Map<int, List<TonicizedScaleDegreeChord?>> tonicizations = {};
     for (int tonic = 0; tonic < length + 2; tonic++) {
       ScaleDegreeChord? tonicChord;

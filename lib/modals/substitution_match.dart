@@ -1,5 +1,3 @@
-import 'package:thoery_test/modals/progression.dart';
-import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 
@@ -48,9 +46,7 @@ class SubstitutionMatch {
           return progression.addSeventh(ratio: ratio);
         } else {
           return ScaleDegreeProgression.fromProgression(
-            progression.relativeRhythmTo(ratio),
-            inMinor: progression.inMinor,
-          );
+            progression.relativeRhythmTo(ratio));
         }
       case SubstitutionMatchType.tonicization:
         return progression.tonicizedFor(

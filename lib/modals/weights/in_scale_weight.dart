@@ -1,7 +1,6 @@
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
-import 'package:tonic/tonic.dart';
 
 import '../scale_degree.dart';
 
@@ -17,12 +16,32 @@ class InScaleWeight extends Weight {
           description: WeightDescription.diatonic,
         );
 
+  static final List<ScaleDegree> sharps = [
+    ScaleDegree.parse('#IV'),
+    ScaleDegree.parse('#I'),
+    ScaleDegree.parse('#V'),
+    ScaleDegree.parse('#II'),
+    ScaleDegree.parse('#VI'),
+    ScaleDegree.parse('#III'),
+    ScaleDegree.parse('#VII'),
+  ];
+  static final List<ScaleDegree> flats = [
+    ScaleDegree.parse('bVII'),
+    ScaleDegree.parse('bIII'),
+    ScaleDegree.parse('bVI'),
+    ScaleDegree.parse('bII'),
+    ScaleDegree.parse('bV'),
+    ScaleDegree.parse('bI'),
+    ScaleDegree.parse('bIV'),
+  ];
+
   @override
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
   }) {
     int count = 0, outCount = 0;
+    String details = '';
     for (ScaleDegreeChord? chord in progression.values) {
       if (chord != null) {
         List<ScaleDegree> degrees = chord.degrees;

@@ -23,7 +23,7 @@ abstract class ScaleDegreeChordTest {
             chords.add(ScaleDegreeChord(scale, Chord.parse(name)));
             inScale.add('$name: ${chords.last}');
           } catch (e) {
-            print('$converted in ${scale.commonName} failed:');
+            print('$converted in $scale failed:');
             Pitch cRoot = converted, tRoot = scale.tonic.toPitch();
             int semitones = (cRoot.semitones - tRoot.semitones) % 12;
             int number = 1 + cRoot.letterIndex - tRoot.letterIndex;
@@ -47,7 +47,7 @@ abstract class ScaleDegreeChordTest {
           .map((ScaleDegreeChord sdc) =>
               '$sdc: ${sdc.inScale(entry.key).commonName}')
           .toList();
-      print('${entry.key.commonName}: $chords');
+      print('${entry.key}: $chords');
     }
     return true;
   }

@@ -1,13 +1,13 @@
-import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/pitch_scale.dart';
-import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:tonic/tonic.dart';
 
+import 'extensions/scale_extension.dart';
 import 'modals/chord_progression.dart';
 import 'modals/scale_degree.dart';
+import 'modals/scale_degree_chord.dart';
 import 'modals/substitution.dart';
 
 void main() {
@@ -46,11 +46,8 @@ void main() {
 }
 
 void _testBaseClasses() {
-  var p = ScaleDegreeProgression.fromList(
-    ['ii', 'V', 'V', 'I'],
-    durations: [1, 2, 2.25, 1.25],
-    inMinor: false,
-  );
+  var p = ScaleDegreeProgression.fromList(['ii', 'V', 'V', 'I'],
+      durations: [1, 2, 2.25, 1.25]);
 
   p.add(ScaleDegreeChord.majorTonicTriad, 1.75);
 
@@ -58,11 +55,7 @@ void _testBaseClasses() {
   print(p.durations);
   print('${p.duration}\n');
 
-  var np = ScaleDegreeProgression.fromList(
-    ['I', 'V'],
-    durations: [1, 1.25],
-    inMinor: false,
-  );
+  var np = ScaleDegreeProgression.fromList(['I', 'V'], durations: [1, 1.25]);
 
   print(np.values);
   print(np.durations);
@@ -239,7 +232,7 @@ _basicMatchingTest({bool inputChords = false}) {
   // Detect the base progressions' scale
   final List<PitchScale> _possibleScales =
       _baseChordProgression.matchWithScales();
-  print('Scale Found: ${_possibleScales[0].commonName}.');
+  print('Scale Found: ${_possibleScales[0]}.');
 
   // Convert the base progression to roman numerals, we used the most probable
   // scale that was detected (which would be the first in the list).
@@ -262,8 +255,7 @@ _basicMatchingTest({bool inputChords = false}) {
   // The conversion (happens now for ease of use but as stated earlier these
   // will be saved like this already).
   final List<ScaleDegreeProgression> _savedProgressions = _drySavedProgressions
-      .map((List<String> prog) =>
-          ScaleDegreeProgression.fromList(prog, inMinor: false))
+      .map((List<String> prog) => ScaleDegreeProgression.fromList(prog))
       .toList();
 
   /* TDC: I'm not sure if, for instance, a ii V I in a different rhythm than
@@ -287,8 +279,7 @@ _basicMatchingTest({bool inputChords = false}) {
 
   // To demonstrate different modes matching we'll add another ii V I
   // progression but in a minor scale...
-  _savedProgressions
-      .add(ScaleDegreeProgression.fromList(['iidim', 'V', 'i'], inMinor: true));
+  _savedProgressions.add(ScaleDegreeProgression.fromList(['iidim', 'V', 'i']));
 
   print('Saved Progressions:\n$_savedProgressions.\n');
 

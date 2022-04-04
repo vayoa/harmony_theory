@@ -1,6 +1,6 @@
+import 'package:thoery_test/extensions/scale_extension.dart';
 import 'package:thoery_test/modals/chord_progression.dart';
 import 'package:tonic/tonic.dart';
-import 'package:thoery_test/extensions/scale_extension.dart';
 
 import '../modals/pitch_scale.dart';
 
@@ -11,14 +11,14 @@ abstract class KrumhanslSchmucklerTest {
         californication.krumhanslSchmucklerScales;
     bool _californication = contains(
         _californicationResults.sublist(0, precision), californicationScale);
-    print('Californication - ${californicationScale.commonName}:'
-        '\n${_californicationResults.map((e) => e.commonName).toList()}');
+    print('Californication - $californicationScale:'
+        '\n${_californicationResults.map((e) => e.toString()).toList()}');
     List<PitchScale> _yonatanHakatanResults =
         yonatanHakatan.krumhanslSchmucklerScales;
     bool _yonatanHakatan = contains(
         _yonatanHakatanResults.sublist(0, precision), yonatanHakatanScale);
-    print('Yonatan Hakatan - ${yonatanHakatanScale.commonName}:'
-        '\n${_yonatanHakatanResults.map((e) => e.commonName).toList()}');
+    print('Yonatan Hakatan - $yonatanHakatanScale:'
+        '\n${_yonatanHakatanResults.map((e) => e.toString()).toList()}');
     return _californication && _yonatanHakatan;
   }
 
