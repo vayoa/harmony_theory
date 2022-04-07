@@ -53,13 +53,16 @@ class HarmonicFunctionWeight extends Weight {
     int maxImportance = HarmonicFunctionBank.maxFunctionImportance;
     int score = 0, count = 0;
     String details = '';
-    for (int i = 0; i < progression.length - 1; i++) {
-      if (progression[i] != null && progression[i + 1] != null) {
+    for (int i = 0; i < progression.length; i++) {
+      int currPos = i, nextPos = i + 1;
+      if (nextPos == progression.length) nextPos = 0;
+      if (progression[currPos] != null && progression[nextPos] != null) {
         count++;
         int weakHash =
-            prepareForCheck(progression[i]!, progression[i + 1]!).weakHash;
-        int next =
-            prepareForCheck(progression[i + 1]!, progression[i]!).weakHash;
+            prepareForCheck(progression[currPos]!, progression[nextPos]!)
+                .weakHash;
+        int next = prepareForCheck(progression[nextPos]!, progression[currPos]!)
+            .weakHash;
         if (sortedFunctions.containsKey(weakHash) &&
             sortedFunctions[weakHash]![next] != null) {
           Map<int, int> sorted = sortedFunctions[weakHash]!;
@@ -67,30 +70,32 @@ class HarmonicFunctionWeight extends Weight {
           String verb = sorted[next]! > 0 ? 'Adding' : 'Deducting';
           details += verb +
               ' ${sorted[next]} points for'
-                  ' ${progression[i]!} -> ${progression[i + 1]!} (now $score)\n';
+                  ' ${progression[currPos]!} -> ${progression[nextPos]!} (now $score)\n';
         } else {
-          Interval upFromCurrent =
-              progression[i + 1]!.rootDegree.from(progression[i]!.rootDegree);
-          Interval downFromCurrent =
-              progression[i]!.rootDegree.from(progression[i + 1]!.rootDegree);
+          Interval upFromCurrent = progression[nextPos]!
+              .rootDegree
+              .from(progression[currPos]!.rootDegree);
+          Interval downFromCurrent = progression[currPos]!
+              .rootDegree
+              .from(progression[nextPos]!.rootDegree);
           if (upFromCurrent.equals(Interval.P4)) {
             score += 2;
             details += 'Adding 2 points for'
-                ' ${progression[i]!} -> ${progression[i + 1]!} (a 4th up, now $score)\n';
+                ' ${progression[currPos]!} -> ${progression[nextPos]!} (a 4th up, now $score)\n';
           } else if (downFromCurrent.equals(Interval.P4)) {
             score += 1;
             details += 'Adding 1 point for'
-                ' ${progression[i]!} -> ${progression[i + 1]!} (a 4th down, now $score)\n';
+                ' ${progression[currPos]!} -> ${progression[nextPos]!} (a 4th down, now $score)\n';
           } else if (upFromCurrent.equals(Interval.m2) ||
               upFromCurrent.equals(Interval.M2)) {
             score += 1;
             details += 'Adding 1 point for'
-                ' ${progression[i]!} -> ${progression[i + 1]!} (a 2nd up, now $score)\n';
+                ' ${progression[currPos]!} -> ${progression[nextPos]!} (a 2nd up, now $score)\n';
           } else if (upFromCurrent.equals(Interval.M3) ||
               upFromCurrent.equals(Interval.m3)) {
             score -= 2;
             details += 'Deducting 2 points for '
-                '${progression[i]!} -> ${progression[i + 1]!} '
+                '${progression[currPos]!} -> ${progression[nextPos]!} '
                 '(a 3 up, now $score)\n';
           }
         }
