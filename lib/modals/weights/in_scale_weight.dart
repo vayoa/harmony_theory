@@ -47,13 +47,23 @@ class InScaleWeight extends Weight {
         List<ScaleDegree> degrees = chord.degrees;
         count += degrees.length;
         for (ScaleDegree degree in degrees) {
-          if (!degree.isDiatonic) outCount++;
+          for (int i = 0; i < sharps.length; i++) {
+            if (sharps[i] == degree || flats[i] == degree) {
+              int points = i + 1;
+              outCount += points;
+              details += 'Subtracting $points points for a $degree in $chord. '
+                  'Subtracted Points: $outCount.\n';
+            }
+          }
         }
       }
     }
+    count *= sharps.length;
     return Score(
-      score: 1.0 - outCount / count,
-      details: 'Out of $count chord notes, $outCount are out of the scale.',
+      score: 1.0 - (outCount / count),
+      details: details +
+          'Out of $count max points, '
+              'this progression got ${count - outCount} points.',
     );
   }
 }
