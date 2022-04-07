@@ -344,7 +344,8 @@ class ScaleDegreeChord {
       null: HarmonicFunction.tonic,
     },
     /*TODO: Are you sure about this? this means that a V - I could be replaced
-            by a III - I and vice versa.
+            by a III - I and vice versa - although other weights would take
+            care of that.
      */
     ScaleDegreeChord.parse('III'): {
       null: HarmonicFunction.dominant,
