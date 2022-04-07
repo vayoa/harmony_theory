@@ -36,14 +36,34 @@ class ImportantChordsWeight extends Weight {
   }) {
     int points = 0, max = 0;
     String details = '';
-    if (_isTonic(base[0])) {
-      max++;
-      if (!_isTonic(progression[0])) {
-        points++;
-        details +=
-            '-1 for tonic in the beginning of base (${base[0]}) replaced by a '
-            '${progression[0]} in the beginning of the sub progression. '
-            'Points: $points.\n';
+    if (base[0] != null) {
+      // If the first chord of base is a I or a vi
+      if (base[0]!.weakEqual(ScaleDegreeChord.majorTonicTriad) ||
+          base[0]!.weakEqual(ScaleDegreeChord.vi)) {
+        max += 3;
+        // If the first chord in progression isn't a I or a vi.
+        if (progression[0] == null || !progression[0]!.weakEqual(base[0]!)) {
+          // If it's a different tonic subtract 2 points.
+          if (_isTonic(progression[0])) {
+            points += 2;
+          } else {
+            // If it's not a tonic at all subtract 3.
+            points += 3;
+          }
+          details +=
+              '${-1 * points} for tonic in the beginning of base (${base[0]}) '
+              'replaced by a ${progression[0]} in the beginning of the sub '
+              'progression. Points: $points.\n';
+        }
+      } else if (_isTonic(base[0])) {
+        max++;
+        if (!_isTonic(progression[0])) {
+          points++;
+          details +=
+              '-1 for tonic in the beginning of base (${base[0]}) replaced by a '
+              '${progression[0]} in the beginning of the sub progression. '
+              'Points: $points.\n';
+        }
       }
     }
     // i
