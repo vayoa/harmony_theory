@@ -192,6 +192,8 @@ _test() {
     keepHarmonicFunction: true,
   );
 
+  print(sub.toString(detailed: true));
+
   ScaleDegreeProgression baseProg = sub.base;
   // print(const NewRhythmWeight().score(progression: baseProg, base: baseProg));
 
