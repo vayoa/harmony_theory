@@ -130,15 +130,17 @@ class ScaleDegreeChord {
     return false;
   }
 
-  // TODO: The other checks here might be redundant...
-  bool get containsSeventh {
+  bool get requiresAddingSeventh {
     if (degreesLength >= 4) {
-      if (_pattern.intervals[3].number == 7) {
-        return true;
-      } else {
-        for (int i = degreesLength - 1; i >= 0; i--) {
-          if (_pattern.intervals[i].number == 7) return true;
-        }
+      // If we're any of these patterns, don't consider this a 7th when
+      // deciding whether to add to the whole progression a 7th when
+      // substituting.
+      if (_pattern.fullName != 'Dominant 7th' &&
+          _pattern.fullName != 'Diminished 7th' &&
+          _pattern.fullName != 'Dominant 7♭5' &&
+          // Also half-diminished 7th.
+          _pattern.fullName != 'Minor 7th ♭5') {
+        return _pattern.intervals[3].number == 7;
       }
     }
     return false;
@@ -187,7 +189,8 @@ class ScaleDegreeChord {
   /// Will return a new [ScaleDegreeChord] with an added 7th if possible.
   /// [harmonicFunction] can be given for slightly more relevant results.
   ScaleDegreeChord addSeventh({HarmonicFunction? harmonicFunction}) {
-    switch (_pattern.name) {
+    if (_pattern.intervals.length >= 4) return ScaleDegreeChord.copy(this);
+    switch (_pattern.fullName) {
       case "Minor":
         return ScaleDegreeChord.raw(
             ChordPattern.parse('Minor 7th'), _rootDegree);

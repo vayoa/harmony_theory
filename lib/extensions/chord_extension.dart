@@ -35,8 +35,23 @@ extension ChordExtension on Chord {
     return false;
   }
 
+  static final Pattern cordNamePattern =
+      RegExp(r"^([a-gA-G],*'*[#b♯♭𝄪𝄫]*)\s*(.*)$");
+
   static Chord parse(String name) {
-    name = name.replaceAll('b', '♭');
-    return Chord.parse(name.replaceFirst(RegExp(r'((?<!di)m7$)'), 'min7'));
+    name = name.replaceAll('b', '♭').replaceAll('#', '♯');
+    final match = cordNamePattern.matchAsPrefix(name);
+    if (match == null) throw FormatException("invalid Chord name: $name");
+    String pitch = match[1]!;
+    String pattern = match[2]!;
+    switch (pattern) {
+      case 'm7':
+        pattern = 'min7';
+        break;
+      case '7':
+        pattern = 'dom7';
+        break;
+    }
+    return ChordPattern.parse(pattern).at(Pitch.parse(pitch));
   }
 }

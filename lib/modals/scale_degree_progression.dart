@@ -243,10 +243,9 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
                     baseIndex: baseChordPos,
                     subIndex: subChordPos,
                     type: type,
-                    withSeventh: (this[baseChordPos] != null &&
-                            this[baseChordPos]!.containsSeventh) ||
-                        (sub[subChordPos] != null &&
-                            sub[subChordPos]!.containsSeventh),
+                    // We add seventh only if base contains one.
+                    withSeventh: this[baseChordPos] != null &&
+                        this[baseChordPos]!.requiresAddingSeventh,
                   ),
                 );
               }

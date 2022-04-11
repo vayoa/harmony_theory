@@ -31,6 +31,7 @@ class SubstitutionMatch {
         base.canBeTonic) {
       return SubstitutionMatchType.tonicization;
     }
+    return null;
   }
 
   static ScaleDegreeProgression getSubstitution({
