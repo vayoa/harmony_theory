@@ -321,13 +321,13 @@ class Progression<T> {
     return measures;
   }
 
-  void add(T? value, double duration) {
-    if (duration <= 0) {
-      throw NonPositiveDuration(value, duration);
+  void add(T? value, double newDuration) {
+    if (newDuration <= 0) {
+      throw NonPositiveDuration(value, newDuration);
     }
     T? last = _values.isEmpty ? null : _values.last;
     if (_values.isNotEmpty && adjacentValuesEqual(value, last)) {
-      double dur = (duration + _durations.last) % _timeSignature.decimal;
+      double dur = (newDuration + _durations.last) % _timeSignature.decimal;
       if (dur > 0) {
         checkValidDuration(
           value: value,
@@ -338,12 +338,12 @@ class Progression<T> {
         );
         if (!_hasNull) _hasNull = value == null;
       }
-      _durations.last += duration;
+      _durations.last += newDuration;
     } else {
       checkValidDuration(
-          value: value, duration: duration, overallDuration: this.duration);
+          value: value, duration: newDuration, overallDuration: duration);
       _values.add(value);
-      _durations.add(duration);
+      _durations.add(newDuration);
     }
     if (!_hasNull) _hasNull = value == null;
     updateFull();
@@ -491,6 +491,7 @@ class Progression<T> {
     required double duration,
     required double overallDuration,
   }) {
+    assert(overallDuration >= 0);
     double decimal = _timeSignature.decimal;
     if (duration < 0) {
       throw NonPositiveDuration(value, duration);
