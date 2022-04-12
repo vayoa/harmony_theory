@@ -3,7 +3,6 @@ import 'package:thoery_test/modals/weights/weight.dart';
 
 import '../scale_degree_chord.dart';
 
-
 // TDC: This needs to be built in instead of a weight...
 class KeepHarmonicFunctionWeight extends Weight {
   const KeepHarmonicFunctionWeight({
@@ -36,13 +35,18 @@ class KeepHarmonicFunctionWeight extends Weight {
     String details = '';
     // Since a progression has to have the same duration as it's base...
     while (subIndex < progression.length && baseIndex < base.length) {
-      replacements++;
-      if (underBase != baseFunction) {
-        points++;
-        details += '-1 for ${base[baseIndex]} in base '
-            '(a ${baseFunction.name}) replaced by a '
-            '${progression[subIndex]} (a ${underBase.name}). '
-            'Deducted points: $points.\n';
+      ScaleDegreeChord? baseChord = base[baseIndex];
+      ScaleDegreeChord? subChord = progression[subIndex];
+      if (((baseChord == null) != (subChord == null)) ||
+          (baseChord != null && !baseChord.weakEqual(subChord!))) {
+        replacements++;
+        if (underBase != baseFunction) {
+          points++;
+          details += '-1 for ${base[baseIndex]} in base '
+              '(a ${baseFunction.name}) replaced by a '
+              '${progression[subIndex]} (a ${underBase.name}). '
+              'Deducted points: $points.\n';
+        }
       }
       double nextBaseDurSum = baseDurSum + base.durations[baseIndex];
       double nextSubDurSum = subDurSum + progression.durations[subIndex];
@@ -63,6 +67,7 @@ class KeepHarmonicFunctionWeight extends Weight {
     }
     details += "Out of $replacements chord replacements, $points didn't keep "
         "the base progression's harmonic function.";
-    return Score(score: 1.0 - (points / replacements), details: details);
+    double score = replacements == 0 ? 1.0 : 1.0 - (points / replacements);
+    return Score(score: score, details: details);
   }
 }
