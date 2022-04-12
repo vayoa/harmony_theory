@@ -3,14 +3,19 @@ import 'package:thoery_test/modals/scale_degree_progression.dart';
 
 // TDC: Decide if this stays static or not, since it has a constructor...
 class ProgressionBank {
-  static final Map<int, ScaleDegreeProgression> _bank = {};
+  static Map<int, ScaleDegreeProgression> _bank = {};
 
   /// Notice: if the major tonic is in the last place it will be saved in a
   /// different group then if it's in any other place (for tonicization).
-  static final Map<int, List<int>> _groupedBank = {};
+  static Map<int, List<int>> _groupedBank = {};
 
-  static final int tonicizationHash =
-      Object.hash(ScaleDegreeChord.majorTonicTriad.weakHash, true);
+  static final int _tonicHash = ScaleDegreeChord.majorTonicTriad.weakHash;
+
+  static final int tonicizationHash = Object.hash(_tonicHash, true);
+
+  Map<int, ScaleDegreeProgression> get bank => _bank;
+
+  Map<int, List<int>> get groupedBank => _groupedBank;
 
   /// Returns all saved progressions that have a
   /// [ScaleDegreeChord.majorTonicTriad] as their last chord.
@@ -49,9 +54,34 @@ class ProgressionBank {
     }
   }
 
-  Map<int, ScaleDegreeProgression> get bank => _bank;
+  ProgressionBank.fromJson(Map<String, dynamic> json) {
+    _bank = {
+      for (MapEntry<String, dynamic> entry in json['bank'].entries)
+        int.parse(entry.key): ScaleDegreeProgression.fromJson(entry.value)
+    };
+    _groupedBank = {
+      for (MapEntry<String, dynamic> entry in json['groupedBank'].entries)
+        int.parse(entry.key): entry.value.cast<int>(),
+    };
+  }
 
-  Map<int, List<int>> get groupedBank => _groupedBank;
+  /* TDC: Decide whether to save these maps with Strings as their keys to not
+          have to convert them here (but have to convert ints to strings to use
+          them, and have the map hash strings instead of ints...)
+          or
+          Keep them as int keys and convert them everytime you want to save
+          to json.
+   */
+  Map<String, dynamic> toJson() => {
+        'bank': {
+          for (MapEntry<int, ScaleDegreeProgression> entry in _bank.entries)
+            entry.key.toString(): entry.value.toJson()
+        },
+        'groupedBank': {
+          for (MapEntry<int, List<int>> entry in _groupedBank.entries)
+            entry.key.toString(): entry.value
+        }
+      };
 
   @override
   String toString() {
@@ -73,7 +103,7 @@ class ProgressionBank {
   /// [ScaleDegreeChord.majorTonicTriad]'s weak hash.
   static int weakHashWithPlace(ScaleDegreeChord chord, [bool last = false]) {
     int weakHash = chord.weakHash;
-    if (weakHash == ScaleDegreeChord.majorTonicTriad.weakHash) {
+    if (weakHash == _tonicHash) {
       return Object.hash(weakHash, last);
     }
     return weakHash;

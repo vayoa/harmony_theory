@@ -85,6 +85,15 @@ class ScaleDegree {
     }
   }
 
+  ScaleDegree.fromJson(Map<String, dynamic> json)
+      : _degree = json['d'],
+        _accidentals = json['a'];
+
+  Map<String, dynamic> toJson() => {
+        'd': _degree,
+        'a': _accidentals,
+      };
+
   static final tonic = ScaleDegree.parse('I');
   static final V = ScaleDegree.parse('V');
   static final vii = ScaleDegree.parse('vii');

@@ -15,6 +15,31 @@ extension ChordPatternExtension on ChordPattern {
     }
     return false;
   }
+
+  static ChordPattern fromJson(Map<String, dynamic> json) =>
+      chordPatternSpecs[json['fn']]!;
+
+  Map<String, dynamic> toJson() => {'fn': fullName};
+
+  static final Map<String, ChordPattern> chordPatternSpecs = {
+    'Major': ChordPattern.parse('Major'),
+    'Minor': ChordPattern.parse('Minor'),
+    'Augmented': ChordPattern.parse('Augmented'),
+    'Diminished': ChordPattern.parse('Diminished'),
+    'Sus2': ChordPattern.parse('Sus2'),
+    'Sus4': ChordPattern.parse('Sus4'),
+    'Dominant 7th': ChordPattern.parse('Dominant 7th'),
+    'Augmented 7th': ChordPattern.parse('Augmented 7th'),
+    'Diminished 7th': ChordPattern.parse('Diminished 7th'),
+    'Major 7th': ChordPattern.parse('Major 7th'),
+    'Minor 7th': ChordPattern.parse('Minor 7th'),
+    'Dominant 7♭5': ChordPattern.parse('Dominant 7♭5'),
+    'Minor 7th ♭5': ChordPattern.parse('Minor 7th ♭5'),
+    'Diminished Maj 7th': ChordPattern.parse('Diminished Maj 7th'),
+    'Minor-Major 7th': ChordPattern.parse('Minor-Major 7th'),
+    '6th': ChordPattern.parse('6th'),
+    'Minor 6th': ChordPattern.parse('Minor 6th'),
+  };
 }
 
 extension ChordExtension on Chord {

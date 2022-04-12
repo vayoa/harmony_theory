@@ -97,6 +97,15 @@ class ScaleDegreeChord {
     _rootDegree = ScaleDegree.parse(match[1]!);
   }
 
+  ScaleDegreeChord.fromJson(Map<String, dynamic> json)
+      : _rootDegree = ScaleDegree.fromJson(json['rd']),
+        _pattern = ChordPatternExtension.fromJson(json['p']);
+
+  Map<String, dynamic> toJson() => {
+        'rd': _rootDegree.toJson(),
+        'p': _pattern.toJson(),
+      };
+
   ChordPattern get pattern => _pattern;
 
   ScaleDegree get rootDegree => _rootDegree;

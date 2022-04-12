@@ -28,6 +28,8 @@ class Progression<T> {
 
   TimeSignature get timeSignature => _timeSignature;
 
+  /* TDC: This doesn't need to be a field since it can now be calculated in
+          O(n)... */
   bool _full;
 
   /// Whether the [Progression] leaves no empty spaces in a measure, based on

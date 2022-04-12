@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:thoery_test/modals/absolute_durations.dart';
 import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
@@ -83,29 +84,53 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           ),
         );
 
-  // TDC: Make this work only for minor/major...
-  // TODO: This might not work now, check (only if you're using it...)!
+  ScaleDegreeProgression.fromJson(Map<String, dynamic> json)
+      : super.raw(
+          values: [
+            for (Map<String, dynamic>? map in json['val'])
+              map == null ? null : ScaleDegreeChord.fromJson(map)
+          ],
+          durations:
+              AbsoluteDurations((json['dur'] as List<dynamic>).cast<double>()),
+          timeSignature: TimeSignature.fromJson(json['ts']),
+          hasNull: json['null'],
+        );
+
+  Map<String, dynamic> toJson() {
+    //TDC: Not sure if this is needed.
+    List<Map<String, dynamic>?> _chords =
+        values.map((e) => e?.toJson()).toList(growable: false);
+    return {
+      'val': _chords,
+      'dur': durations.realDurations,
+      'ts': timeSignature.toJson(),
+      'null': hasNull,
+    };
+  }
+
+// TDC: Make this work only for minor/major...
+// TODO: This might not work now, check (only if you're using it...)!
   /// Returns a new [ScaleDegreeChord] converted from [fromMode] mode to
   /// [toMode] mode.
   /// If [fromMode] isn't specified it is based on [_inMinor].
   /// Ionian's (Major) mode number is 0 and so on...
-  // ScaleDegreeProgression modeShift({int? fromMode, required int toMode}) {
-  //   fromMode ??= _inMinor ? 5 : 0;
-  //   return ScaleDegreeProgression.fromProgression(
-  //     Progression<ScaleDegreeChord>.raw(
-  //       values: values
-  //           .map((ScaleDegreeChord? chord) =>
-  //               chord?.modeShift(fromMode!, toMode))
-  //           .toList(),
-  //       durations: durations,
-  //       timeSignature: timeSignature,
-  //       hasNull: hasNull,
-  //     ),
-  //     inMinor: _inMinor,
-  //   );
-  // }
+// ScaleDegreeProgression modeShift({int? fromMode, required int toMode}) {
+//   fromMode ??= _inMinor ? 5 : 0;
+//   return ScaleDegreeProgression.fromProgression(
+//     Progression<ScaleDegreeChord>.raw(
+//       values: values
+//           .map((ScaleDegreeChord? chord) =>
+//               chord?.modeShift(fromMode!, toMode))
+//           .toList(),
+//       durations: durations,
+//       timeSignature: timeSignature,
+//       hasNull: hasNull,
+//     ),
+//     inMinor: _inMinor,
+//   );
+// }
 
-  /* TDC: Not sure if this is the best way to do it and if it's even
+/* TDC: Not sure if this is the best way to do it and if it's even
           important... */
   ScaleDegreeProgression addSeventh({double ratio = 1.0}) {
     ScaleDegreeProgression converted =
@@ -133,8 +158,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     return converted;
   }
 
-  // TDC: Implement scale pattern matching!!
-  /* TDC: SUPPORT THE NEW DURATION REFACTOR: MEASURES AREN'T CUT SO A VALUE
+// TDC: Implement scale pattern matching!!
+/* TDC: SUPPORT THE NEW DURATION REFACTOR: MEASURES AREN'T CUT SO A VALUE
           COULD HAVE A DURATION OF 1.25 FOR INSTANCE. WE NEED TO MATCH THAT
           VALUE FOR 1.0 AS WELL AS 0.25 IF IT'S SKIPPING A MEASURE!!!
           |
@@ -151,9 +176,9 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   /// [start] - [end] (end excluded).
   /// [forIndex], if not null, will search only for substitutions containing
   /// that index.
-  /* TDC: Make sure the ranges work correctly without flagging legal
+/* TDC: Make sure the ranges work correctly without flagging legal
           substitutions. */
-  // ADC: Convert!!
+// ADC: Convert!!
   List<SubstitutionMatch> getFittingMatchLocations(ScaleDegreeProgression sub,
       {int start = 0, int? end, int? forIndex}) {
     // List containing lists of match locations (first element is location in
@@ -262,7 +287,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   /// the progressions are (the more chords they have in common in the same
   /// duration from their start), where 0.0 means they are completely different
   /// and 1.0 means they are the same progression.
-  // TDC: This isn't really working correctly...
+// TDC: This isn't really working correctly...
   double percentMatchedTo(ScaleDegreeProgression other) {
     if (duration != other.duration) return 0.0;
     double durationSum = 0, otherSum = 0, sum = 0;
@@ -306,7 +331,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
 
   /// Get a comparing score of this [ScaleDegreeProgression] against a base
   /// one ([base]), which we're meant to substitute.
-  /* TODO: This doesn't really make sense as a progression has to possibility
+/* TODO: This doesn't really make sense as a progression has to possibility
       to substitute multiple times in one progression, so which one are we
       calculating against?
       for example, if we are a [1, 2] matching against a [1, 2, 7, 2], we can
@@ -315,7 +340,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       should calculate the substitutions for a progression, but this can't be
       it. Think of a better solution.
    */
-  /* TODO: There isn't really a perception of rhythm in this function, beyond
+/* TODO: There isn't really a perception of rhythm in this function, beyond
             one list cell = one bar. You should implement an actual rhythm
             system... (of course the ScaleDegreeProgression has to support
             a way to represent a chord's duration...).
@@ -371,23 +396,23 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     return points / length;
   }
 
-  // TDC: Implement scale pattern matching!!
-  /* TDC: Returns a lot of duplicates (that we filter with the toSet() method
+// TDC: Implement scale pattern matching!!
+/* TDC: Returns a lot of duplicates (that we filter with the toSet() method
           in the end.
           Figure out a way to optimize this filtering... (The problem could be
           in getFittingMatchLocations...).
    */
-  // TDC: Implement weight scoring in this function so we won't have to loop again.
+// TDC: Implement weight scoring in this function so we won't have to loop again.
   /// Returns a substituted [base] from the current progression within the
   /// range [start] - [end] (end excluded) if possible.
   /// If not, returns [base].
-  /* TODO: It doesn't make sense to call this from the sub on a base, switch
+/* TODO: It doesn't make sense to call this from the sub on a base, switch
           it around...
    */
-  /* TODO: Don't just copy the code, also it's inefficient to calculate these
+/* TODO: Don't just copy the code, also it's inefficient to calculate these
       things twice.
   */
-  /* TODO: If the base is a IVmaj7 V7 Imaj7 and we're a ii V I we should still
+/* TODO: If the base is a IVmaj7 V7 Imaj7 and we're a ii V I we should still
           match, and suggest a ii7 V7 Imaj7. (THIS CAN NOW BE DONE WITH THE NEW
           WEAK EQUALITY FUNCTION...).
    */
