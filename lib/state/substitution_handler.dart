@@ -9,6 +9,7 @@ import 'package:thoery_test/modals/weights/important_chords_weight.dart';
 import 'package:thoery_test/modals/weights/in_scale_weight.dart';
 import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/overtaking_weight.dart';
+import 'package:thoery_test/modals/weights/rhythm_and_placement_weight.dart';
 import 'package:thoery_test/modals/weights/uniques_weight.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
 import 'package:thoery_test/state/progression_bank.dart';
@@ -22,7 +23,7 @@ abstract class SubstitutionHandler {
     OvertakingWeight(),
     UniquesWeight(),
     HarmonicFunctionWeight(),
-    // RhythmWeight(),
+    RhythmAndPlacementWeight(),
     ImportantChordsWeight(),
   ];
 
