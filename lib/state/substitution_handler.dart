@@ -61,7 +61,9 @@ abstract class SubstitutionHandler {
     ScaleDegreeProgression base, {
     required ProgressionBank bank,
     int start = 0,
+    double startDur = 0.0,
     int? end,
+    double? endDur,
   }) {
     final List<Substitution> substitutions = [];
     end ??= base.length;
@@ -73,8 +75,14 @@ abstract class SubstitutionHandler {
             bank.getByGroup(chord: chord, withTonicization: false);
         if (progressions != null && progressions.isNotEmpty) {
           for (ScaleDegreeProgression sub in progressions) {
-            List<Substitution> possibleSubs = base.getPossibleSubstitutions(sub,
-                start: start, end: end, forIndex: i);
+            List<Substitution> possibleSubs = base.getPossibleSubstitutions(
+              sub,
+              start: start,
+              startDur: startDur,
+              end: end,
+              endDur: endDur,
+              forIndex: i,
+            );
             for (Substitution possibleSub in possibleSubs) {
               if (possibleSub.substitutedBase != base) {
                 substitutions.add(possibleSub);
@@ -99,14 +107,24 @@ abstract class SubstitutionHandler {
     return substitutions.toSet().toList();
   }
 
-  static List<Substitution> getRatedSubstitutions(ScaleDegreeProgression base,
-      {required ProgressionBank bank,
-      bool keepHarmonicFunction = false,
-      ScaleDegreeProgression? harmonicFunctionBase,
-      int start = 0,
-      int? end}) {
-    List<Substitution> substitutions =
-        _getPossibleSubstitutions(base, bank: bank, start: start, end: end);
+  static List<Substitution> getRatedSubstitutions(
+    ScaleDegreeProgression base, {
+    required ProgressionBank bank,
+    bool keepHarmonicFunction = false,
+    ScaleDegreeProgression? harmonicFunctionBase,
+    int start = 0,
+    double startDur = 0.0,
+    int? end,
+    double? endDur,
+  }) {
+    List<Substitution> substitutions = _getPossibleSubstitutions(
+      base,
+      bank: bank,
+      start: start,
+      startDur: startDur,
+      end: end,
+      endDur: endDur,
+    );
     for (Substitution sub in substitutions) {
       sub.scoreWith(weights,
           keepHarmonicFunction: keepHarmonicFunction,
@@ -164,7 +182,9 @@ abstract class SubstitutionHandler {
     required int maxIterations,
     bool keepHarmonicFunction = false,
     int start = 0,
+    double startDur = 0.0,
     int? end,
+    double? endDur,
     PitchScale? scale,
   }) {
     var sAP = getAndPrintBase(base, scale: scale);
@@ -178,7 +198,9 @@ abstract class SubstitutionHandler {
         keepHarmonicFunction: keepHarmonicFunction,
         harmonicFunctionBase: baseProgression,
         start: start,
+        startDur: startDur,
         end: end,
+        endDur: endDur,
       );
       prev = rated.first.substitutedBase;
       maxIterations--;
@@ -194,7 +216,9 @@ abstract class SubstitutionHandler {
     int? maxIterations,
     bool keepHarmonicFunction = false,
     int start = 0,
+    double startDur = 0.0,
     int? end,
+    double? endDur,
     PitchScale? scale,
   }) {
     var sAP = getAndPrintBase(base, scale: scale);
@@ -209,7 +233,9 @@ abstract class SubstitutionHandler {
         keepHarmonicFunction: keepHarmonicFunction,
         harmonicFunctionBase: baseProgression,
         start: start,
+        startDur: startDur,
         end: end,
+        endDur: endDur,
       );
       prev = rated.first.substitutedBase;
       if (maxIterations != null) {
