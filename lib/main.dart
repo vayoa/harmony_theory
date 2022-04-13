@@ -11,6 +11,7 @@ import 'modals/scale_degree_chord.dart';
 import 'modals/substitution.dart';
 
 void main() {
+  _testCut();
   _test();
   final ChordProgression _base = ChordProgression.evenTime([
     Chord.parse('Cm'),
@@ -185,14 +186,14 @@ _test() {
   //   bank: bank,
   // );
 
-  Substitution sub = SubstitutionHandler.substituteBy(
-    base: base,
+  List<Substitution> subs = SubstitutionHandler.getRatedSubstitutions(
+    ScaleDegreeProgression.fromChords(
+        PitchScale.common(tonic: Pitch.parse('C')), base),
     bank: bank,
-    maxIterations: 50,
+    // maxIterations: 50,
     keepHarmonicFunction: true,
   );
-
-  ScaleDegreeProgression baseProg = sub.base;
+  print(subs.length);
   // print(const NewRhythmWeight().score(progression: baseProg, base: baseProg));
 
   // Substitution sub = SubstitutionHandler.perfectSubstitution(
@@ -207,6 +208,38 @@ _test() {
   // }
 
   // _basicMatchingTest();
+}
+
+_testCut() {
+  var base = ScaleDegreeProgression.fromList(
+      [null, null, 'V', 'V', null, 'I', null, null]);
+  var sub = ScaleDegreeProgression.fromList(['ii', 'V', 'I', 'ii']);
+  print(base);
+  print(sub);
+  int start = 0;
+  double startDur = 0.25;
+  int? end = 2;
+  double? endDur = 0.25;
+  print(base.getFittingMatchLocations(
+    sub,
+    start: start,
+    startDur: startDur,
+    end: end,
+    endDur: endDur,
+  ));
+
+  List<Substitution> subs = base.getPossibleSubstitutions(
+    sub,
+    start: start,
+    startDur: startDur,
+    end: end,
+    endDur: endDur,
+  );
+
+  for (Substitution sub in subs) {
+    print('${sub.substitutedBase} - ${sub.match}');
+    print('${sub.substitutedBase.durations}\n');
+  }
 }
 
 _basicMatchingTest({bool inputChords = false}) {

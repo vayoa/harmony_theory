@@ -174,13 +174,31 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   /// Returns a list containing substitution match locations, where [sub] could
   /// substitute the current progression (base) within the range of
   /// [start] - [end] (end excluded).
+  ///
   /// [forIndex], if not null, will search only for substitutions containing
   /// that index.
+  ///
+  /// [startDur] - if you want to start at a different time, essentially cutting
+  /// the duration at start. The duration you input will not be included.
+  ///
+  /// [endDur] - limit the end duration. The duration you input will be
+  /// included.
 /* TDC: Make sure the ranges work correctly without flagging legal
           substitutions. */
 // ADC: Convert!!
-  List<SubstitutionMatch> getFittingMatchLocations(ScaleDegreeProgression sub,
-      {int start = 0, int? end, int? forIndex}) {
+  List<SubstitutionMatch> getFittingMatchLocations(
+    ScaleDegreeProgression sub, {
+    int start = 0,
+    int? end,
+    int? forIndex,
+    double startDur = 0.0,
+    double? endDur,
+  }) {
+    end ??= length;
+    endDur ??= durations[end - 1];
+    assert(durations[start] > startDur);
+    assert(endDur != 0 && durations[end - 1] >= endDur);
+
     // List containing lists of match locations (first element is location in
     // base and second is location here).
     final List<SubstitutionMatch> matches = [];
@@ -205,14 +223,28 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     // progression [1 2, 3, -, -] where 1 and 2 are 1/8 and 3 is a 1/4 would be
     // considered the same as a [1, 2, 3] where 1 and 2 are 1/4 and 3 is a 1/2.
 
-    end ??= length;
     int loopStart = start, loopEnd = end;
     if (forIndex != null) {
       loopStart = forIndex;
       loopEnd = forIndex + 1;
     }
 
+    double durationToStart =
+        durations.real(start) - durations[start] + startDur;
+    double maxDur = durations.real(end - 1);
+    if (endDur != durations[end - 1]) maxDur += -durations[end - 1] + endDur;
+
     for (var baseChordPos = loopStart; baseChordPos < loopEnd; baseChordPos++) {
+      double minus = 0;
+      double realBaseDuration = durations[baseChordPos];
+      if (baseChordPos == start) {
+        minus = startDur;
+      } else if (baseChordPos == end - 1) {
+        realBaseDuration = endDur;
+      }
+      realBaseDuration -= minus;
+      double realDurationToBase =
+          durations.real(baseChordPos) - durations[baseChordPos] + minus;
       for (var subChordPos = 0; subChordPos < sub.length; subChordPos++) {
         // If the two chords are equal.
         // Or if we have a tonicization.
@@ -226,22 +258,19 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           // substitute in place for the current chord.
           // For this to be true there needs to be enough duration to cover the
           // rest of the progression.
-          final double ratio =
-              durations[baseChordPos] / sub.durations[subChordPos];
+          final double ratio = realBaseDuration / sub.durations[subChordPos];
           // TDC: Is this condition even necessary?
           if (sub.duration * ratio <= duration) {
             double neededDurationLeft = 0, neededDurationRight = 0;
-            double baseDurationLeft = 0, baseDurationRight = 0;
+            double baseDurationLeft = 0.0, baseDurationRight = 0.0;
             bool enoughInLeft = false, enoughInRight = false;
             neededDurationLeft = sub.sumDurations(0, subChordPos) * ratio;
             // If this is 0 than there's no point on checking the sum since it's
             // 0... (also there'll be an error with base[baseChordPos - 1] if we
             // don't check this...)
-            if (baseChordPos != 0) {
-              for (var i = baseChordPos - 1; !enoughInLeft && i >= start; i--) {
-                baseDurationLeft += durations[i];
-                enoughInLeft = baseDurationLeft >= neededDurationLeft;
-              }
+            if (baseChordPos != start) {
+              baseDurationLeft =
+                  durations.real(baseChordPos - 1) - durationToStart;
             }
             enoughInLeft = baseDurationLeft >= neededDurationLeft;
             // Continue on only if there's enough duration to fit sub in the
@@ -249,10 +278,9 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             if (enoughInLeft) {
               if (subChordPos != end - 1) {
                 neededDurationRight = sub.sumDurations(subChordPos + 1) * ratio;
-                for (var i = baseChordPos + 1; !enoughInRight && i < end; i++) {
-                  baseDurationRight += durations[i];
-                  enoughInRight = baseDurationRight >= neededDurationRight;
-                }
+                baseDurationRight =
+                    maxDur - realDurationToBase - realBaseDuration;
+                enoughInRight = baseDurationRight >= neededDurationRight;
               }
               // enoughInRight could still be false while this condition will be
               // true (because if we matched on the last chord we won't sum the
@@ -266,7 +294,9 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
                 matches.add(
                   SubstitutionMatch(
                     baseIndex: baseChordPos,
+                    baseOffset: baseChordPos == start ? startDur : 0.0,
                     subIndex: subChordPos,
+                    ratio: ratio,
                     type: type,
                     // We add seventh only if base contains one.
                     withSeventh: this[baseChordPos] != null &&
@@ -406,6 +436,9 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   /// Returns a substituted [base] from the current progression within the
   /// range [start] - [end] (end excluded) if possible.
   /// If not, returns [base].
+  /// The range can also be fine tuned with [startDur] and [endDur]
+  /// (the duration int [startDur] will be excluded and the duration in [endDur]
+  /// wll be included).
 /* TODO: It doesn't make sense to call this from the sub on a base, switch
           it around...
    */
@@ -416,10 +449,22 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           match, and suggest a ii7 V7 Imaj7. (THIS CAN NOW BE DONE WITH THE NEW
           WEAK EQUALITY FUNCTION...).
    */
-  List<Substitution> getPossibleSubstitutions(ScaleDegreeProgression sub,
-      {int start = 0, int? end, int? forIndex}) {
-    final List<SubstitutionMatch> matches = getFittingMatchLocations(sub,
-        start: start, end: end, forIndex: forIndex);
+  List<Substitution> getPossibleSubstitutions(
+    ScaleDegreeProgression sub, {
+    int start = 0,
+    int? end,
+    int? forIndex,
+    double startDur = 0.0,
+    double? endDur,
+  }) {
+    final List<SubstitutionMatch> matches = getFittingMatchLocations(
+      sub,
+      start: start,
+      startDur: startDur,
+      end: end,
+      endDur: endDur,
+      forIndex: forIndex,
+    );
     final List<Substitution> substitutions = [];
 
     /* FIXME: This gets computed twice (first time in
@@ -438,7 +483,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
                 progression: sub,
                 type: match.type,
                 addSeventh: match.withSeventh,
-                ratio: durations[baseChord] / sub.durations[chord],
+                ratio: match.ratio,
                 tonic: this[match.baseIndex]);
         // The duration from the beginning of sub to matching chord in sub.
         double d1 = -1 * relativeMatch.sumDurations(0, chord);
@@ -448,12 +493,12 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         // the duration of the matching chord itself.
         double d2 = relativeMatch.sumDurations(chord);
         // Last index to change...
-        int right = getIndexFromDuration(d2, from: baseChord);
+        int right =
+            getIndexFromDuration(d2 - match.baseOffset, from: baseChord);
         ScaleDegreeProgression substitution =
             ScaleDegreeProgression.fromProgression(sublist(0, left));
-        // TDC: This won't support empty chord spaces...
-        double bd1 = -1 * sumDurations(left, baseChord);
-        double bd2 = sumDurations(baseChord, right + 1);
+        double bd1 = -1 * sumDurations(left, baseChord) - match.baseOffset;
+        double bd2 = sumDurations(baseChord, right + 1) - match.baseOffset;
         if (bd1 - d1 != 0) {
           substitution.add(this[left], -1 * (bd1 - d1));
         }
