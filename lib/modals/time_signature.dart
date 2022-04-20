@@ -25,8 +25,13 @@ class TimeSignature {
   // I'm not saving step and decimal since we can very easily calculate them
   // and it'll save space in the json.
   /// Only works with the one digit time signatures that exists currently.
-  TimeSignature.fromString(String string)
-      : this(int.parse(string[0]), int.parse(string[2]));
+  TimeSignature.fromJson(Map<String, dynamic> json)
+      : this(json['n'], json['d']);
+
+  Map<String, dynamic> toJson() => {
+        'n': numerator,
+        'd': denominator,
+      };
 
   // TDC: Check this!!
   /// Returns whether [duration] is valid for this TimeSignature or not.

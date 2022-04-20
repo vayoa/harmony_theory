@@ -92,7 +92,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           ],
           durations:
               AbsoluteDurations((json['dur'] as List<dynamic>).cast<double>()),
-          timeSignature: TimeSignature.fromString(json['ts']),
+          timeSignature: TimeSignature.fromJson(json['ts']),
           hasNull: json['null'],
         );
 
@@ -103,7 +103,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     return {
       'val': _chords,
       'dur': durations.realDurations,
-      'ts': timeSignature.toString(),
+      'ts': timeSignature.toJson(),
       'null': hasNull,
     };
   }
