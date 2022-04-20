@@ -43,10 +43,14 @@ abstract class ProgressionBank {
 
   static void initializeBuiltIn() {
     // TODO: Make sure no two same hashes are in a list in _groupedBank.
-    for (ProgressionBankEntry entry in _bankList) {
-      assert(
-          entry.title.isNotEmpty && entry.builtIn && entry.usedInSubstitutions);
-      add(entry);
+    for (MapEntry<String, ScaleDegreeProgression> mapEntry
+        in _builtInBank.entries) {
+      ProgressionBankEntry entry = ProgressionBankEntry(
+        builtIn: true,
+        usedInSubstitutions: true,
+        progression: mapEntry.value,
+      );
+      add(title: mapEntry.key, entry: entry);
     }
   }
 
@@ -58,8 +62,7 @@ abstract class ProgressionBank {
     };
     _bank = {
       for (MapEntry<String, dynamic> entry in json['bank'].entries)
-        entry.key:
-            ProgressionBankEntry.fromJson(json: entry.value, title: entry.key)
+        entry.key: ProgressionBankEntry.fromJson(json: entry.value)
     };
     _groupedBank = {
       for (MapEntry<String, dynamic> entry in json['groupedBank'].entries)
@@ -96,14 +99,14 @@ abstract class ProgressionBank {
   ///
   /// If another entry in the bank has the same title, will override that
   /// entry with the new one ([entry]).
-  static void add(ProgressionBankEntry entry) {
-    String title = entry.title;
+  static void add(
+      {required String title, required ProgressionBankEntry entry}) {
     // Remove the entry if currently present.
     remove(title);
     _bank[title] = entry;
     if (entry.usedInSubstitutions) {
       int hash = entry.progression.hashCode;
-      _addProgToGroups(entry.progression, entry.title, hash);
+      _addProgToGroups(entry.progression, title, hash);
     }
   }
 
@@ -177,8 +180,7 @@ abstract class ProgressionBank {
   static void rename(
       {required String previousTitle, required String newTitle}) {
     if (canRename(previousTitle: previousTitle, newTitle: newTitle)) {
-      ProgressionBankEntry entry =
-          _bank[previousTitle]!.copyWith(title: newTitle);
+      ProgressionBankEntry entry = _bank[previousTitle]!;
       _bank.remove(previousTitle);
       _bank[newTitle] = entry;
       if (entry.usedInSubstitutions) {
@@ -258,226 +260,89 @@ abstract class ProgressionBank {
     return null;
   }
 
-  static final List<ProgressionBankEntry> _bankList = [
-    ProgressionBankEntry(
-      title: 'Deceptive Cadence',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['V', 'vi']),
-    ),
+  static final Map<String, ScaleDegreeProgression> _builtInBank = {
+    'Deceptive Cadence': ScaleDegreeProgression.fromList(['V', 'vi']),
     // V I
-    ProgressionBankEntry(
-      title: 'Authentic Cadence',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['V', 'I']),
-    ),
-    ProgressionBankEntry(
-      title: 'Authentic Cadence 2',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['V', 'I'],
-          durations: [1 / 4, 1 / 2]),
-    ),
+    'Authentic Cadence': ScaleDegreeProgression.fromList(['V', 'I']),
+    'Authentic Cadence 2':
+        ScaleDegreeProgression.fromList(['V', 'I'], durations: [1 / 4, 1 / 2]),
     // ii V I
-    ProgressionBankEntry(
-      title: 'Two-Five-One',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['ii', 'V', 'I']),
-    ),
-    ProgressionBankEntry(
-      title: 'Two-Five-One 2',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['ii', 'V', 'I'],
-          durations: [1 / 4, 1 / 4, 1 / 2]),
-    ),
-    ProgressionBankEntry(
-      title: 'Altered Two-Five-One in Minor',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(
-          ['viidim', 'iii', 'III', 'vi'],
-          durations: [1 / 4, 1 / 4, 1 / 4, 1 / 4]),
-    ),
-    ProgressionBankEntry(
-      title: 'Two(diminished)-Five-One',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['iidim', 'V', 'I']),
-    ),
-    ProgressionBankEntry(
-      title: 'Two(half-diminished)-Five-One',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['iim7b5', 'V', 'I']),
-    ),
-    ProgressionBankEntry(
-      title: 'Two-Five-One with 7ths',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['iim7b5', 'V7', 'I']),
-    ),
+    'Two-Five-One': ScaleDegreeProgression.fromList(['ii', 'V', 'I']),
+    'Two-Five-One 2': ScaleDegreeProgression.fromList(['ii', 'V', 'I'],
+        durations: [1 / 4, 1 / 4, 1 / 2]),
+    'Altered Two-Five-One in Minor': ScaleDegreeProgression.fromList(
+        ['viidim', 'iii', 'III', 'vi'],
+        durations: [1 / 4, 1 / 4, 1 / 4, 1 / 4]),
+    'Two(diminished)-Five-One':
+        ScaleDegreeProgression.fromList(['iidim', 'V', 'I']),
+    'Two(half-diminished)-Five-One':
+        ScaleDegreeProgression.fromList(['iim7b5', 'V', 'I']),
+
+    'Two-Five-One with 7ths':
+        ScaleDegreeProgression.fromList(['iim7b5', 'V7', 'I']),
+
     // IV V I
-    ProgressionBankEntry(
-      title: 'Four-Five-One',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['IV', 'V', 'I']),
-    ),
-    ProgressionBankEntry(
-      title: 'Altered Minor Plagal Cadence',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['IV', 'iv', 'I']),
-    ),
+    'Four-Five-One': ScaleDegreeProgression.fromList(['IV', 'V', 'I']),
+
+    'Altered Minor Plagal Cadence':
+        ScaleDegreeProgression.fromList(['IV', 'iv', 'I']),
+
     // IV I
-    ProgressionBankEntry(
-      title: 'Plagal Cadence',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['IV', 'I']),
-    ),
-    ProgressionBankEntry(
-      title: 'Minor Plagal Cadence',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['iv', 'I']),
-    ),
+    'Plagal Cadence': ScaleDegreeProgression.fromList(['IV', 'I']),
+
+    'Minor Plagal Cadence': ScaleDegreeProgression.fromList(['iv', 'I']),
+
     // Added
-    ProgressionBankEntry(
-      title: 'Altered Authentic Cadence in Minor',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['iii', 'III', 'vi']),
-    ),
-    ProgressionBankEntry(
-      title: 'Altered Authentic Cadence in Minor 2',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['iii', 'III', 'vi', 'vi']),
-    ),
-    ProgressionBankEntry(
-      title: 'Diminished Resolution with 7ths',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['iim7b5', 'I']),
-    ),
-    ProgressionBankEntry(
-      title: 'Diminished Resolution',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['iidim', 'I']),
-    ),
-    ProgressionBankEntry(
-      title: 'Diatonic Quartal Harmony',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression:
-          ScaleDegreeProgression.fromList(['IV', 'II', 'V', 'III', 'vi']),
-    ),
-    ProgressionBankEntry(
-      title: 'Reversed Diatonic Quartal Harmony',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression:
-          ScaleDegreeProgression.fromList(['vi', 'III', 'V', 'II', 'IV']),
-    ),
-    ProgressionBankEntry(
-      // TDC: Get the help of yuval to name.
-      title: 'Yuval Added',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['bVII', 'V', 'I']),
-    ),
-    ProgressionBankEntry(
-      // TDC: Get the help of yuval to name.
-      title: 'Yuval Added 2',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression:
-          ScaleDegreeProgression.fromList(['bVI', 'IV', 'bVII', 'V', 'I']),
-    ),
-    ProgressionBankEntry(
-      title: 'One-Four-One',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['I', 'IV', 'I']),
-    ),
-    ProgressionBankEntry(
-      title: 'One-Six-One',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['I', 'iv', 'I']),
-    ),
-    ProgressionBankEntry(
-      // TDC: Get the help of yuval to name.
-      title: 'Yuval Added 3',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['bII', 'V', 'I']),
-    ),
-    ProgressionBankEntry(
-      // TDC: Get the help of yuval to name.
-      title: 'Yuval Added 4',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['bVII', 'VIIdim7', 'I']),
-    ),
-    ProgressionBankEntry(
-      // TDC: Get the help of yuval to name.
-      title: 'Diatonic Diminished',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['VIIdim7', 'I']),
-    ),
-    ProgressionBankEntry(
-      // TDC: Get the help of yuval to name.
-      title: 'Minor-Based Diminished',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['bII7', 'I']),
-    ),
-    ProgressionBankEntry(
-      // TDC: Get the help of yuval to name.
-      title: 'Yuval Added 5',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['ii', 'bII', 'I']),
-    ),
-    ProgressionBankEntry(
-      // TDC: Get the help of yuval to name.
-      title: 'Yuval Added 6',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['iidim', 'bII', 'I']),
-    ),
-    ProgressionBankEntry(
-      // TDC: Get the help of yuval to name.
-      title: 'Yuval Added 7',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['bVI', 'bVII', 'I']),
-    ),
-    ProgressionBankEntry(
-      // TDC: Get the help of yuval to name.
-      title: 'Yuval Added 8',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['bVII', 'I']),
-    ),
-    ProgressionBankEntry(
-      title: 'Augmented Authentic Cadence',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['Vaug', 'I']),
-    ),
-    ProgressionBankEntry(
-      title: 'Six-Five-One',
-      builtIn: true,
-      usedInSubstitutions: true,
-      progression: ScaleDegreeProgression.fromList(['iv', 'V', 'I']),
-    ),
-  ];
+    'Altered Authentic Cadence in Minor':
+        ScaleDegreeProgression.fromList(['iii', 'III', 'vi']),
+
+    'Altered Authentic Cadence in Minor 2':
+        ScaleDegreeProgression.fromList(['iii', 'III', 'vi', 'vi']),
+
+    'Diminished Resolution with 7ths':
+        ScaleDegreeProgression.fromList(['iim7b5', 'I']),
+
+    'Diminished Resolution': ScaleDegreeProgression.fromList(['iidim', 'I']),
+
+    'Diatonic Quartal Harmony':
+        ScaleDegreeProgression.fromList(['IV', 'II', 'V', 'III', 'vi']),
+
+    'Reversed Diatonic Quartal Harmony':
+        ScaleDegreeProgression.fromList(['vi', 'III', 'V', 'II', 'IV']),
+
+    // TDC: Get the help of yuval to name.
+    'Yuval Added': ScaleDegreeProgression.fromList(['bVII', 'V', 'I']),
+
+    // TDC: Get the help of yuval to name.
+    'Yuval Added 2':
+        ScaleDegreeProgression.fromList(['bVI', 'IV', 'bVII', 'V', 'I']),
+
+    'One-Four-One': ScaleDegreeProgression.fromList(['I', 'IV', 'I']),
+
+    'One-Six-One': ScaleDegreeProgression.fromList(['I', 'iv', 'I']),
+
+    // TDC: Get the help of yuval to name.
+    'Yuval Added 3': ScaleDegreeProgression.fromList(['bII', 'V', 'I']),
+
+    // TDC: Get the help of yuval to name.
+    'Yuval Added 4': ScaleDegreeProgression.fromList(['bVII', 'VIIdim7', 'I']),
+
+    // TDC: Get the help of yuval to name.
+    'Diatonic Diminished': ScaleDegreeProgression.fromList(['VIIdim7', 'I']),
+
+    // TDC: Get the help of yuval to name.
+    'Minor-Based Diminished': ScaleDegreeProgression.fromList(['bII7', 'I']),
+
+    // TDC: Get the help of yuval to name.
+    'Yuval Added 5': ScaleDegreeProgression.fromList(['ii', 'bII', 'I']),
+    // TDC: Get the help of yuval to name.
+    'Yuval Added 6': ScaleDegreeProgression.fromList(['iidim', 'bII', 'I']),
+    // TDC: Get the help of yuval to name.
+    'Yuval Added 7': ScaleDegreeProgression.fromList(['bVI', 'bVII', 'I']),
+    // TDC: Get the help of yuval to name.
+    'Yuval Added 8': ScaleDegreeProgression.fromList(['bVII', 'I']),
+    'Augmented Authentic Cadence':
+        ScaleDegreeProgression.fromList(['Vaug', 'I']),
+    'Six-Five-One': ScaleDegreeProgression.fromList(['iv', 'V', 'I']),
+  };
 }
