@@ -99,11 +99,12 @@ class ScaleDegreeChord {
 
   ScaleDegreeChord.fromJson(Map<String, dynamic> json)
       : _rootDegree = ScaleDegree.fromJson(json['rd']),
-        _pattern = ChordPatternExtension.fromJson(json['p']);
+        _pattern = ChordPatternExtension.fromFullName(json['p']);
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() =>
+      {
         'rd': _rootDegree.toJson(),
-        'p': _pattern.toJson(),
+        'p': _pattern.fullName,
       };
 
   ChordPattern get pattern => _pattern;

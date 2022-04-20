@@ -16,10 +16,8 @@ extension ChordPatternExtension on ChordPattern {
     return false;
   }
 
-  static ChordPattern fromJson(Map<String, dynamic> json) =>
-      chordPatternSpecs[json['fn']]!;
-
-  Map<String, dynamic> toJson() => {'fn': fullName};
+  static ChordPattern fromFullName(String fullName) =>
+      chordPatternSpecs[fullName]!;
 
   static final Map<String, ChordPattern> chordPatternSpecs = {
     'Major': ChordPattern.parse('Major'),
