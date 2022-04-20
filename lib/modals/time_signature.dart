@@ -22,12 +22,11 @@ class TimeSignature {
   /// Constructs a 4/4 [TimeSignature] object.
   const TimeSignature.evenTime() : this(4, 4);
 
-  TimeSignature.fromJson(Map<String, dynamic> json)
-      : this(json['num'], json['denom']);
-
   // I'm not saving step and decimal since we can very easily calculate them
   // and it'll save space in the json.
-  Map<String, dynamic> toJson() => {'num': numerator, 'denom': denominator};
+  /// Only works with the one digit time signatures that exists currently.
+  TimeSignature.fromString(String string)
+      : this(int.parse(string[0]), int.parse(string[2]));
 
   // TDC: Check this!!
   /// Returns whether [duration] is valid for this TimeSignature or not.
