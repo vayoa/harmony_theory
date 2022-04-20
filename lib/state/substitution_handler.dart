@@ -175,7 +175,6 @@ abstract class SubstitutionHandler {
 
   static Substitution substituteBy({
     required ChordProgression base,
-    required ProgressionBank bank,
     required int maxIterations,
     bool keepHarmonicFunction = false,
     int start = 0,
@@ -208,7 +207,6 @@ abstract class SubstitutionHandler {
 
   static Substitution perfectSubstitution({
     required ChordProgression base,
-    required ProgressionBank bank,
     int? maxIterations,
     bool keepHarmonicFunction = false,
     int start = 0,
