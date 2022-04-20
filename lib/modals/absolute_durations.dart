@@ -88,8 +88,15 @@ class AbsoluteDurations {
       other.length == length &&
       other._real == _real;
 
+  /// Hashes based on rhythm relations. We take the first duration and base
+  /// the whole other ones on the relation between them and it.
   @override
-  int get hashCode => Object.hashAll(_real);
+  int get hashCode {
+    if (_real.isEmpty) return Object.hashAll(_real);
+    double _first = _real.first;
+    List<double> relations = [for (double dur in _real) dur / _first];
+    return Object.hashAll(relations);
+  }
 
   @override
   String toString() {

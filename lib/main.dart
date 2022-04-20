@@ -137,7 +137,7 @@ _test() {
   // print(bank);
   // print(base.getPossibleSubstitutions(bank));
 
-  ProgressionBank bank = ProgressionBank();
+  ProgressionBank.initializeBuiltIn();
   // Chords for "יונתן הקטן".
   ChordProgression base = ChordProgression(
     chords: [
@@ -189,7 +189,6 @@ _test() {
   List<Substitution> subs = SubstitutionHandler.getRatedSubstitutions(
     ScaleDegreeProgression.fromChords(
         PitchScale.common(tonic: Pitch.parse('C')), base),
-    bank: bank,
     // maxIterations: 50,
     keepHarmonicFunction: true,
   );

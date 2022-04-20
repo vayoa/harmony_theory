@@ -59,7 +59,6 @@ abstract class SubstitutionHandler {
 
   static List<Substitution> _getPossibleSubstitutions(
     ScaleDegreeProgression base, {
-    required ProgressionBank bank,
     int start = 0,
     double startDur = 0.0,
     int? end,
@@ -72,7 +71,7 @@ abstract class SubstitutionHandler {
       if (chord != null) {
         // TDC: Implement tonicization optimization.
         List<ScaleDegreeProgression>? progressions =
-            bank.getByGroup(chord: chord, withTonicization: false);
+            ProgressionBank.getByGroup(chord: chord, withTonicization: false);
         if (progressions != null && progressions.isNotEmpty) {
           for (ScaleDegreeProgression sub in progressions) {
             List<Substitution> possibleSubs = base.getPossibleSubstitutions(
@@ -109,7 +108,6 @@ abstract class SubstitutionHandler {
 
   static List<Substitution> getRatedSubstitutions(
     ScaleDegreeProgression base, {
-    required ProgressionBank bank,
     bool keepHarmonicFunction = false,
     ScaleDegreeProgression? harmonicFunctionBase,
     int start = 0,
@@ -119,7 +117,6 @@ abstract class SubstitutionHandler {
   }) {
     List<Substitution> substitutions = _getPossibleSubstitutions(
       base,
-      bank: bank,
       start: start,
       startDur: startDur,
       end: end,
@@ -165,7 +162,7 @@ abstract class SubstitutionHandler {
     ScaleDegreeProgression baseProgression = sAP.value;
 
     List<Substitution> rated = getRatedSubstitutions(baseProgression,
-        bank: bank, keepHarmonicFunction: keepHarmonicFunction);
+        keepHarmonicFunction: keepHarmonicFunction);
 
     print('Suggestions:');
     String subs = '';
@@ -194,7 +191,6 @@ abstract class SubstitutionHandler {
     do {
       rated = getRatedSubstitutions(
         prev,
-        bank: bank,
         keepHarmonicFunction: keepHarmonicFunction,
         harmonicFunctionBase: baseProgression,
         start: start,
@@ -229,7 +225,6 @@ abstract class SubstitutionHandler {
     do {
       rated = getRatedSubstitutions(
         prev,
-        bank: bank,
         keepHarmonicFunction: keepHarmonicFunction,
         harmonicFunctionBase: baseProgression,
         start: start,
