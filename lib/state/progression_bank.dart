@@ -99,15 +99,16 @@ abstract class ProgressionBank {
   ///
   /// If another entry in the bank has the same title, will override that
   /// entry with the new one ([entry]).
-  static void add(
-      {required String title, required ProgressionBankEntry entry}) {
+  ///
+  /// Will return the hash of the progression.
+  static int add({required String title, required ProgressionBankEntry entry}) {
     // Remove the entry if currently present.
-    remove(title);
+    int hash = remove(title) ?? entry.progression.hashCode;
     _bank[title] = entry;
     if (entry.usedInSubstitutions) {
-      int hash = entry.progression.hashCode;
       _addProgToGroups(entry.progression, title, hash);
     }
+    return hash;
   }
 
   /// Removes an entry with the title of [entryTitle] from the [_bank] (and
@@ -115,17 +116,24 @@ abstract class ProgressionBank {
   /// [usedInSubstitutions]...).
   ///
   /// If no such entry exists (only checks for it's title), will do nothing.
-  static void remove(String entryTitle) {
+  ///
+  /// Will return the hash of the progression if removed.
+  static int? remove(String entryTitle) {
     if (_bank.containsKey(entryTitle)) {
       ProgressionBankEntry entry = _bank[entryTitle]!;
+      int hash = entry.progression.hashCode;
       _bank.remove(entryTitle);
+      _substitutionsHashesBank.remove(hash);
       if (entry.usedInSubstitutions) {
-        int hash = entry.progression.hashCode;
         _removeProgFromGroups(entry.progression, hash);
       }
+      return hash;
     }
+    return null;
   }
 
+  /// Adds the progression to it's relevant groups ([_groupedBank]) and to
+  /// [_substitutionsHashesBank] to be later used in substitutions.
   static void _addProgToGroups(ScaleDegreeProgression progression, String title,
       [int? hash]) {
     hash ??= progression.hashCode;
@@ -153,7 +161,6 @@ abstract class ProgressionBank {
   static void _removeProgFromGroups(ScaleDegreeProgression progression,
       [int? hash]) {
     hash ??= progression.hashCode;
-    _substitutionsHashesBank.remove(hash);
     for (int i = 0; i < progression.length; i++) {
       ScaleDegreeChord? chord = progression[i];
       final Map<int, ScaleDegreeChord> addedChords = {};
@@ -208,6 +215,7 @@ abstract class ProgressionBank {
         if (useInSubstitutions) {
           _addProgToGroups(entry.progression, title);
         } else {
+          _substitutionsHashesBank.remove(hash);
           _removeProgFromGroups(entry.progression);
         }
       }
