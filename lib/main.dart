@@ -139,8 +139,8 @@ _test() {
 
   ProgressionBank.initializeBuiltIn();
   // Chords for "יונתן הקטן".
-  ChordProgression base = ChordProgression(
-    chords: [
+  ChordProgression base = ChordProgression.evenTime(
+    [
       Chord.parse('C'),
       Chord.parse('G'),
       Chord.parse('C'),
@@ -160,26 +160,6 @@ _test() {
       Chord.parse('G'),
       Chord.parse('C'),
     ],
-    durations: [
-      1 / 4 * 2,
-      1 / 4 * 2,
-      1 / 4 * 2,
-      1 / 4 * 2,
-      1 / 4 * 2,
-      1 / 4 * 2,
-      1 / 8 * 2,
-      1 / 8 * 2,
-      1 / 4 * 2,
-      1 / 4 * 2,
-      1 / 4 * 2,
-      1 / 4 * 2,
-      1 / 4 * 2,
-      1 / 4 * 2,
-      1 / 4 * 2,
-      1 / 8 * 2,
-      1 / 8 * 2,
-      1 / 4 * 2,
-    ],
   );
   // SubstitutionHandler.test(
   //   base: base,
@@ -193,6 +173,7 @@ _test() {
     keepHarmonicFunction: true,
   );
   print(subs.length);
+  assert(subs.length == 455);
   // print(const NewRhythmWeight().score(progression: baseProg, base: baseProg));
 
   // Substitution sub = SubstitutionHandler.perfectSubstitution(

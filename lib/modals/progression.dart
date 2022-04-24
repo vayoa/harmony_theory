@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:thoery_test/extensions/chord_extension.dart';
+import 'package:thoery_test/modals/identifiable.dart';
 import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
 
@@ -16,7 +17,7 @@ import 'exceptions.dart';
 /// If 2 adjacent values are the same, their durations are summed and they
 /// become one value. This is done to save space as the cases in which we need
 /// them to be split are less common then the cases where it doesn't matter.
-class Progression<T> {
+class Progression<T> implements Identifiable {
   late final List<T?> _values;
 
   List<T?> get values => _values;
@@ -199,6 +200,7 @@ class Progression<T> {
           Look at all of its uses and try to fit getPlayingIndex() in there
           instead.
   */
+
   /// Returns a list index such that the duration from that index to [from] is
   /// [duration]. Negative [durations] also work.
   /// If no such index exits, returns -1.
@@ -391,6 +393,19 @@ class Progression<T> {
 
   @override
   int get hashCode => Object.hash(Object.hashAll(_values), _durations);
+
+  @override
+  int get id => Identifiable.hash2(valuesID, _durations.id);
+
+  int get valuesID {
+    if (_values.isEmpty) return _values.hashCode;
+    int hash = 0;
+    for (T? value in _values) {
+      hash = Identifiable.combine(
+          hash, value is Identifiable ? value.id : value.hashCode);
+    }
+    return Identifiable.finish(hash);
+  }
 
   String valueFormat(T? value) =>
       value == null ? 'null' : notNullValueFormat(value);

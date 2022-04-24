@@ -1,4 +1,6 @@
-class AbsoluteDurations {
+import 'package:thoery_test/modals/identifiable.dart';
+
+class AbsoluteDurations implements Identifiable {
   late final List<double> _real;
 
   AbsoluteDurations(this._real);
@@ -96,6 +98,17 @@ class AbsoluteDurations {
     double _first = _real.first;
     List<double> relations = [for (double dur in _real) dur / _first];
     return Object.hashAll(relations);
+  }
+
+  @override
+  int get id {
+    if (_real.isEmpty) return _real.hashCode;
+    double _first = _real.first;
+    int hash = 0;
+    for (double dur in _real) {
+      hash = Identifiable.combine(hash, (dur / _first).hashCode);
+    }
+    return Identifiable.finish(hash);
   }
 
   @override

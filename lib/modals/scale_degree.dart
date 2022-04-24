@@ -1,8 +1,9 @@
 import 'package:thoery_test/extensions/scale_extension.dart';
+import 'package:thoery_test/modals/identifiable.dart';
 import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:tonic/tonic.dart';
 
-class ScaleDegree {
+class ScaleDegree implements Identifiable {
   static const List<String> degrees = [
     'I',
     'II',
@@ -178,4 +179,7 @@ class ScaleDegree {
 
   @override
   int get hashCode => Object.hash(_degree, _accidentals);
+
+  @override
+  int get id => Identifiable.hash2(_degree, _accidentals);
 }

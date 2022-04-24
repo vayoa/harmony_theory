@@ -1,11 +1,12 @@
 import 'package:thoery_test/extensions/chord_extension.dart';
 import 'package:thoery_test/extensions/interval_extension.dart';
+import 'package:thoery_test/modals/identifiable.dart';
 import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
 
-class ScaleDegreeChord {
+class ScaleDegreeChord implements Identifiable {
   late final ChordPattern _pattern;
 
   /// The root degree from which the chord is constructed.
@@ -318,6 +319,21 @@ class ScaleDegreeChord {
         _rootDegree,
         Object.hashAll(
             [for (Interval interval in intervals) interval.getHash]));
+  }
+
+  /// Like [weakHash] but is consistent over executions.
+  @override
+  int get id {
+    List<Interval> intervals = _pattern.intervals.sublist(1, 3);
+    if (intervals.length >= 4) {
+      if (!_rootDegree.add(_pattern.intervals[3]).isDiatonic) {
+        intervals.add(_pattern.intervals[3]);
+      }
+    }
+    return Identifiable.hash2(
+        _rootDegree.id,
+        Identifiable.hashAllInts(
+            [for (Interval interval in intervals) interval.id]));
   }
 
   HarmonicFunction deriveHarmonicFunction({ScaleDegreeChord? next}) {
