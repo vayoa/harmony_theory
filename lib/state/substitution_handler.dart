@@ -94,8 +94,8 @@ abstract class SubstitutionHandler {
     // We do this here since it's more efficient...
     List<ScaleDegreeProgression> tonicizations = ProgressionBank.tonicizations;
     for (ScaleDegreeProgression sub in tonicizations) {
-      List<Substitution> possibleSubs =
-          base.getPossibleSubstitutions(sub, start: start, end: end);
+      List<Substitution> possibleSubs = base.getPossibleSubstitutions(sub,
+          start: start, startDur: startDur, end: end, endDur: endDur);
       for (Substitution possibleSub in possibleSubs) {
         if (possibleSub.substitutedBase != base) {
           substitutions.add(possibleSub);
