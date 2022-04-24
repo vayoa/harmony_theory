@@ -139,8 +139,8 @@ _test() {
 
   ProgressionBank.initializeBuiltIn();
   // Chords for "יונתן הקטן".
-  ChordProgression base = ChordProgression.evenTime(
-    [
+  ChordProgression base = ChordProgression(
+    chords: [
       Chord.parse('C'),
       Chord.parse('G'),
       Chord.parse('C'),
@@ -159,6 +159,26 @@ _test() {
       Chord.parse('C'),
       Chord.parse('G'),
       Chord.parse('C'),
+    ],
+    durations: [
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 8 * 2,
+      1 / 8 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 4 * 2,
+      1 / 8 * 2,
+      1 / 8 * 2,
+      1 / 4 * 2,
     ],
   );
   // SubstitutionHandler.test(
