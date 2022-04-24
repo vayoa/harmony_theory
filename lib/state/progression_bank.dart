@@ -242,10 +242,7 @@ abstract class ProgressionBank {
   /// [ScaleDegreeChord.majorTonicTriad]'s weak hash.
   static int weakHashWithPlace(ScaleDegreeChord chord, [bool last = false]) {
     int weakHash = chord.weakHash;
-    if (weakHash == _tonicHash) {
-      return Object.hash(weakHash, last);
-    }
-    return weakHash;
+    return Object.hash(weakHash, weakHash == _tonicHash ? last : false);
   }
 
   /// Returns all saved progressions from [_bank] containing the
