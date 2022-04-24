@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:thoery_test/extensions/chord_extension.dart';
 import 'package:thoery_test/extensions/interval_extension.dart';
 import 'package:thoery_test/modals/identifiable.dart';
@@ -70,10 +72,10 @@ class ScaleDegreeChord implements Identifiable {
 
   ScaleDegreeChord.copy(ScaleDegreeChord chord)
       : _pattern = ChordPattern(
-            name: chord._pattern.name,
-            fullName: chord._pattern.fullName,
-            abbrs: chord._pattern.abbrs,
-            intervals: chord._pattern.intervals),
+      name: chord._pattern.name,
+      fullName: chord._pattern.fullName,
+      abbrs: chord._pattern.abbrs,
+      intervals: chord._pattern.intervals),
         _rootDegree = ScaleDegree.copy(chord._rootDegree);
 
   ScaleDegreeChord.parse(String chord) {
@@ -102,8 +104,7 @@ class ScaleDegreeChord implements Identifiable {
       : _rootDegree = ScaleDegree.fromJson(json['rd']),
         _pattern = ChordPatternExtension.fromFullName(json['p']);
 
-  Map<String, dynamic> toJson() =>
-      {
+  Map<String, dynamic> toJson() => {
         'rd': _rootDegree.toJson(),
         'p': _pattern.fullName,
       };
@@ -219,7 +220,7 @@ class ScaleDegreeChord implements Identifiable {
         return ScaleDegreeChord.raw(
             ChordPattern.parse('Augmented 7th'), _rootDegree);
       case "Diminished":
-        // not sure if to add 'Diminished 7th' here somehow...
+      // not sure if to add 'Diminished 7th' here somehow...
         return ScaleDegreeChord.raw(
             ChordPattern.parse('Minor 7th ♭5'), _rootDegree);
       default:
@@ -263,6 +264,10 @@ class ScaleDegreeChord implements Identifiable {
 
   @override
   int get hashCode => Object.hash(_pattern.fullName, _rootDegree);
+
+  @override
+  int get id => Identifiable.hash2(
+      Identifiable.hashAllInts(utf8.encode(_pattern.fullName)), _rootDegree.id);
 
   // TDC: Check if this works correctly!!
   /// Returns true if the chord is equal to [other], such that their triads + 7
@@ -322,8 +327,7 @@ class ScaleDegreeChord implements Identifiable {
   }
 
   /// Like [weakHash] but is consistent over executions.
-  @override
-  int get id {
+  int get weakID {
     List<Interval> intervals = _pattern.intervals.sublist(1, 3);
     if (intervals.length >= 4) {
       if (!_rootDegree.add(_pattern.intervals[3]).isDiatonic) {
@@ -356,7 +360,7 @@ class ScaleDegreeChord implements Identifiable {
 
   // TDC: Maybe skip defining where it goes entirely and just do things with percentages...
   static final Map<int, Map<List<int>?, HarmonicFunction>> defaultFunctions =
-      <ScaleDegreeChord, Map<List<String>?, HarmonicFunction>>{
+  <ScaleDegreeChord, Map<List<String>?, HarmonicFunction>>{
     ScaleDegreeChord.majorTonicTriad: {
       null: HarmonicFunction.tonic,
     },
@@ -400,16 +404,16 @@ class ScaleDegreeChord implements Identifiable {
       ['vi']: HarmonicFunction.subDominant,
     }
   }.map((ScaleDegreeChord key, Map<List<String>?, HarmonicFunction> value) =>
-          MapEntry<int, Map<List<int>?, HarmonicFunction>>(key.weakHash, {
-            for (MapEntry<List<String>?, HarmonicFunction> entry
-                in value.entries)
-              (entry.key == null
-                  ? null
-                  : [
-                      for (String chord in entry.key!)
-                        ScaleDegreeChord.parse(chord).weakHash
-                    ]): entry.value
-          }));
+      MapEntry<int, Map<List<int>?, HarmonicFunction>>(key.weakHash, {
+        for (MapEntry<List<String>?, HarmonicFunction> entry
+        in value.entries)
+          (entry.key == null
+              ? null
+              : [
+            for (String chord in entry.key!)
+              ScaleDegreeChord.parse(chord).weakHash
+          ]): entry.value
+      }));
 
   static final ScaleDegreeChord majorTonicTriad = ScaleDegreeChord.parse('I');
   static final ScaleDegreeChord ii = ScaleDegreeChord.parse('ii');

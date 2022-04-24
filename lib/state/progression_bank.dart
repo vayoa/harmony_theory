@@ -19,7 +19,7 @@ abstract class ProgressionBank {
   /// different group then if it's in any other place (for tonicization).
   static Map<int, List<int>> _groupedBank = {};
 
-  static final int _tonicID = ScaleDegreeChord.majorTonicTriad.id;
+  static final int _tonicID = ScaleDegreeChord.majorTonicTriad.weakID;
 
   static final int tonicizationID = Identifiable.hash2(_tonicID, true.hashCode);
 
@@ -222,7 +222,7 @@ abstract class ProgressionBank {
   /// [last] will only have effect when [chord.id] is equal to
   /// [ScaleDegreeChord.majorTonicTriad]'s weak hash.
   static int weakIDWithPlace(ScaleDegreeChord chord, [bool last = false]) {
-    int weakID = chord.id;
+    int weakID = chord.weakID;
     return Identifiable.hash2(
         weakID, weakID == _tonicID ? last.hashCode : false.hashCode);
   }
