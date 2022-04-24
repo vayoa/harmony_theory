@@ -102,9 +102,9 @@ class AbsoluteDurations implements Identifiable {
 
   @override
   int get id {
-    if (_real.isEmpty) return _real.hashCode;
-    double _first = _real.first;
     int hash = 0;
+    if (_real.isEmpty) return hash;
+    double _first = _real.first;
     for (double dur in _real) {
       hash = Identifiable.combine(hash, (dur / _first).hashCode);
     }

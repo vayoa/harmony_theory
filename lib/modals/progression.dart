@@ -398,8 +398,8 @@ class Progression<T> implements Identifiable {
   int get id => Identifiable.hash2(valuesID, _durations.id);
 
   int get valuesID {
-    if (_values.isEmpty) return _values.hashCode;
     int hash = 0;
+    if (_values.isEmpty) return hash;
     for (T? value in _values) {
       hash = Identifiable.combine(
           hash, value is Identifiable ? value.id : value.hashCode);
