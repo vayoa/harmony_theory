@@ -45,8 +45,11 @@ abstract class ProgressionBank {
 
   static void initializeBuiltIn() {
     // TODO: Make sure no two same ids are in a list in _groupedBank.
+    _bank = {};
+    _substitutionsIDBank = {};
+    _groupedBank = {}
     for (MapEntry<String, ScaleDegreeProgression> mapEntry
-        in _builtInBank.entries) {
+    in _builtInBank.entries) {
       ProgressionBankEntry entry = ProgressionBankEntry(
         builtIn: true,
         usedInSubstitutions: true,
