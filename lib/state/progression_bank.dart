@@ -3,6 +3,8 @@ import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/state/progression_bank_entry.dart';
 
+import '../modals/progression.dart';
+
 // TDC: Decide if this stays static or not, since it has a constructor...
 abstract class ProgressionBank {
   /// Key - entry title, value - entry.
@@ -203,6 +205,9 @@ abstract class ProgressionBank {
   static bool canUseInSubstitutions(String title) =>
       _bank.containsKey(title) &&
       !idExistsInSubs(title, _bank[title]!.progression.id);
+
+  static bool canBeSubstitution(Progression progression) =>
+      progression.length >= 2 && progression.length <= 8;
 
   static void changeUseInSubstitutions(
       {required String title, required bool useInSubstitutions}) {
