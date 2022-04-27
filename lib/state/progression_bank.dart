@@ -200,7 +200,7 @@ abstract class ProgressionBank {
   }
 
   static bool idExistsInSubs(String title, int id) =>
-      _substitutionsIDBank.containsKey(id) && _substitutionsIDBank[id] != title;
+      _substitutionsIDBank.containsKey(id) && _substitutionsIDBank[id] == title;
 
   static bool canUseInSubstitutions(String title) =>
       _bank.containsKey(title) &&
