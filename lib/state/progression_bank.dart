@@ -199,12 +199,13 @@ abstract class ProgressionBank {
     }
   }
 
-  static bool idExistsInSubs(String title, int id) =>
-      _substitutionsIDBank.containsKey(id) && _substitutionsIDBank[id] == title;
+  static bool idFreeInSubs(String title, int id) =>
+      !_substitutionsIDBank.containsKey(id) ||
+      _substitutionsIDBank[id] == title;
 
   static bool canUseInSubstitutions(String title) =>
       _bank.containsKey(title) &&
-      !idExistsInSubs(title, _bank[title]!.progression.id);
+      idFreeInSubs(title, _bank[title]!.progression.id);
 
   static bool canBeSubstitution(Progression progression) =>
       progression.length >= 2 && progression.length <= 8;
@@ -214,7 +215,7 @@ abstract class ProgressionBank {
     if (_bank.containsKey(title)) {
       ProgressionBankEntry entry = _bank[title]!;
       if (entry.usedInSubstitutions != useInSubstitutions &&
-          !idExistsInSubs(title, _bank[title]!.progression.id)) {
+          idFreeInSubs(title, _bank[title]!.progression.id)) {
         _bank[title] = entry.copyWith(usedInSubstitutions: useInSubstitutions);
         if (useInSubstitutions) {
           _addProgToGroups(entry.progression, title);
