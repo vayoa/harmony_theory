@@ -128,8 +128,8 @@ abstract class ProgressionBank {
       ProgressionBankEntry entry = _bank[entryTitle]!;
       int id = entry.progression.id;
       _bank.remove(entryTitle);
-      _substitutionsIDBank.remove(id);
-      if (entry.usedInSubstitutions) {
+      if (entry.usedInSubstitutions && entryTitle == _substitutionsIDBank[id]) {
+        _substitutionsIDBank.remove(id);
         _removeProgFromGroups(entry.progression, id);
       }
       return id;
