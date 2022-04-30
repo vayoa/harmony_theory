@@ -283,6 +283,8 @@ abstract class ProgressionBank {
     // IV V I
     'Four-Five-One': ScaleDegreeProgression.fromList(['IV', 'V', 'I']),
 
+    'Four(minor)-Five-One': ScaleDegreeProgression.fromList(['iv', 'V', 'I']),
+
     'Altered Minor Plagal Cadence':
         ScaleDegreeProgression.fromList(['IV', 'iv', 'I']),
 
@@ -342,6 +344,5 @@ abstract class ProgressionBank {
     'Yuval Added 8': ScaleDegreeProgression.fromList(['bVII', 'I']),
     'Augmented Authentic Cadence':
         ScaleDegreeProgression.fromList(['Vaug', 'I']),
-    'Six-Five-One': ScaleDegreeProgression.fromList(['iv', 'V', 'I']),
   };
 }
