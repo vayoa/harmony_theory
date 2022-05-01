@@ -192,7 +192,10 @@ _test() {
     // maxIterations: 50,
     keepHarmonicFunction: true,
   );
-  print(subs.length);
+  print('subs: ${subs.length}');
+  for (var sub in subs) {
+    print('${sub.originalSubstitution} - ${sub.substitutedBase}');
+  }
   assert(subs.length == 455);
   // print(const NewRhythmWeight().score(progression: baseProg, base: baseProg));
 

@@ -188,7 +188,9 @@ class Progression<T> implements Identifiable {
   /// Sums [durations] from [start] to [end], not including [end].
   /// If [start] == [end], returns 0.0.
   double sumDurations([int start = 0, int? end]) {
-    assert(start >= 0 && (end == null || (end <= length && start <= end)));
+    if (!(start >= 0 && (end == null || (end <= length && start <= end)))) {
+      throw RangeError('0 <= $start <= $end <= $length is not true.');
+    }
     if (start == 0 && end == null) return duration;
     end ??= length;
     // This is done like this since every element includes its own duration...

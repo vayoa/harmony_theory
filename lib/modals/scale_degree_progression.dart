@@ -488,13 +488,14 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         // The duration from the beginning of sub to matching chord in sub.
         double d1 = -1 * relativeMatch.sumDurations(0, chord);
         // First index that could be changed.
-        int left = getIndexFromDuration(d1, from: baseChord);
+        int left = getPlayingIndex(d1, from: baseChord);
         // The duration from the matching chord in sub to the end of sub, without
         // the duration of the matching chord itself.
         double d2 = relativeMatch.sumDurations(chord);
         // Last index to change...
-        int right =
-            getIndexFromDuration(d2 - match.baseOffset, from: baseChord);
+        int right = getPlayingIndex(
+            d2 - match.baseOffset - (timeSignature.step / 2),
+            from: baseChord);
         ScaleDegreeProgression substitution =
             ScaleDegreeProgression.fromProgression(sublist(0, left));
         double bd1 = -1 * sumDurations(left, baseChord) - match.baseOffset;
@@ -541,7 +542,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     for (int i = 0; i < relativeSubSection.length; i++) {
       ScaleDegreeChord? filler = relativeSubSection[i];
       double dur = relativeSubSection.durations[i];
-      filler ??= this[getIndexFromDuration(durationBefore + sum)];
+      filler ??= this[getPlayingIndex(durationBefore + sum)];
       sum += dur;
       filled.add(filler, dur);
     }
