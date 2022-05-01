@@ -504,7 +504,7 @@ class Progression<T> implements Identifiable {
 
   /// Checks whether [duration] is valid.
   void checkValidDuration({
-    required dynamic value,
+    required T? value,
     required double duration,
     required double overallDuration,
   }) {
