@@ -32,12 +32,16 @@ abstract class ProgressionBank {
   static Map<int, List<int>> get groupedBank => _groupedBank;
 
   /// Returns all saved progressions that have a
-  /// [ScaleDegreeChord.majorTonicTriad] as their last chord.
-  static List<ScaleDegreeProgression> get tonicizations {
+  /// [ScaleDegreeChord.majorTonicTriad] as their last chord in the form of
+  /// [title, progression].
+  static List<List<dynamic>> get tonicizations {
     if (_groupedBank.containsKey(tonicizationID)) {
       return [
         for (int id in _groupedBank[tonicizationID]!)
-          _bank[_substitutionsIDBank[id]!]!.progression
+          [
+            _substitutionsIDBank[id]!,
+            _bank[_substitutionsIDBank[id]!]!.progression
+          ]
       ];
     }
     return const [];
