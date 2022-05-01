@@ -3,9 +3,9 @@ import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/substitution_match.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
-import 'package:tonic/tonic.dart';
 
 class Substitution {
+  final String? title;
   final ScaleDegreeProgression substitutedBase;
   final ScaleDegreeProgression originalSubstitution;
   final ScaleDegreeProgression base;
@@ -17,6 +17,7 @@ class Substitution {
   double get rating => score.score;
 
   Substitution({
+    this.title,
     required this.substitutedBase,
     required this.originalSubstitution,
     required this.base,
@@ -27,6 +28,7 @@ class Substitution {
   }) : score = score ?? SubstitutionScore.empty();
 
   Substitution copyWith({
+    String? title,
     ScaleDegreeProgression? substitutedBase,
     ScaleDegreeProgression? originalSubstitution,
     ScaleDegreeProgression? base,
@@ -36,6 +38,7 @@ class Substitution {
     SubstitutionMatch? match,
   }) =>
       Substitution(
+        title: title ?? this.title,
         substitutedBase: substitutedBase ?? this.substitutedBase,
         originalSubstitution: originalSubstitution ?? this.originalSubstitution,
         base: base ?? this.base,
@@ -47,8 +50,7 @@ class Substitution {
 
   /// If [keepHarmonicFunction] is true and no [harmonicFunctionBase] is given,
   /// will use [base] as the latter.
-  SubstitutionScore scoreWith(
-    List<Weight> weights, {
+  SubstitutionScore scoreWith(List<Weight> weights, {
     bool keepHarmonicFunction = false,
     ScaleDegreeProgression? harmonicFunctionBase,
   }) {
@@ -95,7 +97,7 @@ class Substitution {
 
   @override
   String toString({PitchScale? scale, bool detailed = false}) {
-    return '-- $originalSubstitution --\n'
+    return '-- "$title" $originalSubstitution --\n'
             '$substitutedBase' +
         (scale == null ? ': ' : ' ->\n${substitutedBase.inScale(scale)}:') +
         ' ${rating.toStringAsFixed(3)} '

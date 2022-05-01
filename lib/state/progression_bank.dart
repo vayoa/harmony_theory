@@ -241,10 +241,10 @@ abstract class ProgressionBank {
   }
 
   /// Returns all saved progressions from [_bank] containing the
-  /// [ScaleDegreeChord.id] of [chord].
+  /// [ScaleDegreeChord.id] of [chord] in the form of [title, progression].
   /// If [withTonicization] is true, returns also all saved progressions that
   /// have a [ScaleDegreeChord.majorTonicTriad] as their last chord.
-  static List<ScaleDegreeProgression>? getByGroup(
+  static List<List<dynamic>>? getByGroup(
       {required ScaleDegreeChord chord, required bool withTonicization}) {
     List<int>? ids = _groupedBank[weakIDWithPlace(chord, false)];
     if (ids != null) {
@@ -253,7 +253,11 @@ abstract class ProgressionBank {
         ids.addAll(_groupedBank[tonicizationID]!);
       }
       return [
-        for (int id in ids) _bank[_substitutionsIDBank[id]!]!.progression
+        for (int id in ids)
+          [
+            _substitutionsIDBank[id]!,
+            _bank[_substitutionsIDBank[id]!]!.progression
+          ]
       ];
     }
     return null;

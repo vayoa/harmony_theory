@@ -70,12 +70,12 @@ abstract class SubstitutionHandler {
       ScaleDegreeChord? chord = base[i];
       if (chord != null) {
         // TDC: Implement tonicization optimization.
-        List<ScaleDegreeProgression>? progressions =
+        List<List<dynamic>>? progressions =
             ProgressionBank.getByGroup(chord: chord, withTonicization: false);
         if (progressions != null && progressions.isNotEmpty) {
-          for (ScaleDegreeProgression sub in progressions) {
+          for (List<dynamic> pair in progressions) {
             List<Substitution> possibleSubs = base.getPossibleSubstitutions(
-              sub,
+              pair[1],
               start: start,
               startDur: startDur,
               end: end,
@@ -84,7 +84,7 @@ abstract class SubstitutionHandler {
             );
             for (Substitution possibleSub in possibleSubs) {
               if (possibleSub.substitutedBase != base) {
-                substitutions.add(possibleSub);
+                substitutions.add(possibleSub.copyWith(title: pair[0]));
               }
             }
           }
@@ -94,6 +94,7 @@ abstract class SubstitutionHandler {
     // We do this here since it's more efficient...
     List<ScaleDegreeProgression> tonicizations = ProgressionBank.tonicizations;
     for (ScaleDegreeProgression sub in tonicizations) {
+      String title = ProgressionBank.substitutionsIDBank[sub.id]!;
       List<Substitution> possibleSubs = base.getPossibleSubstitutions(sub,
           start: start, startDur: startDur, end: end, endDur: endDur);
       for (Substitution possibleSub in possibleSubs) {
