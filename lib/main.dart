@@ -196,7 +196,7 @@ _test() {
   assert(subs.length == 452);
 
   subs = SubstitutionHandler.getRatedSubstitutions(progression,
-      keepAmount: KeepHarmonicFunctionAmount.medium);
+      keepAmount: KeepHarmonicFunctionAmount.med);
   print('subs (medium): ${subs.length}');
   assert(subs.length == 452);
 

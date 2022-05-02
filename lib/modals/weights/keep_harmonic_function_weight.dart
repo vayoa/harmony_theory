@@ -82,6 +82,6 @@ class KeepHarmonicFunctionWeight extends Weight {
 
 enum KeepHarmonicFunctionAmount {
   low, // Don't check at all.
-  medium, // Check and treat as a real weight.
+  med, // Check and treat as a real weight.
   high, // If a sub doesn't get full points, remove it.
 }
