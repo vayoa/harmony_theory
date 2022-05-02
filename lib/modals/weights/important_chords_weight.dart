@@ -159,7 +159,8 @@ class ImportantChordsWeight extends Weight {
           // there's no need to check if a dominant is preceding it, since we
           // know there isn't...
           stopNext = true;
-          if (!_isTonic(progression[middleSub])) {
+          if (middleSub < progression.length &&
+              !_isTonic(progression[middleSub])) {
             points++;
             details +=
                 '-1 for tonic in the middle of base (${base[middleBase]}) '
