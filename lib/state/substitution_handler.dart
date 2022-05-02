@@ -30,6 +30,11 @@ abstract class SubstitutionHandler {
   static const KeepHarmonicFunctionWeight keepHarmonicFunction =
       KeepHarmonicFunctionWeight();
 
+  static KeepHarmonicFunctionAmount _keepAmount =
+      KeepHarmonicFunctionAmount.high;
+
+  static KeepHarmonicFunctionAmount get keepAmount => _keepAmount;
+
   /* TODO: Find a better way to access weights by name (or provide the weight
           object in SubstitutionScore. */
   static final Map<String, Weight> weightsMap = {
@@ -103,13 +108,14 @@ abstract class SubstitutionHandler {
 
   static List<Substitution> getRatedSubstitutions(
     ScaleDegreeProgression base, {
-    bool keepHarmonicFunction = false,
+    KeepHarmonicFunctionAmount? keepAmount,
     ScaleDegreeProgression? harmonicFunctionBase,
     int start = 0,
     double startDur = 0.0,
     int? end,
     double? endDur,
   }) {
+    if (keepAmount != null) _keepAmount = keepAmount;
     List<Substitution> substitutions = _getPossibleSubstitutions(
       base,
       start: start,
@@ -117,13 +123,18 @@ abstract class SubstitutionHandler {
       end: end,
       endDur: endDur,
     );
+    List<Substitution> sorted = [];
+    bool shouldCalc = _keepAmount != KeepHarmonicFunctionAmount.low;
     for (Substitution sub in substitutions) {
-      sub.scoreWith(weights,
-          keepHarmonicFunction: keepHarmonicFunction,
+      SubstitutionScore? score = sub.scoreWith(weights,
+          keepHarmonicFunction: shouldCalc,
           harmonicFunctionBase: harmonicFunctionBase);
+      if (score != null) {
+        sorted.add(sub);
+      }
     }
-    substitutions.sort((Substitution a, Substitution b) => -1 * a.compareTo(b));
-    return substitutions;
+    sorted.sort((Substitution a, Substitution b) => -1 * a.compareTo(b));
+    return sorted;
   }
 
   static MapEntry<PitchScale, ScaleDegreeProgression> getAndPrintBase(
@@ -146,7 +157,7 @@ abstract class SubstitutionHandler {
   static List<Substitution> test(
       {ChordProgression? base,
       bool inputBase = false,
-      keepHarmonicFunction = false,
+      KeepHarmonicFunctionAmount? keepAmount,
       required ProgressionBank bank}) {
     assert(base != null || inputBase);
     if (inputBase) {
@@ -156,8 +167,8 @@ abstract class SubstitutionHandler {
     PitchScale scale = sAP.key;
     ScaleDegreeProgression baseProgression = sAP.value;
 
-    List<Substitution> rated = getRatedSubstitutions(baseProgression,
-        keepHarmonicFunction: keepHarmonicFunction);
+    List<Substitution> rated =
+        getRatedSubstitutions(baseProgression, keepAmount: keepAmount);
 
     print('Suggestions:');
     String subs = '';
@@ -171,7 +182,7 @@ abstract class SubstitutionHandler {
   static Substitution substituteBy({
     required ChordProgression base,
     required int maxIterations,
-    bool keepHarmonicFunction = false,
+    KeepHarmonicFunctionAmount? keepHarmonicFunction,
     int start = 0,
     double startDur = 0.0,
     int? end,
@@ -185,7 +196,7 @@ abstract class SubstitutionHandler {
     do {
       rated = getRatedSubstitutions(
         prev,
-        keepHarmonicFunction: keepHarmonicFunction,
+        keepAmount: keepHarmonicFunction,
         harmonicFunctionBase: baseProgression,
         start: start,
         startDur: startDur,
@@ -203,7 +214,7 @@ abstract class SubstitutionHandler {
   static Substitution perfectSubstitution({
     required ChordProgression base,
     int? maxIterations,
-    bool keepHarmonicFunction = false,
+    KeepHarmonicFunctionAmount? keepHarmonicFunction,
     int start = 0,
     double startDur = 0.0,
     int? end,
@@ -218,7 +229,7 @@ abstract class SubstitutionHandler {
     do {
       rated = getRatedSubstitutions(
         prev,
-        keepHarmonicFunction: keepHarmonicFunction,
+        keepAmount: keepHarmonicFunction,
         harmonicFunctionBase: baseProgression,
         start: start,
         startDur: startDur,

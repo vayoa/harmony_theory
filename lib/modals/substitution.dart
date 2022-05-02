@@ -1,6 +1,7 @@
 import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/substitution_match.dart';
+import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
 
@@ -48,15 +49,37 @@ class Substitution {
         match: match ?? this.match,
       );
 
+  /// Returns and sets the substitution's [score] based on the relevant
+  /// parameters.
+  ///
+  /// If [KeepHarmonicFunctionWeight] (based on
+  /// [SubstitutionHandler.keepAmount]) has failed a progression, returns null.
+  ///
   /// If [keepHarmonicFunction] is true and no [harmonicFunctionBase] is given,
   /// will use [base] as the latter.
-  SubstitutionScore scoreWith(List<Weight> weights, {
+  SubstitutionScore? scoreWith(
+    List<Weight> weights, {
     bool keepHarmonicFunction = false,
     ScaleDegreeProgression? harmonicFunctionBase,
   }) {
     double rating = 0.0;
     int length = 0;
     Map<String, Score> details = {};
+    // First, score with
+    if (keepHarmonicFunction) {
+      Weight keep = SubstitutionHandler.keepHarmonicFunction;
+      Score keepScore = keep.scaledScore(
+          progression: substitutedBase, base: harmonicFunctionBase ?? base);
+      rating += keepScore.score;
+      details[keep.name] = keepScore;
+      length += keep.importance;
+      // If keepAmount is high and the substitution keepHarmonicFunction score
+      // is 0, return null.
+      if (SubstitutionHandler.keepAmount == KeepHarmonicFunctionAmount.high &&
+          keepScore.score == 0.0) {
+        return null;
+      }
+    }
     for (Weight weight in weights) {
       Score weightScore;
       length += weight.importance;
@@ -72,14 +95,6 @@ class Substitution {
       }
       rating += weightScore.score;
       details[weight.name] = weightScore;
-    }
-    if (keepHarmonicFunction) {
-      Weight keep = SubstitutionHandler.keepHarmonicFunction;
-      Score keepScore = keep.scaledScore(
-          progression: substitutedBase, base: harmonicFunctionBase ?? base);
-      rating += keepScore.score;
-      details[keep.name] = keepScore;
-      length += keep.importance;
     }
     rating / length;
     score = SubstitutionScore(score: rating / length, details: details);

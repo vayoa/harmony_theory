@@ -1,20 +1,18 @@
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
+import 'package:thoery_test/state/substitution_handler.dart';
 
 import '../scale_degree_chord.dart';
 
 // TDC: This needs to be built in instead of a weight...
 class KeepHarmonicFunctionWeight extends Weight {
-  const KeepHarmonicFunctionWeight({
-    this.keepHarmonicFunctionAmount = 5,
-  }) : super(
+  const KeepHarmonicFunctionWeight()
+      : super(
           name: 'KeepHarmonicFunction',
           description: WeightDescription.technical,
           importance: 5,
           scoringStage: ScoringStage.afterSubstitution,
         );
-
-  final int keepHarmonicFunctionAmount;
 
   @override
   Score score({
@@ -41,6 +39,16 @@ class KeepHarmonicFunctionWeight extends Weight {
           (baseChord != null && !baseChord.weakEqual(subChord!))) {
         replacements++;
         if (underBase != baseFunction) {
+          // We use the static keep amount in SubstitutionHandler.
+          if (SubstitutionHandler.keepAmount ==
+              KeepHarmonicFunctionAmount.high) {
+            return Score(
+                score: 0.0,
+                details: 'A ${base[baseIndex]} in base '
+                    '(a ${baseFunction.name}) was replaced by a '
+                    '${progression[subIndex]} (a ${underBase.name}). '
+                    'Deducted points: $points.');
+          }
           points++;
           details += '-1 for ${base[baseIndex]} in base '
               '(a ${baseFunction.name}) replaced by a '
@@ -70,4 +78,10 @@ class KeepHarmonicFunctionWeight extends Weight {
     double score = replacements == 0 ? 1.0 : 1.0 - (points / replacements);
     return Score(score: score, details: details);
   }
+}
+
+enum KeepHarmonicFunctionAmount {
+  low, // Don't check at all.
+  medium, // Check and treat as a real weight.
+  high, // If a sub doesn't get full points, remove it.
 }

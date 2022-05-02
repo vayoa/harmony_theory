@@ -1,5 +1,6 @@
 import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
+import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:tonic/tonic.dart';
@@ -186,14 +187,23 @@ _test() {
   //   bank: bank,
   // );
 
+  ScaleDegreeProgression progression = ScaleDegreeProgression.fromChords(
+      PitchScale.common(tonic: Pitch.parse('C')), base);
   List<Substitution> subs = SubstitutionHandler.getRatedSubstitutions(
-    ScaleDegreeProgression.fromChords(
-        PitchScale.common(tonic: Pitch.parse('C')), base),
-    // maxIterations: 50,
-    keepHarmonicFunction: true,
-  );
-  print('subs: ${subs.length}');
+      progression,
+      keepAmount: KeepHarmonicFunctionAmount.low);
+  print('subs (low): ${subs.length}');
   assert(subs.length == 452);
+
+  subs = SubstitutionHandler.getRatedSubstitutions(progression,
+      keepAmount: KeepHarmonicFunctionAmount.medium);
+  print('subs (medium): ${subs.length}');
+  assert(subs.length == 452);
+
+  subs = SubstitutionHandler.getRatedSubstitutions(progression,
+      keepAmount: KeepHarmonicFunctionAmount.high);
+  print('subs (high): ${subs.length}');
+  assert(subs.length == 19);
   // print(const NewRhythmWeight().score(progression: baseProg, base: baseProg));
 
   // Substitution sub = SubstitutionHandler.perfectSubstitution(
