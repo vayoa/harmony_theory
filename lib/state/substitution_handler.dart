@@ -31,7 +31,7 @@ abstract class SubstitutionHandler {
       KeepHarmonicFunctionWeight();
 
   static KeepHarmonicFunctionAmount _keepAmount =
-      KeepHarmonicFunctionAmount.high;
+      KeepHarmonicFunctionAmount.med;
 
   static KeepHarmonicFunctionAmount get keepAmount => _keepAmount;
 
