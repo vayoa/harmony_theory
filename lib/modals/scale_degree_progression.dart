@@ -360,7 +360,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         double d2 = relativeMatch.sumDurations(chord);
         // Last index to change...
         int right =
-            getPlayingIndex(d2 - match.baseOffset - halfStep, from: baseChord);
+            getPlayingIndex(d2 + match.baseOffset - halfStep, from: baseChord);
         ScaleDegreeProgression substitution =
             ScaleDegreeProgression.fromProgression(sublist(0, left));
         double bd1 = -1 * sumDurations(left, baseChord) - match.baseOffset;
