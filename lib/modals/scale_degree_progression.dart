@@ -276,8 +276,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             // Continue on only if there's enough duration to fit sub in the
             // left side of base from baseChordPose...
             if (enoughInLeft) {
+              neededDurationRight = sub.sumDurations(subChordPos + 1) * ratio;
               if (subChordPos != end - 1) {
-                neededDurationRight = sub.sumDurations(subChordPos + 1) * ratio;
                 baseDurationRight =
                     maxDur - realDurationToBase - realBaseDuration;
                 enoughInRight = baseDurationRight >= neededDurationRight;
@@ -496,6 +496,9 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         int right = getPlayingIndex(
             d2 - match.baseOffset - (timeSignature.step / 2),
             from: baseChord);
+        if (right == -1) {
+          throw Exception();
+        }
         ScaleDegreeProgression substitution =
             ScaleDegreeProgression.fromProgression(sublist(0, left));
         double bd1 = -1 * sumDurations(left, baseChord) - match.baseOffset;
