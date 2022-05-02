@@ -311,37 +311,35 @@ abstract class ProgressionBank {
     'Reversed Diatonic Quartal Harmony':
         ScaleDegreeProgression.fromList(['vi', 'III', 'V', 'II', 'IV']),
 
-    // TDC: Get the help of yuval to name.
-    'Yuval Added': ScaleDegreeProgression.fromList(['bVII', 'V', 'I']),
+    'Mix Pre-Dominant': ScaleDegreeProgression.fromList(['bVII', 'V', 'I']),
 
-    // TDC: Get the help of yuval to name.
-    'Yuval Added 2':
+    'Long Chromatic Inner Voice':
         ScaleDegreeProgression.fromList(['bVI', 'IV', 'bVII', 'V', 'I']),
 
     'One-Four-One': ScaleDegreeProgression.fromList(['I', 'IV', 'I']),
 
     'One-Four-One Altered': ScaleDegreeProgression.fromList(['I', 'iv', 'I']),
 
-    // TDC: Get the help of yuval to name.
-    'Yuval Added 3': ScaleDegreeProgression.fromList(['bII', 'V', 'I']),
+    'Neapolitan Cadence': ScaleDegreeProgression.fromList(['bII', 'V', 'I']),
 
-    // TDC: Get the help of yuval to name.
-    'Yuval Added 4': ScaleDegreeProgression.fromList(['bVII', 'VIIdim7', 'I']),
+    'Short Chromatic Inner Voice (dim)':
+        ScaleDegreeProgression.fromList(['bVII', 'VIIdim7', 'I']),
 
-    // TDC: Get the help of yuval to name.
     'Diatonic Diminished': ScaleDegreeProgression.fromList(['VIIdim7', 'I']),
 
-    // TDC: Get the help of yuval to name.
     'Minor-Based Diminished': ScaleDegreeProgression.fromList(['bII7', 'I']),
 
-    // TDC: Get the help of yuval to name.
-    'Yuval Added 5': ScaleDegreeProgression.fromList(['ii', 'bII', 'I']),
-    // TDC: Get the help of yuval to name.
-    'Yuval Added 6': ScaleDegreeProgression.fromList(['iidim', 'bII', 'I']),
-    // TDC: Get the help of yuval to name.
-    'Yuval Added 7': ScaleDegreeProgression.fromList(['bVI', 'bVII', 'I']),
-    // TDC: Get the help of yuval to name.
-    'Yuval Added 8': ScaleDegreeProgression.fromList(['bVII', 'I']),
+    'Two-SubFive-One': ScaleDegreeProgression.fromList(['ii', 'bII', 'I']),
+
+    'Two(diminished)-SubFive-One':
+        ScaleDegreeProgression.fromList(['iidim', 'bII', 'I']),
+
+    'Simple Mixture Ascent':
+        ScaleDegreeProgression.fromList(['bVI', 'bVII', 'I']),
+
+    'Short Simple Mixture Ascent':
+        ScaleDegreeProgression.fromList(['bVII', 'I']),
+
     'Augmented Authentic Cadence':
         ScaleDegreeProgression.fromList(['Vaug', 'I']),
   };
