@@ -274,7 +274,6 @@ class ScaleDegreeChord implements Identifiable {
   int get id => Identifiable.hash2(
       Identifiable.hashAllInts(utf8.encode(_pattern.fullName)), _rootDegree.id);
 
-  // TDC: Check if this works correctly!!
   /// Returns true if the chord is equal to [other], such that their triads + 7
   /// are equal. Tensions aren't taken into consideration.
   /// If there's no 7 in only one of the chords we treat it as if it had the
@@ -310,11 +309,6 @@ class ScaleDegreeChord implements Identifiable {
     }
     return true;
   }
-
-  // TDC: Only works for the major scale, is this correct?
-  // TDC: Check if this works correctly!!
-  /* TDC: Needs to be better realized, doesn't really match with the regular
-          hash. */
 
   /// Returns a hash of the chord with no tensions. 7th are hashed in if
   /// they're not diatonic (based on the major scale).
@@ -359,11 +353,9 @@ class ScaleDegreeChord implements Identifiable {
       }
       return forChord[null]!;
     }
-    // TDC: Actually implement this function...
     return HarmonicFunction.undefined;
   }
 
-  // TDC: Maybe skip defining where it goes entirely and just do things with percentages...
   static final Map<int, Map<List<int>?, HarmonicFunction>> defaultFunctions =
   <ScaleDegreeChord, Map<List<String>?, HarmonicFunction>>{
     ScaleDegreeChord.majorTonicTriad: {

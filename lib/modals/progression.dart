@@ -29,10 +29,6 @@ class Progression<T> implements Identifiable {
 
   TimeSignature get timeSignature => _timeSignature;
 
-  /* TDC: This doesn't need to be a field since it can now be calculated in
-          O(n)... */
-  bool _full;
-
   /// Whether the [Progression] leaves no empty spaces in a measure, based on
   /// its [_timeSignature].
   bool get full => duration % _timeSignature.decimal == 0;
@@ -56,7 +52,6 @@ class Progression<T> implements Identifiable {
       {TimeSignature? timeSignature, double? ratio})
       : assert(values.length == durations.length),
         _timeSignature = timeSignature ?? const TimeSignature.evenTime(),
-        _full = false,
         _hasNull = false,
         _values = [] {
     ratio ??= 1.0;
@@ -88,7 +83,6 @@ class Progression<T> implements Identifiable {
       }
     }
     _durations = AbsoluteDurations(_durationList);
-    updateFull();
   }
 
   // Since sublist is used a lot, I made this one function for a light
@@ -111,7 +105,6 @@ class Progression<T> implements Identifiable {
   })  : assert(values.length == durations.length),
         _timeSignature = timeSignature ?? const TimeSignature.evenTime(),
         _hasNull = false,
-        _full = false,
         _values = [] {
     ratio ??= 1.0;
     end ??= values.length;
@@ -143,7 +136,6 @@ class Progression<T> implements Identifiable {
       }
     }
     _durations = AbsoluteDurations(_durationList);
-    updateFull();
   }
 
   /// Constructs a progression where [durations] is a list of absolute durations.
@@ -164,10 +156,7 @@ class Progression<T> implements Identifiable {
   })  : _values = values,
         _durations = durations,
         _timeSignature = timeSignature,
-        _hasNull = hasNull,
-        _full = durations.isEmpty
-            ? true
-            : durations.realLast % timeSignature.decimal == 0;
+        _hasNull = hasNull;
 
   Progression.empty({TimeSignature? timeSignature})
       : this.absolute([], [], timeSignature: timeSignature);
@@ -179,11 +168,6 @@ class Progression<T> implements Identifiable {
             List.generate(base.length,
                 (index) => (index + 1) * (1 / timeSignature.denominator)),
             timeSignature: timeSignature);
-
-  bool updateFull() {
-    _full = duration % _timeSignature.decimal == 0;
-    return _full;
-  }
 
   /// Sums [durations] from [start] to [end], not including [end].
   /// If [start] == [end], returns 0.0.
@@ -197,11 +181,6 @@ class Progression<T> implements Identifiable {
     return (end == 0 ? 0.0 : _durations.real(end - 1)) -
         (start == 0 ? 0.0 : _durations.real(start - 1));
   }
-
-  /* TDC: This function makes absolutely no sense and is not consistent.
-          Look at all of its uses and try to fit getPlayingIndex() in there
-          instead.
-  */
 
   /// Returns the index of the "playing" value at [duration] from the index
   /// [from] (INCLUDED!!! see examples), which is 0 by default.
@@ -331,12 +310,11 @@ class Progression<T> implements Identifiable {
       _durations.add(newDuration);
     }
     if (!_hasNull) _hasNull = value == null;
-    updateFull();
   }
 
   void addAll(Progression<T> progression) {
     if (!progression.isEmpty) {
-      bool fullBefore = _full;
+      bool fullBefore = full;
       // In case the last of the current progression is equal to the first
       // of the added progression...
       add(progression.values.first, progression.durations.first);
@@ -344,7 +322,6 @@ class Progression<T> implements Identifiable {
         if (fullBefore) {
           _values.addAll(progression.values.sublist(1));
           _durations.addAll(progression.durations, from: 1);
-          updateFull();
         } else {
           for (int i = 1; i < progression.length; i++) {
             add(progression.values[i], progression.durations[i]);
@@ -429,7 +406,7 @@ class Progression<T> implements Identifiable {
           output += '$formatted ';
         }
       }
-      if (!_full) {
+      if (!full) {
         final double rhythmLeft = timeSignature.decimal - duration;
         if (rhythmLeft <= step) {
           output += '-, ';

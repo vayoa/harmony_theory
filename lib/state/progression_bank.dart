@@ -5,7 +5,6 @@ import 'package:thoery_test/state/progression_bank_entry.dart';
 
 import '../modals/progression.dart';
 
-// TDC: Decide if this stays static or not, since it has a constructor...
 abstract class ProgressionBank {
   /// Key - entry title, value - entry.
   static Map<String, ProgressionBankEntry> _bank = {};
@@ -79,13 +78,6 @@ abstract class ProgressionBank {
     };
   }
 
-  /* TDC: Decide whether to save these maps with Strings as their keys to not
-          have to convert them here (but have to convert ints to strings to use
-          them, and have the map id strings instead of ints...)
-          or
-          Keep them as int keys and convert them everytime you want to save
-          to json.
-   */
   static Map<String, dynamic> toJson() => {
         'substitutionsTitles': {
           for (MapEntry<int, String> entry in _substitutionsIDBank.entries)

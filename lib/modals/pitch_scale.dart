@@ -28,7 +28,6 @@ class PitchScale {
 
   bool get isMinor => pattern.isMinor;
 
-  // TDC: Make sure this works!
   /// Returns [tonic] if [isMinor] is false, otherwise returns the major
   /// tonic for the minor scale.
   Pitch get majorTonic => pattern.isMinor ? tonic + Interval.m3 : tonic;

@@ -91,28 +91,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     };
   }
 
-// TDC: Make this work only for minor/major...
-// TODO: This might not work now, check (only if you're using it...)!
-  /// Returns a new [ScaleDegreeChord] converted from [fromMode] mode to
-  /// [toMode] mode.
-  /// If [fromMode] isn't specified it is based on [_inMinor].
-  /// Ionian's (Major) mode number is 0 and so on...
-// ScaleDegreeProgression modeShift({int? fromMode, required int toMode}) {
-//   fromMode ??= _inMinor ? 5 : 0;
-//   return ScaleDegreeProgression.fromProgression(
-//     Progression<ScaleDegreeChord>.raw(
-//       values: values
-//           .map((ScaleDegreeChord? chord) =>
-//               chord?.modeShift(fromMode!, toMode))
-//           .toList(),
-//       durations: durations,
-//       timeSignature: timeSignature,
-//       hasNull: hasNull,
-//     ),
-//     inMinor: _inMinor,
-//   );
-// }
-
 /* TDC: Not sure if this is the best way to do it and if it's even
           important... */
   ScaleDegreeProgression addSeventh({double ratio = 1.0}) {
@@ -141,19 +119,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     return converted;
   }
 
-// TDC: Implement scale pattern matching!!
-/* TDC: SUPPORT THE NEW DURATION REFACTOR: MEASURES AREN'T CUT SO A VALUE
-          COULD HAVE A DURATION OF 1.25 FOR INSTANCE. WE NEED TO MATCH THAT
-          VALUE FOR 1.0 AS WELL AS 0.25 IF IT'S SKIPPING A MEASURE!!!
-          |
-          EXAMPLE:
-          [I, V, I]
-          [0.5, 1.0, 0.5]
-          WILL LOOK LIKE THIS | I V | V I |, WE NEED TO GENERATE MATCHES FOR
-          THE V IN THE FIRST MEASURE AND THE V IN THE SECOND ONE, EVEN THOUGH
-          THEY ARE REPRESENTED AS ONE VALUE WITH ONE DURATION!!!
-   */
-
   /// Returns a list containing substitution match locations, where [sub] could
   /// substitute the current progression (base) within the range of
   /// [start] - [end] (end excluded).
@@ -166,8 +131,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   ///
   /// [endDur] - limit the end duration. The duration you input will be
   /// included.
-/* TDC: Make sure the ranges work correctly without flagging legal
-          substitutions. */
   List<SubstitutionMatch> getFittingMatchLocations(
     ScaleDegreeProgression sub, {
     int start = 0,
@@ -185,8 +148,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     // base and second is location here).
     final List<SubstitutionMatch> matches = [];
 
-    // TODO: Check if it's the way this needs to be
-    // TDC: Update this explanation with the new durations...
     // Each progression is treated differently. By that I mean that if a user
     // has a [1, 2, 3, 4] saved, as well as a [1, 2] and a [3, 4] for example,
     // they will all be treated as different progressions. This is why we're
@@ -335,7 +296,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     return durationSum / duration;
   }
 
-// TDC: Implement scale pattern matching!!
 /* TDC: Returns a lot of duplicates (that we filter with the toSet() method
           in the end.
           Figure out a way to optimize this filtering... (The problem could be

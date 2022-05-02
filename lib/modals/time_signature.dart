@@ -28,7 +28,6 @@ class TimeSignature {
   TimeSignature.fromString(String string)
       : this(int.parse(string[0]), int.parse(string[2]));
 
-  // TDC: Check this!!
   /// Returns whether [duration] is valid for this TimeSignature or not.
   bool validDuration(double duration) =>
       (duration % decimal == 0) ||
