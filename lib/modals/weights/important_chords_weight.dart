@@ -107,7 +107,7 @@ class ImportantChordsWeight extends Weight {
           }
           points += sub;
           details +=
-              '${-1 * sub} for tonic in the end of base (${base.values.last})'
+              '${-1 * sub} for tonic in the end of base (${base.values.last}) '
               'replaced by a ${progression.values.last} in the end of the '
               'sub progression. Points: $points.\n';
         }
@@ -147,14 +147,14 @@ class ImportantChordsWeight extends Weight {
     // See documentation as to why this is done twice.
     if (base.measureCount % 2 == 0) {
       bool stop = false;
-      int middleBase = base.getIndexFromDuration(base.duration / 2);
+      int middleBase = base.getPlayingIndex(base.duration / 2);
       for (int i = 0; i < 2; i++) {
         bool stopNext = false;
         middleBase += i;
-        if (base.length < middleBase && _isTonic(base[middleBase])) {
+        if (base.length > middleBase && _isTonic(base[middleBase])) {
           max++;
           int middleSub =
-              progression.getIndexFromDuration(progression.duration / 2) + i;
+              progression.getPlayingIndex(progression.duration / 2) + i;
           // If we're a tonic and by chance the next chord will also be a tonic,
           // there's no need to check if a dominant is preceding it, since we
           // know there isn't...

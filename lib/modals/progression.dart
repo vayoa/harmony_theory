@@ -203,27 +203,6 @@ class Progression<T> implements Identifiable {
           instead.
   */
 
-  /// Returns a list index such that the duration from that index to [from] is
-  /// [duration]. Negative [durations] also work.
-  /// If no such index exits, returns -1.
-  int getIndexFromDuration(double duration, {int from = 0}) {
-    if (duration > this.duration) {
-      return -1;
-    }
-    int playing = getPlayingIndex(duration, from: from);
-    if (duration < 0) return playing;
-    double diff = 0.0;
-    if (from != 0) diff = _durations.real(from - 1);
-    if (duration + diff == this.duration) {
-      return length - 1;
-    }
-    if (playing == length - 1 ||
-        (duration == _durations.real(playing) - _durations[playing] - diff)) {
-      return playing;
-    }
-    return playing + 1;
-  }
-
   /// Returns the index of the "playing" value at [duration] from the index
   /// [from] (INCLUDED!!! see examples), which is 0 by default.
   /// If no such index exists, returns -1.
