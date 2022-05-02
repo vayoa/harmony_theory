@@ -72,10 +72,10 @@ class ScaleDegreeChord implements Identifiable {
 
   ScaleDegreeChord.copy(ScaleDegreeChord chord)
       : _pattern = ChordPattern(
-      name: chord._pattern.name,
-      fullName: chord._pattern.fullName,
-      abbrs: chord._pattern.abbrs,
-      intervals: chord._pattern.intervals),
+            name: chord._pattern.name,
+            fullName: chord._pattern.fullName,
+            abbrs: chord._pattern.abbrs,
+            intervals: chord._pattern.intervals),
         _rootDegree = ScaleDegree.copy(chord._rootDegree);
 
   ScaleDegreeChord.parse(String chord) {
@@ -238,12 +238,17 @@ class ScaleDegreeChord implements Identifiable {
   String get patternString {
     String _patternStr = _pattern.abbr;
     if (_pattern.intervals[1] == Interval.m3) {
-      switch (_pattern.name) {
+      switch (_pattern.fullName) {
         case 'Minor':
           _patternStr = '';
           break;
-        case 'Min 7th':
+        case 'Minor 7th':
           _patternStr = '7';
+          break;
+        case 'Minor-Major 7th':
+        case 'Major 7th':
+          _patternStr = 'Δ7';
+          break;
       }
     }
     return _patternStr;
@@ -404,16 +409,16 @@ class ScaleDegreeChord implements Identifiable {
       ['vi']: HarmonicFunction.subDominant,
     }
   }.map((ScaleDegreeChord key, Map<List<String>?, HarmonicFunction> value) =>
-      MapEntry<int, Map<List<int>?, HarmonicFunction>>(key.weakHash, {
-        for (MapEntry<List<String>?, HarmonicFunction> entry
-        in value.entries)
-          (entry.key == null
-              ? null
-              : [
-            for (String chord in entry.key!)
-              ScaleDegreeChord.parse(chord).weakHash
-          ]): entry.value
-      }));
+          MapEntry<int, Map<List<int>?, HarmonicFunction>>(key.weakHash, {
+            for (MapEntry<List<String>?, HarmonicFunction> entry
+                in value.entries)
+              (entry.key == null
+                  ? null
+                  : [
+                      for (String chord in entry.key!)
+                        ScaleDegreeChord.parse(chord).weakHash
+                    ]): entry.value
+          }));
 
   static final ScaleDegreeChord majorTonicTriad = ScaleDegreeChord.parse('I');
   static final ScaleDegreeChord ii = ScaleDegreeChord.parse('ii');

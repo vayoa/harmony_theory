@@ -1,6 +1,4 @@
-import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
-import 'package:tonic/tonic.dart';
 
 class TonicizedScaleDegreeChord extends ScaleDegreeChord {
   final ScaleDegreeChord tonic;
@@ -37,5 +35,5 @@ class TonicizedScaleDegreeChord extends ScaleDegreeChord {
             tonicizedToMajorScale: tonicizedToMajorScale);
 
   @override
-  String toString() => '$tonicizedToTonic/$tonic';
+  String toString() => '$tonicizedToTonic/${tonic.rootDegreeString}';
 }
