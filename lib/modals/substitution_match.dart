@@ -1,25 +1,27 @@
-import 'package:thoery_test/modals/progression.dart';
-import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 
 class SubstitutionMatch {
   final int baseIndex;
+  final double baseOffset;
   final int subIndex;
+  final double ratio;
   final SubstitutionMatchType type;
   final bool withSeventh;
 
   const SubstitutionMatch({
     required this.baseIndex,
+    required this.baseOffset,
     required this.subIndex,
+    required this.ratio,
     required this.type,
     this.withSeventh = false,
   });
 
   @override
   String toString() {
-    return "base: $baseIndex, sub: $subIndex, type: ${type.name}, "
-        "withSeventh: $withSeventh.";
+    return "base: $baseIndex(start $baseOffset), sub: $subIndex, "
+        "type: ${type.name}, withSeventh: $withSeventh, ratio: $ratio.";
   }
 
   static SubstitutionMatchType? getMatchType(
@@ -33,6 +35,7 @@ class SubstitutionMatch {
         base.canBeTonic) {
       return SubstitutionMatchType.tonicization;
     }
+    return null;
   }
 
   static ScaleDegreeProgression getSubstitution({
@@ -48,9 +51,7 @@ class SubstitutionMatch {
           return progression.addSeventh(ratio: ratio);
         } else {
           return ScaleDegreeProgression.fromProgression(
-            progression.relativeRhythmTo(ratio),
-            inMinor: progression.inMinor,
-          );
+              progression.relativeRhythmTo(ratio));
         }
       case SubstitutionMatchType.tonicization:
         return progression.tonicizedFor(

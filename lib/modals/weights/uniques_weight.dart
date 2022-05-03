@@ -1,7 +1,5 @@
-import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
-import 'package:tonic/tonic.dart';
 
 class UniquesWeight extends Weight {
   const UniquesWeight()
@@ -12,7 +10,7 @@ class UniquesWeight extends Weight {
           description: WeightDescription.exotic,
         );
 
-  // FIXME: Optimize this a bit more...
+  // TDC: Optimize this a bit more...
   @override
   Score score({
     required ScaleDegreeProgression progression,

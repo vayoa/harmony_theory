@@ -1,11 +1,9 @@
-import 'dart:math';
-
 import 'package:thoery_test/extensions/scale_extension.dart';
+import 'package:thoery_test/modals/identifiable.dart';
 import 'package:thoery_test/modals/pitch_scale.dart';
-import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
 
-class ScaleDegree {
+class ScaleDegree implements Identifiable {
   static const List<String> degrees = [
     'I',
     'II',
@@ -48,17 +46,13 @@ class ScaleDegree {
 
   /// A separate function from the default constructor to avoid
   /// [Interval.fromSemitones] construction errors we don't care about.
+  /// Will always assume it gets the parameters for a degree in a major scale.
   ScaleDegree.rawInterval({
     required ScalePattern scalePattern,
     required int intervalNumber,
     required int intervalSemitones,
   }) {
-    final List<int> _semitones;
-    if (scalePattern.isMinor) {
-      _semitones = ScalePatternExtension.minorKeySemitones;
-    } else {
-      _semitones = ScalePatternExtension.majorKeySemitones;
-    }
+    final List<int> _semitones = ScalePatternExtension.majorKeySemitones;
     _degree = (intervalNumber - 1) % 7;
     int accidentals = (intervalSemitones - _semitones[_degree]) % 12;
     int down = (_semitones[_degree] - intervalSemitones) % 12;
@@ -91,6 +85,15 @@ class ScaleDegree {
       _accidentals = 0;
     }
   }
+
+  ScaleDegree.fromJson(Map<String, dynamic> json)
+      : _degree = json['d'],
+        _accidentals = json['a'];
+
+  Map<String, dynamic> toJson() => {
+        'd': _degree,
+        'a': _accidentals,
+      };
 
   static final tonic = ScaleDegree.parse('I');
   static final V = ScaleDegree.parse('V');
@@ -176,4 +179,7 @@ class ScaleDegree {
 
   @override
   int get hashCode => Object.hash(_degree, _accidentals);
+
+  @override
+  int get id => Identifiable.hash2(_degree, _accidentals);
 }

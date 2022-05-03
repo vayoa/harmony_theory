@@ -1,12 +1,14 @@
+import 'dart:convert';
+
 import 'package:thoery_test/extensions/chord_extension.dart';
-import 'package:thoery_test/extensions/scale_extension.dart';
+import 'package:thoery_test/extensions/interval_extension.dart';
+import 'package:thoery_test/modals/identifiable.dart';
 import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
-import 'package:thoery_test/extensions/interval_extension.dart';
 import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
 
-class ScaleDegreeChord {
+class ScaleDegreeChord implements Identifiable {
   late final ChordPattern _pattern;
 
   /// The root degree from which the chord is constructed.
@@ -54,7 +56,7 @@ class ScaleDegreeChord {
 
   ScaleDegreeChord(PitchScale scale, Chord chord) {
     _pattern = chord.pattern;
-    Pitch cRoot = chord.root, tRoot = scale.tonic.toPitch();
+    Pitch cRoot = chord.root, tRoot = scale.majorTonic;
     int semitones = (cRoot.semitones - tRoot.semitones) % 12;
     int number = 1 + cRoot.letterIndex - tRoot.letterIndex;
     if (number <= 0) number += 7;
@@ -98,6 +100,15 @@ class ScaleDegreeChord {
     _rootDegree = ScaleDegree.parse(match[1]!);
   }
 
+  ScaleDegreeChord.fromJson(Map<String, dynamic> json)
+      : _rootDegree = ScaleDegree.fromJson(json['rd']),
+        _pattern = ChordPatternExtension.fromFullName(json['p']);
+
+  Map<String, dynamic> toJson() => {
+        'rd': _rootDegree.toJson(),
+        'p': _pattern.fullName,
+      };
+
   ChordPattern get pattern => _pattern;
 
   ScaleDegree get rootDegree => _rootDegree;
@@ -131,15 +142,17 @@ class ScaleDegreeChord {
     return false;
   }
 
-  // TODO: The other checks here might be redundant...
-  bool get containsSeventh {
+  bool get requiresAddingSeventh {
     if (degreesLength >= 4) {
-      if (_pattern.intervals[3].number == 7) {
-        return true;
-      } else {
-        for (int i = degreesLength - 1; i >= 0; i--) {
-          if (_pattern.intervals[i].number == 7) return true;
-        }
+      // If we're any of these patterns, don't consider this a 7th when
+      // deciding whether to add to the whole progression a 7th when
+      // substituting.
+      if (_pattern.fullName != 'Dominant 7th' &&
+          _pattern.fullName != 'Diminished 7th' &&
+          _pattern.fullName != 'Dominant 7♭5' &&
+          // Also half-diminished 7th.
+          _pattern.fullName != 'Minor 7th ♭5') {
+        return _pattern.intervals[3].number == 7;
       }
     }
     return false;
@@ -188,7 +201,8 @@ class ScaleDegreeChord {
   /// Will return a new [ScaleDegreeChord] with an added 7th if possible.
   /// [harmonicFunction] can be given for slightly more relevant results.
   ScaleDegreeChord addSeventh({HarmonicFunction? harmonicFunction}) {
-    switch (_pattern.name) {
+    if (_pattern.intervals.length >= 4) return ScaleDegreeChord.copy(this);
+    switch (_pattern.fullName) {
       case "Minor":
         return ScaleDegreeChord.raw(
             ChordPattern.parse('Minor 7th'), _rootDegree);
@@ -206,7 +220,7 @@ class ScaleDegreeChord {
         return ScaleDegreeChord.raw(
             ChordPattern.parse('Augmented 7th'), _rootDegree);
       case "Diminished":
-        // not sure if to add 'Diminished 7th' here somehow...
+      // not sure if to add 'Diminished 7th' here somehow...
         return ScaleDegreeChord.raw(
             ChordPattern.parse('Minor 7th ♭5'), _rootDegree);
       default:
@@ -224,12 +238,17 @@ class ScaleDegreeChord {
   String get patternString {
     String _patternStr = _pattern.abbr;
     if (_pattern.intervals[1] == Interval.m3) {
-      switch (_pattern.name) {
+      switch (_pattern.fullName) {
         case 'Minor':
           _patternStr = '';
           break;
-        case 'Min 7th':
+        case 'Minor 7th':
           _patternStr = '7';
+          break;
+        case 'Minor-Major 7th':
+        case 'Major 7th':
+          _patternStr = 'Δ7';
+          break;
       }
     }
     return _patternStr;
@@ -246,12 +265,15 @@ class ScaleDegreeChord {
   @override
   bool operator ==(Object other) =>
       other is ScaleDegreeChord &&
-      (other._pattern == _pattern && other._rootDegree == _rootDegree);
+      (other._pattern.equals(_pattern) && other._rootDegree == _rootDegree);
 
   @override
   int get hashCode => Object.hash(_pattern.fullName, _rootDegree);
 
-  // TDC: Check if this works correctly!!
+  @override
+  int get id => Identifiable.hash2(
+      Identifiable.hashAllInts(utf8.encode(_pattern.fullName)), _rootDegree.id);
+
   /// Returns true if the chord is equal to [other], such that their triads + 7
   /// are equal. Tensions aren't taken into consideration.
   /// If there's no 7 in only one of the chords we treat it as if it had the
@@ -288,11 +310,6 @@ class ScaleDegreeChord {
     return true;
   }
 
-  // TDC: Only works for the major scale, is this correct?
-  // TDC: Check if this works correctly!!
-  /* TDC: Needs to be better realized, doesn't really match with the regular
-          hash. */
-
   /// Returns a hash of the chord with no tensions. 7th are hashed in if
   /// they're not diatonic (based on the major scale).
   int get weakHash {
@@ -306,6 +323,20 @@ class ScaleDegreeChord {
         _rootDegree,
         Object.hashAll(
             [for (Interval interval in intervals) interval.getHash]));
+  }
+
+  /// Like [weakHash] but is consistent over executions.
+  int get weakID {
+    List<Interval> intervals = _pattern.intervals.sublist(1, 3);
+    if (intervals.length >= 4) {
+      if (!_rootDegree.add(_pattern.intervals[3]).isDiatonic) {
+        intervals.add(_pattern.intervals[3]);
+      }
+    }
+    return Identifiable.hash2(
+        _rootDegree.id,
+        Identifiable.hashAllInts(
+            [for (Interval interval in intervals) interval.id]));
   }
 
   HarmonicFunction deriveHarmonicFunction({ScaleDegreeChord? next}) {
@@ -322,13 +353,11 @@ class ScaleDegreeChord {
       }
       return forChord[null]!;
     }
-    // TDC: Actually implement this function...
     return HarmonicFunction.undefined;
   }
 
-  // TDC: Maybe skip defining where it goes entirely and just do things with percentages...
   static final Map<int, Map<List<int>?, HarmonicFunction>> defaultFunctions =
-      <ScaleDegreeChord, Map<List<String>?, HarmonicFunction>>{
+  <ScaleDegreeChord, Map<List<String>?, HarmonicFunction>>{
     ScaleDegreeChord.majorTonicTriad: {
       null: HarmonicFunction.tonic,
     },
@@ -345,7 +374,8 @@ class ScaleDegreeChord {
       null: HarmonicFunction.tonic,
     },
     /*TODO: Are you sure about this? this means that a V - I could be replaced
-            by a III - I and vice versa.
+            by a III - I and vice versa - although other weights would take
+            care of that.
      */
     ScaleDegreeChord.parse('III'): {
       null: HarmonicFunction.dominant,

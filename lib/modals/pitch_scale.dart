@@ -28,11 +28,9 @@ class PitchScale {
 
   bool get isMinor => pattern.isMinor;
 
-  String get commonName {
-    final String scalePattern =
-        pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
-    return tonic.commonName + ' ' + scalePattern;
-  }
+  /// Returns [tonic] if [isMinor] is false, otherwise returns the major
+  /// tonic for the minor scale.
+  Pitch get majorTonic => pattern.isMinor ? tonic + Interval.m3 : tonic;
 
   operator ==(Object other) =>
       other is PitchScale &&
@@ -42,4 +40,11 @@ class PitchScale {
   @override
   int get hashCode => Object.hash(Object.hashAll(pattern.intervals),
       tonic.accidentalsString, tonic.semitones % 12);
+
+  @override
+  String toString() {
+    final String scalePattern =
+        pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
+    return tonic.commonName + ' ' + scalePattern;
+  }
 }

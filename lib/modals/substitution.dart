@@ -1,32 +1,35 @@
 import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/substitution_match.dart';
+import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
-import 'package:tonic/tonic.dart';
 
 class Substitution {
+  final String? title;
   final ScaleDegreeProgression substitutedBase;
   final ScaleDegreeProgression originalSubstitution;
   final ScaleDegreeProgression base;
   SubstitutionScore score;
-  final SubstitutionMatch? match;
+  final SubstitutionMatch match;
   final int firstChangedIndex;
   final int lastChangedIndex;
 
   double get rating => score.score;
 
   Substitution({
+    this.title,
     required this.substitutedBase,
     required this.originalSubstitution,
     required this.base,
     required this.firstChangedIndex,
     required this.lastChangedIndex,
+    required this.match,
     SubstitutionScore? score,
-    this.match,
   }) : score = score ?? SubstitutionScore.empty();
 
   Substitution copyWith({
+    String? title,
     ScaleDegreeProgression? substitutedBase,
     ScaleDegreeProgression? originalSubstitution,
     ScaleDegreeProgression? base,
@@ -36,6 +39,7 @@ class Substitution {
     SubstitutionMatch? match,
   }) =>
       Substitution(
+        title: title ?? this.title,
         substitutedBase: substitutedBase ?? this.substitutedBase,
         originalSubstitution: originalSubstitution ?? this.originalSubstitution,
         base: base ?? this.base,
@@ -45,9 +49,15 @@ class Substitution {
         match: match ?? this.match,
       );
 
+  /// Returns and sets the substitution's [score] based on the relevant
+  /// parameters.
+  ///
+  /// If [KeepHarmonicFunctionWeight] (based on
+  /// [SubstitutionHandler.keepAmount]) has failed a progression, returns null.
+  ///
   /// If [keepHarmonicFunction] is true and no [harmonicFunctionBase] is given,
   /// will use [base] as the latter.
-  SubstitutionScore scoreWith(
+  SubstitutionScore? scoreWith(
     List<Weight> weights, {
     bool keepHarmonicFunction = false,
     ScaleDegreeProgression? harmonicFunctionBase,
@@ -55,6 +65,21 @@ class Substitution {
     double rating = 0.0;
     int length = 0;
     Map<String, Score> details = {};
+    // First, score with
+    if (keepHarmonicFunction) {
+      Weight keep = SubstitutionHandler.keepHarmonicFunction;
+      Score keepScore = keep.scaledScore(
+          progression: substitutedBase, base: harmonicFunctionBase ?? base);
+      rating += keepScore.score;
+      details[keep.name] = keepScore;
+      length += keep.importance;
+      // If keepAmount is high and the substitution keepHarmonicFunction score
+      // is 0, return null.
+      if (SubstitutionHandler.keepAmount == KeepHarmonicFunctionAmount.high &&
+          keepScore.score == 0.0) {
+        return null;
+      }
+    }
     for (Weight weight in weights) {
       Score weightScore;
       length += weight.importance;
@@ -70,14 +95,6 @@ class Substitution {
       }
       rating += weightScore.score;
       details[weight.name] = weightScore;
-    }
-    if (keepHarmonicFunction) {
-      Weight keep = SubstitutionHandler.keepHarmonicFunction;
-      Score keepScore = keep.scaledScore(
-          progression: substitutedBase, base: harmonicFunctionBase ?? base);
-      rating += keepScore.score;
-      details[keep.name] = keepScore;
-      length += keep.importance;
     }
     rating / length;
     score = SubstitutionScore(score: rating / length, details: details);
@@ -95,7 +112,7 @@ class Substitution {
 
   @override
   String toString({PitchScale? scale, bool detailed = false}) {
-    return '-- $originalSubstitution --\n'
+    return '-- "$title" $originalSubstitution --\n'
             '$substitutedBase' +
         (scale == null ? ': ' : ' ->\n${substitutedBase.inScale(scale)}:') +
         ' ${rating.toStringAsFixed(3)} '

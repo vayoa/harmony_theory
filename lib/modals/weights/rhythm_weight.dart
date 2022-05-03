@@ -22,6 +22,7 @@ class RhythmWeight extends Weight {
   TODO: Maybe take down points for durations that are multiples of 4 (like an
    1/8 to a 1/2).
   */
+  // TDC: Convert to absolute durations!
   @override
   Score score({
     required ScaleDegreeProgression progression,
@@ -30,7 +31,8 @@ class RhythmWeight extends Weight {
     Map<double, int> commonDur = {};
     double step = 1 / progression.timeSignature.denominator;
     int count = 0;
-    for (double duration in progression.durations) {
+    for (int i = 0; i < progression.durations.length; i++) {
+      double duration = progression.durations[i];
       // TODO: This logic might need fixing...
       if (commonDur.containsKey(duration)) {
         commonDur[duration] = commonDur[duration]! + 1;
@@ -43,7 +45,8 @@ class RhythmWeight extends Weight {
       return element;
     }).key;
     String details = 'Step: $step, Common: $common.\n';
-    for (double duration in progression.durations) {
+    for (int i = 0; i < progression.durations.length; i++) {
+      double duration = progression.durations[i];
       if (duration < common / 2) {
         count += 2;
         details +=

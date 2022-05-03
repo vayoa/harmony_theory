@@ -1,132 +1,346 @@
+import 'package:thoery_test/modals/identifiable.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
+import 'package:thoery_test/state/progression_bank_entry.dart';
 
-class ProgressionBank {
-  static final Map<int, ScaleDegreeProgression> _bank = {};
+import '../modals/progression.dart';
 
+abstract class ProgressionBank {
+  /// Key - entry title, value - entry.
+  static Map<String, ProgressionBankEntry> _bank = {};
+
+  /// Key - entry progression id, value - entry's title.
+  ///
+  /// Holds the ids for the progressions that are used in the substitutions.
+  static Map<int, String> _substitutionsIDBank = {};
+
+  /// Key - scale degree chord id, value - list of entry progression ids.
+  ///
   /// Notice: if the major tonic is in the last place it will be saved in a
   /// different group then if it's in any other place (for tonicization).
-  static final Map<int, List<int>> _groupedBank = {};
+  static Map<int, List<int>> _groupedBank = {};
 
-  ProgressionBank([List<ScaleDegreeProgression>? additionalProgressions]) {
-    if (additionalProgressions != null && additionalProgressions.isNotEmpty) {
-      _bankList.addAll(additionalProgressions);
+  static final int _tonicID = ScaleDegreeChord.majorTonicTriad.weakID;
+
+  static final int tonicizationID = Identifiable.hash2(_tonicID, true.hashCode);
+
+  static Map<int, String> get substitutionsIDBank => _substitutionsIDBank;
+
+  static Map<String, ProgressionBankEntry> get bank => _bank;
+
+  static Map<int, List<int>> get groupedBank => _groupedBank;
+
+  /// Returns all saved progressions that have a
+  /// [ScaleDegreeChord.majorTonicTriad] as their last chord in the form of
+  /// [title, progression].
+  static List<List<dynamic>> get tonicizations {
+    if (_groupedBank.containsKey(tonicizationID)) {
+      return [
+        for (int id in _groupedBank[tonicizationID]!)
+          [
+            _substitutionsIDBank[id]!,
+            _bank[_substitutionsIDBank[id]!]!.progression
+          ]
+      ];
     }
+    return const [];
+  }
 
-    // TODO: Make sure no two same hashes are in a list in _groupedBank.
-    for (ScaleDegreeProgression progression in _bankList) {
-      int hash = progression.hashCode;
-      _bank[hash] = progression;
-      for (int i = 0; i < progression.length; i++) {
-        ScaleDegreeChord? chord = progression[i];
-        final Map<int, ScaleDegreeChord> addedChords = {};
-        if (chord != null) {
-          int weakChordHash =
-              weakHashWithPlace(chord, i == progression.length - 1);
-          if (!addedChords.containsKey(weakChordHash)) {
-            addedChords[weakChordHash] = chord;
-            if (_groupedBank.containsKey(weakChordHash)) {
-              _groupedBank[weakChordHash]!.add(hash);
-            } else {
-              _groupedBank[weakChordHash] = [hash];
-            }
+  static void initializeBuiltIn() {
+    // TODO: Make sure no two same ids are in a list in _groupedBank.
+    _bank = {};
+    _substitutionsIDBank = {};
+    _groupedBank = {};
+    for (MapEntry<String, ScaleDegreeProgression> mapEntry
+        in _builtInBank.entries) {
+      ProgressionBankEntry entry = ProgressionBankEntry(
+        builtIn: true,
+        usedInSubstitutions: true,
+        progression: mapEntry.value,
+      );
+      add(title: mapEntry.key, entry: entry);
+    }
+  }
+
+  static void initializeFromJson(Map<String, dynamic> json) {
+    _substitutionsIDBank = {
+      for (MapEntry<String, dynamic> entry
+          in json['substitutionsTitles'].entries)
+        int.parse(entry.key): entry.value
+    };
+    _bank = {
+      for (MapEntry<String, dynamic> entry in json['bank'].entries)
+        entry.key: ProgressionBankEntry.fromJson(json: entry.value)
+    };
+    _groupedBank = {
+      for (MapEntry<String, dynamic> entry in json['groupedBank'].entries)
+        int.parse(entry.key): entry.value.cast<int>(),
+    };
+  }
+
+  static Map<String, dynamic> toJson() => {
+        'substitutionsTitles': {
+          for (MapEntry<int, String> entry in _substitutionsIDBank.entries)
+            entry.key.toString(): entry.value
+        },
+        'bank': {
+          for (MapEntry<String, ProgressionBankEntry> entry in _bank.entries)
+            entry.key: entry.value.toJson()
+        },
+        'groupedBank': {
+          for (MapEntry<int, List<int>> entry in _groupedBank.entries)
+            entry.key.toString(): entry.value
+        }
+      };
+
+  /// Adds [entry] to the [_bank] (and to the [_groupedBank] based on
+  /// [entry.usedInSubstitutions]...).
+  ///
+  /// If the entry exist in the bank already, will do nothing.
+  ///
+  /// If another entry in the bank has the same title, will override that
+  /// entry with the new one ([entry]).
+  ///
+  /// Will return the id of the progression.
+  static int add({required String title, required ProgressionBankEntry entry}) {
+    // Remove the entry if currently present.
+    int id = remove(title) ?? entry.progression.id;
+    _bank[title] = entry;
+    if (entry.usedInSubstitutions) {
+      _addProgToGroups(entry.progression, title, id);
+    }
+    return id;
+  }
+
+  /// Removes an entry with the title of [entryTitle] from the [_bank] (and
+  /// will check to remove from the [_groupedBank] based on the entry's
+  /// [usedInSubstitutions]...).
+  ///
+  /// If no such entry exists (only checks for it's title), will do nothing.
+  ///
+  /// Will return the id of the progression if removed.
+  static int? remove(String entryTitle) {
+    if (_bank.containsKey(entryTitle)) {
+      ProgressionBankEntry entry = _bank[entryTitle]!;
+      int id = entry.progression.id;
+      _bank.remove(entryTitle);
+      if (entry.usedInSubstitutions && entryTitle == _substitutionsIDBank[id]) {
+        _substitutionsIDBank.remove(id);
+        _removeProgFromGroups(entry.progression, id);
+      }
+      return id;
+    }
+    return null;
+  }
+
+  /// Adds the progression to it's relevant groups ([_groupedBank]) and to
+  /// [_substitutionsIDBank] to be later used in substitutions.
+  static void _addProgToGroups(ScaleDegreeProgression progression, String title,
+      [int? id]) {
+    id ??= progression.id;
+    if (!_substitutionsIDBank.containsKey(title)) {
+      _substitutionsIDBank[id] = title;
+    }
+    for (int i = 0; i < progression.length; i++) {
+      ScaleDegreeChord? chord = progression[i];
+      final Map<int, ScaleDegreeChord> addedChords = {};
+      if (chord != null) {
+        int weakChordID = weakIDWithPlace(chord, i == progression.length - 1);
+        if (!addedChords.containsKey(weakChordID)) {
+          addedChords[weakChordID] = chord;
+          if (_groupedBank.containsKey(weakChordID)) {
+            _groupedBank[weakChordID]!.add(id);
+          } else {
+            _groupedBank[weakChordID] = [id];
           }
         }
       }
     }
   }
 
-  Map<int, ScaleDegreeProgression> get bank => _bank;
-
-  Map<int, List<int>> get groupedBank => _groupedBank;
-
-  @override
-  String toString() {
-    String output = '{';
-    for (MapEntry<int, List<int>> entry in _groupedBank.entries) {
-      output += '${entry.key}:\n';
-      for (int hash in entry.value) {
-        output += '${_bank[hash]},\n';
+  static void _removeProgFromGroups(ScaleDegreeProgression progression,
+      [int? id]) {
+    id ??= progression.id;
+    _substitutionsIDBank.remove(id);
+    for (int i = 0; i < progression.length; i++) {
+      ScaleDegreeChord? chord = progression[i];
+      final Map<int, ScaleDegreeChord> addedChords = {};
+      if (chord != null) {
+        int weakChordID = weakIDWithPlace(chord, i == progression.length - 1);
+        if (!addedChords.containsKey(weakChordID)) {
+          addedChords[weakChordID] = chord;
+          if (_groupedBank.containsKey(weakChordID)) {
+            _groupedBank[weakChordID]!.remove(id);
+          }
+        }
       }
-      output += '\n';
     }
-    return output + '}';
+  }
+
+  /// Checks whether an entry with the title [previousTitle] can be renamed to
+  /// [newTitle].
+  static bool canRename(
+          {required String previousTitle, required String newTitle}) =>
+      !_bank.containsKey(newTitle) && _bank.containsKey(previousTitle);
+
+  /// Renames an entry with [previousTitle] to [newTitle], if exists.
+  static void rename(
+      {required String previousTitle, required String newTitle}) {
+    if (canRename(previousTitle: previousTitle, newTitle: newTitle)) {
+      ProgressionBankEntry entry = _bank[previousTitle]!;
+      _bank.remove(previousTitle);
+      _bank[newTitle] = entry;
+      if (entry.usedInSubstitutions) {
+        int id = entry.progression.id;
+        _substitutionsIDBank.remove(id);
+        _substitutionsIDBank[id] = newTitle;
+      }
+    }
+  }
+
+  static bool idFreeInSubs(String title, int id) =>
+      !_substitutionsIDBank.containsKey(id) ||
+      _substitutionsIDBank[id] == title;
+
+  static bool canUseInSubstitutions(String title) =>
+      _bank.containsKey(title) &&
+      idFreeInSubs(title, _bank[title]!.progression.id);
+
+  static bool canBeSubstitution(Progression progression) =>
+      progression.length >= 2 && progression.length <= 8;
+
+  static void changeUseInSubstitutions(
+      {required String title, required bool useInSubstitutions}) {
+    if (_bank.containsKey(title)) {
+      ProgressionBankEntry entry = _bank[title]!;
+      if (entry.usedInSubstitutions != useInSubstitutions &&
+          idFreeInSubs(title, _bank[title]!.progression.id)) {
+        _bank[title] = entry.copyWith(usedInSubstitutions: useInSubstitutions);
+        if (useInSubstitutions) {
+          _addProgToGroups(entry.progression, title);
+        } else {
+          _removeProgFromGroups(entry.progression);
+        }
+      }
+    }
   }
 
   /* TODO: Decide whether to put this method here and whether to always hash
           'last'...*/
 
-  /// [last] will only have effect when [chord.weakHash] is equal to
+  /// [last] will only have effect when [chord.id] is equal to
   /// [ScaleDegreeChord.majorTonicTriad]'s weak hash.
-  static int weakHashWithPlace(ScaleDegreeChord chord, [bool last = false]) {
-    int weakHash = chord.weakHash;
-    if (weakHash == ScaleDegreeChord.majorTonicTriad.weakHash) {
-      return Object.hash(weakHash, last);
-    }
-    return weakHash;
+  static int weakIDWithPlace(ScaleDegreeChord chord, [bool last = false]) {
+    int weakID = chord.weakID;
+    return Identifiable.hash2(
+        weakID, weakID == _tonicID ? last.hashCode : false.hashCode);
   }
 
-  /// If [chord] is a major tonic and [last] is false, all saved progressions
-  /// with a major tonic (including one that have them as their last chords)
-  /// will be returned.
-  List<ScaleDegreeProgression>? getByGroup(ScaleDegreeChord chord,
-      [bool last = false]) {
-    List<int>? hashes = _groupedBank[weakHashWithPlace(chord, last)];
-    if (hashes != null) {
-      hashes = [...hashes];
-      // TODO: Optimize...
-      int weakHash = chord.weakHash;
-      if (!last && weakHash == ScaleDegreeChord.majorTonicTriad.weakHash) {
-        List<int>? otherTonic = _groupedBank[Object.hash(weakHash, true)];
-        if (otherTonic != null && otherTonic.isNotEmpty) {
-          hashes.addAll(otherTonic);
-        }
+  /// Returns all saved progressions from [_bank] containing the
+  /// [ScaleDegreeChord.id] of [chord] in the form of [title, progression].
+  /// If [withTonicization] is true, returns also all saved progressions that
+  /// have a [ScaleDegreeChord.majorTonicTriad] as their last chord.
+  static List<List<dynamic>>? getByGroup(
+      {required ScaleDegreeChord chord, required bool withTonicization}) {
+    List<int>? ids = _groupedBank[weakIDWithPlace(chord, false)];
+    if (ids != null) {
+      if (withTonicization && _groupedBank.containsKey(tonicizationID)) {
+        // TODO: Optimize...
+        ids.addAll(_groupedBank[tonicizationID]!);
       }
-      return [for (int hash in hashes) _bank[hash]!];
+      return [
+        for (int id in ids)
+          [
+            _substitutionsIDBank[id]!,
+            _bank[_substitutionsIDBank[id]!]!.progression
+          ]
+      ];
     }
     return null;
   }
 
-  static final List<ScaleDegreeProgression> _bankList = [
-    ScaleDegreeProgression.fromList(['V', 'vi']),
+  static final Map<String, ScaleDegreeProgression> _builtInBank = {
+    'Deceptive Cadence': ScaleDegreeProgression.fromList(['V', 'vi']),
     // V I
-    ScaleDegreeProgression.fromList(['V', 'I']),
-    ScaleDegreeProgression.fromList(['V', 'I'], durations: [1 / 4, 1 / 2]),
+    'Authentic Cadence': ScaleDegreeProgression.fromList(['V', 'I']),
+    'Authentic Cadence 2':
+        ScaleDegreeProgression.fromList(['V', 'I'], durations: [1 / 4, 1 / 2]),
     // ii V I
-    ScaleDegreeProgression.fromList(['ii', 'V', 'I']),
-    ScaleDegreeProgression.fromList(['ii', 'V', 'I'],
+    'Two-Five-One': ScaleDegreeProgression.fromList(['ii', 'V', 'I']),
+    'Two-Five-One 2': ScaleDegreeProgression.fromList(['ii', 'V', 'I'],
         durations: [1 / 4, 1 / 4, 1 / 2]),
-    ScaleDegreeProgression.fromList(['viidim', 'iii', 'III', 'vi'],
+    'Altered Two-Five-One in Minor': ScaleDegreeProgression.fromList(
+        ['viidim', 'iii', 'III', 'vi'],
         durations: [1 / 4, 1 / 4, 1 / 4, 1 / 4]),
-    ScaleDegreeProgression.fromList(['iidim', 'V', 'I']),
-    ScaleDegreeProgression.fromList(['iim7b5', 'V', 'I']),
-    ScaleDegreeProgression.fromList(['iim7b5', 'V7', 'Imaj7']),
+    'Two(diminished)-Five-One':
+        ScaleDegreeProgression.fromList(['iidim', 'V', 'I']),
+    'Two(half-diminished)-Five-One':
+        ScaleDegreeProgression.fromList(['iim7b5', 'V', 'I']),
+
+    'Two-Five-One with 7ths':
+        ScaleDegreeProgression.fromList(['iim7b5', 'V7', 'I']),
+
     // IV V I
-    ScaleDegreeProgression.fromList(['IV', 'V', 'I']),
-    ScaleDegreeProgression.fromList(['IV', 'iv', 'I']),
+    'Four-Five-One': ScaleDegreeProgression.fromList(['IV', 'V', 'I']),
+
+    'Four(minor)-Five-One': ScaleDegreeProgression.fromList(['iv', 'V', 'I']),
+
+    'Altered Minor Plagal Cadence':
+        ScaleDegreeProgression.fromList(['IV', 'iv', 'I']),
+
     // IV I
-    ScaleDegreeProgression.fromList(['IV', 'I']),
-    ScaleDegreeProgression.fromList(['iv', 'I']),
+    'Plagal Cadence': ScaleDegreeProgression.fromList(['IV', 'I']),
+
+    'Minor Plagal Cadence': ScaleDegreeProgression.fromList(['iv', 'I']),
+
     // Added
-    ScaleDegreeProgression.fromList(['iii', 'III', 'vi']),
-    ScaleDegreeProgression.fromList(['iii', 'III', 'vi', 'vi']),
-    ScaleDegreeProgression.fromList(['iim7b5', 'I']),
-    ScaleDegreeProgression.fromList(['iidim', 'I']),
-    ScaleDegreeProgression.fromList(['IV', 'II', 'V', 'III', 'vi']),
-    ScaleDegreeProgression.fromList(['vi', 'III', 'V', 'II', 'IV']),
-    ScaleDegreeProgression.fromList(['bVII', 'V', 'I']),
-    ScaleDegreeProgression.fromList(['bVI', 'IV', 'bVII', 'V', 'I']),
-    ScaleDegreeProgression.fromList(['I', 'IV', 'I']),
-    ScaleDegreeProgression.fromList(['I', 'iv', 'I']),
-    ScaleDegreeProgression.fromList(['bII', 'V', 'I']),
-    ScaleDegreeProgression.fromList(['bVII', 'VIIdim7', 'I']),
-    ScaleDegreeProgression.fromList(['VIIdim7', 'I']),
-    ScaleDegreeProgression.fromList(['bII7', 'I']),
-    ScaleDegreeProgression.fromList(['iimin7', 'bII7', 'I']),
-    ScaleDegreeProgression.fromList(['iim7b5', 'bII7', 'I']),
-    ScaleDegreeProgression.fromList(['bVI', 'bVII', 'I']),
-    ScaleDegreeProgression.fromList(['bVII', 'I']),
-    ScaleDegreeProgression.fromList(['Vaug', 'I']),
-    ScaleDegreeProgression.fromList(['iv', 'V', 'I']),
-  ];
+    'Altered Authentic Cadence in Minor':
+        ScaleDegreeProgression.fromList(['iii', 'III', 'vi']),
+
+    'Altered Authentic Cadence in Minor 2':
+        ScaleDegreeProgression.fromList(['iii', 'III', 'vi', 'vi']),
+
+    'Diminished Resolution with 7ths':
+        ScaleDegreeProgression.fromList(['iim7b5', 'I']),
+
+    'Diminished Resolution': ScaleDegreeProgression.fromList(['iidim', 'I']),
+
+    'Diatonic Quartal Harmony':
+        ScaleDegreeProgression.fromList(['IV', 'II', 'V', 'III', 'vi']),
+
+    'Reversed Diatonic Quartal Harmony':
+        ScaleDegreeProgression.fromList(['vi', 'III', 'V', 'II', 'IV']),
+
+    'Mix Pre-Dominant': ScaleDegreeProgression.fromList(['bVII', 'V', 'I']),
+
+    'Long Chromatic Inner Voice':
+        ScaleDegreeProgression.fromList(['bVI', 'IV', 'bVII', 'V', 'I']),
+
+    'One-Four-One': ScaleDegreeProgression.fromList(['I', 'IV', 'I']),
+
+    'One-Four-One Altered': ScaleDegreeProgression.fromList(['I', 'iv', 'I']),
+
+    'Neapolitan Cadence': ScaleDegreeProgression.fromList(['bII', 'V', 'I']),
+
+    'Short Chromatic Inner Voice (dim)':
+        ScaleDegreeProgression.fromList(['bVII', 'VIIdim7', 'I']),
+
+    'Diatonic Diminished': ScaleDegreeProgression.fromList(['VIIdim7', 'I']),
+
+    'Minor-Based Diminished': ScaleDegreeProgression.fromList(['bII7', 'I']),
+
+    'Two-SubFive-One': ScaleDegreeProgression.fromList(['ii', 'bII', 'I']),
+
+    'Two(diminished)-SubFive-One':
+        ScaleDegreeProgression.fromList(['iidim', 'bII', 'I']),
+
+    'Simple Mixture Ascent':
+        ScaleDegreeProgression.fromList(['bVI', 'bVII', 'I']),
+
+    'Short Simple Mixture Ascent':
+        ScaleDegreeProgression.fromList(['bVII', 'I']),
+
+    'Augmented Authentic Cadence':
+        ScaleDegreeProgression.fromList(['Vaug', 'I']),
+  };
 }

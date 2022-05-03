@@ -1,6 +1,5 @@
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:tonic/tonic.dart';
 
 /// A particular [ScoreGiver] that scores a [Progression] within a range of
 /// 0 - 1, that is later multiplied by it's [importance].
@@ -63,6 +62,7 @@ enum WeightDescription {
   technical,
 }
 
+// TDC: This is irrelevant now...
 enum ScoringStage {
   /// The saved progression will be scored before substituting the base one.
   beforeSubstitution,

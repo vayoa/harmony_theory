@@ -29,12 +29,12 @@ class ChordProgression extends Progression<Chord> {
           values: progression.values,
           durations: progression.durations,
           timeSignature: progression.timeSignature,
-          duration: progression.duration,
+          hasNull: progression.hasNull,
         );
 
   List<PitchScale> matchWithScales() {
     List<String> chordNames = values
-        .map((Chord? chord) => chord == null ? 'null' : chord.getCommonName())
+        .map((Chord? chord) => chord == null ? 'null' : chord.commonName)
         .toList();
     Map<String, int> counts = {};
     Map<String, int> results = {};
@@ -110,7 +110,7 @@ class ChordProgression extends Progression<Chord> {
   }
 
   @override
-  String notNullValueFormat(Chord value) => value.getCommonName();
+  String notNullValueFormat(Chord value) => value.commonName;
 }
 
 abstract class ScaleMatchUtilities {
