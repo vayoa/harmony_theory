@@ -24,7 +24,7 @@ class HarmonicFunctionWeight extends Weight {
   static Map<int, Map<int, int>> get sortedFunctions =>
       _harmonicFunctionBank.sortedFunctions;
 
-  // TODO: Write this better...
+  // TDC: Write this better...
   ScaleDegreeChord prepareForCheck(
       ScaleDegreeChord chord, ScaleDegreeChord other) {
     if (chord is TonicizedScaleDegreeChord &&
@@ -32,7 +32,7 @@ class HarmonicFunctionWeight extends Weight {
       if (chord.tonic.rootDegree == other.tonic.rootDegree) {
         return chord.tonicizedToTonic;
       } else {
-        return chord.tonicizedToMajorScale;
+        return chord;
       }
     } else if (other is TonicizedScaleDegreeChord &&
         other.tonic.weakEqual(chord)) {

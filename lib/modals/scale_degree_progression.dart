@@ -6,6 +6,7 @@ import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/substitution.dart';
 import 'package:thoery_test/modals/substitution_match.dart';
 import 'package:thoery_test/modals/time_signature.dart';
+import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
 
 import 'chord_progression.dart';
@@ -70,7 +71,11 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       : super.raw(
           values: [
             for (Map<String, dynamic>? map in json['val'])
-              map == null ? null : ScaleDegreeChord.fromJson(map)
+              map == null
+                  ? null
+                  : (map.containsKey('toTonic')
+                      ? TonicizedScaleDegreeChord.fromJson(map)
+                      : ScaleDegreeChord.fromJson(map))
           ],
           durations:
               AbsoluteDurations((json['dur'] as List<dynamic>).cast<double>()),
