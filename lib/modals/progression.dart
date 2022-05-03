@@ -460,6 +460,14 @@ class Progression<T> implements Identifiable {
     return start;
   }
 
+  Progression<T> inTimeSignature(TimeSignature timeSignature) {
+    Progression<T> newProg = Progression.empty(timeSignature: timeSignature);
+    for (int i = 0; i < length; i++) {
+      newProg.add(values[i], durations[i]);
+    }
+    return newProg;
+  }
+
   /// Checks whether [duration] is valid.
   void checkValidDuration({
     required T? value,

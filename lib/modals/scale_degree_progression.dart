@@ -14,7 +14,6 @@ import 'exceptions.dart';
 /// A class representing a harmonic progression, built by [ScaleDegreeChord].
 /// The mode of the progression will always be Ionian (Major).
 class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
-
   ScaleDegreeProgression(List<ScaleDegreeChord?> base, List<double> durations,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : super(base, durations, timeSignature: timeSignature);
@@ -482,4 +481,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
     }
   }
 
+  @override
+  ScaleDegreeProgression inTimeSignature(TimeSignature timeSignature) =>
+      ScaleDegreeProgression.fromProgression(
+          super.inTimeSignature(timeSignature));
 }

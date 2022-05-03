@@ -111,6 +111,10 @@ class ChordProgression extends Progression<Chord> {
 
   @override
   String notNullValueFormat(Chord value) => value.commonName;
+
+  @override
+  ChordProgression inTimeSignature(TimeSignature timeSignature) =>
+      ChordProgression.fromProgression(super.inTimeSignature(timeSignature));
 }
 
 abstract class ScaleMatchUtilities {
