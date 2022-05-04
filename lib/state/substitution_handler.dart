@@ -180,24 +180,21 @@ abstract class SubstitutionHandler {
   }
 
   static Substitution substituteBy({
-    required ChordProgression base,
+    required ScaleDegreeProgression base,
     required int maxIterations,
     KeepHarmonicFunctionAmount? keepHarmonicFunction,
     int start = 0,
     double startDur = 0.0,
     int? end,
     double? endDur,
-    PitchScale? scale,
   }) {
-    var sAP = getAndPrintBase(base, scale: scale);
-    scale = sAP.key;
-    ScaleDegreeProgression baseProgression = sAP.value, prev = baseProgression;
+    ScaleDegreeProgression prev = base;
     List<Substitution> rated;
     do {
       rated = getRatedSubstitutions(
         prev,
         keepAmount: keepHarmonicFunction,
-        harmonicFunctionBase: baseProgression,
+        harmonicFunctionBase: base,
         start: start,
         startDur: startDur,
         end: end,
@@ -206,8 +203,7 @@ abstract class SubstitutionHandler {
       prev = rated.first.substitutedBase;
       maxIterations--;
     } while (maxIterations > 0);
-    Substitution result = rated.first.copyWith(base: baseProgression);
-    print(result.toString(scale: scale));
+    Substitution result = rated.first.copyWith(base: base);
     return result;
   }
 
