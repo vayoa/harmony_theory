@@ -205,6 +205,7 @@ abstract class SubstitutionHandler {
       firstChangedIndex: 0,
       lastChangedIndex: 0,
     );
+    prev.scoreWith(SubstitutionHandler.weights);
     List<Substitution> rated;
     do {
       rated = getRatedSubstitutions(
@@ -216,7 +217,7 @@ abstract class SubstitutionHandler {
         end: end,
         endDur: endDur,
       );
-      if (prev.score.score > rated.first.score.score) {
+      if (rated.isEmpty || prev.score.score > rated.first.score.score) {
         break;
       } else {
         prev = rated.first;
