@@ -4,6 +4,7 @@ import 'package:thoery_test/modals/chord_progression.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/substitution.dart';
+import 'package:thoery_test/modals/substitution_match.dart';
 import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/important_chords_weight.dart';
 import 'package:thoery_test/modals/weights/in_scale_weight.dart';
@@ -179,6 +180,8 @@ abstract class SubstitutionHandler {
     return rated;
   }
 
+  /// Substitutes the best option for [maxIterations] until reached or until
+  /// the previous substitution had a higher score.
   static Substitution substituteBy({
     required ScaleDegreeProgression base,
     required int maxIterations,
@@ -188,11 +191,24 @@ abstract class SubstitutionHandler {
     int? end,
     double? endDur,
   }) {
-    ScaleDegreeProgression prev = base;
+    Substitution prev = Substitution(
+      substitutedBase: base,
+      base: base,
+      originalSubstitution: base,
+      match: const SubstitutionMatch(
+        baseIndex: 0,
+        baseOffset: 0,
+        subIndex: 0,
+        ratio: 0,
+        type: SubstitutionMatchType.dry,
+      ),
+      firstChangedIndex: 0,
+      lastChangedIndex: 0,
+    );
     List<Substitution> rated;
     do {
       rated = getRatedSubstitutions(
-        prev,
+        prev.substitutedBase,
         keepAmount: keepHarmonicFunction,
         harmonicFunctionBase: base,
         start: start,
@@ -200,10 +216,14 @@ abstract class SubstitutionHandler {
         end: end,
         endDur: endDur,
       );
-      prev = rated.first.substitutedBase;
-      maxIterations--;
+      if (prev.score.score > rated.first.score.score) {
+        break;
+      } else {
+        prev = rated.first;
+        maxIterations--;
+      }
     } while (maxIterations > 0);
-    Substitution result = rated.first.copyWith(base: base);
+    Substitution result = prev.copyWith(base: base);
     return result;
   }
 
