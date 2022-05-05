@@ -253,27 +253,28 @@ class Progression<T> implements Identifiable {
   /// over one measures into two chords (thus ruining the original progression).
   List<Progression<T>> splitToMeasures({TimeSignature? timeSignature}) {
     timeSignature ??= _timeSignature;
-    if (duration < _timeSignature.decimal) return [this];
+    final double decimal = _timeSignature.decimal;
+    if (duration < decimal) return [this];
     final List<Progression<T>> measures = [];
     Progression<T> currentMeasure =
         Progression.empty(timeSignature: timeSignature);
     double currentRhythmSum = 0.0;
     for (var i = 0; i < length; i++) {
       double newDur = _durations[i];
-      if (currentRhythmSum + newDur > timeSignature.decimal) {
-        double left = timeSignature.decimal - currentRhythmSum;
+      if (currentRhythmSum + newDur > decimal) {
+        double left = decimal - currentRhythmSum;
         if (left != 0) {
           currentMeasure.add(_values[i], left);
-          newDur -= currentMeasure._durations.last;
+          newDur -= left;
         }
         currentRhythmSum = 0.0;
         measures.add(currentMeasure);
         currentMeasure = Progression.empty(timeSignature: timeSignature);
-        while (newDur > _timeSignature.decimal) {
-          currentMeasure.add(_values[i], 1.0);
+        while (newDur > decimal) {
+          currentMeasure.add(_values[i], decimal);
           measures.add(currentMeasure);
           currentMeasure = Progression.empty(timeSignature: timeSignature);
-          newDur -= _timeSignature.decimal;
+          newDur -= decimal;
         }
       }
       currentRhythmSum += newDur;
