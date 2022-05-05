@@ -53,8 +53,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
                     base.length, (index) => 1 / timeSignature.denominator),
             timeSignature: timeSignature);
 
-  ScaleDegreeProgression.fromChords(PitchScale scale, Progression<Chord> chords,
-      {TimeSignature timeSignature = const TimeSignature.evenTime()})
+  ScaleDegreeProgression.fromChords(PitchScale scale, Progression<Chord> chords)
       : this.fromProgression(
           Progression<ScaleDegreeChord>.raw(
             values: chords.values
@@ -62,7 +61,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
                     chord == null ? null : ScaleDegreeChord(scale, chord))
                 .toList(),
             durations: chords.durations,
-            timeSignature: timeSignature,
+            timeSignature: chords.timeSignature,
             hasNull: chords.hasNull,
           ),
         );
