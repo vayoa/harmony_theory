@@ -159,7 +159,7 @@ class HarmonicFunctionBank {
       3: ['vi'],
     },
     'iv': {
-      1: ['I'],
+      0: ['I'],
       2: ['V'],
     },
     'IV': {
