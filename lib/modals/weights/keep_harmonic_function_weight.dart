@@ -9,7 +9,9 @@ class KeepHarmonicFunctionWeight extends Weight {
   const KeepHarmonicFunctionWeight()
       : super(
           name: 'KeepHarmonicFunction',
-          description: WeightDescription.technical,
+          description: "Prefers progressions that retain the harmonic function "
+              "of their base.",
+          weightDescription: WeightDescription.technical,
           importance: 5,
           scoringStage: ScoringStage.afterSubstitution,
         );

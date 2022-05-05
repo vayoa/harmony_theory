@@ -5,9 +5,11 @@ class UniquesWeight extends Weight {
   const UniquesWeight()
       : super(
           name: 'Uniques',
+          description: "Prefers progressions with a higher amount of unique "
+              "chords.",
           importance: 2,
           scoringStage: ScoringStage.afterSubstitution,
-          description: WeightDescription.exotic,
+          weightDescription: WeightDescription.exotic,
         );
 
   // TDC: Optimize this a bit more...

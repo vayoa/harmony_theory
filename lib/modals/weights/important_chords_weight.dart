@@ -8,8 +8,11 @@ class ImportantChordsWeight extends Weight {
   const ImportantChordsWeight()
       : super(
           name: 'ImportantChords',
+          description: "Prefers progressions that don't change the important "
+              "values in their base (the first, last and middle tonics) and "
+              "the dominants that precede them.",
           importance: 3,
-          description: WeightDescription.technical,
+          weightDescription: WeightDescription.technical,
           scoringStage: ScoringStage.afterSubstitution,
         );
 

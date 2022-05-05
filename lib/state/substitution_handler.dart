@@ -4,6 +4,7 @@ import 'package:thoery_test/modals/chord_progression.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/substitution.dart';
+import 'package:thoery_test/modals/weights/ClimacticEndingWeight.dart';
 import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/important_chords_weight.dart';
 import 'package:thoery_test/modals/weights/in_scale_weight.dart';
@@ -25,6 +26,7 @@ abstract class SubstitutionHandler {
     HarmonicFunctionWeight(),
     RhythmAndPlacementWeight(),
     ImportantChordsWeight(),
+    ClimacticEndingWeight(),
   ];
 
   static const KeepHarmonicFunctionWeight keepHarmonicFunction =

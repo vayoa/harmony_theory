@@ -1,15 +1,16 @@
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
-import 'package:tonic/tonic.dart';
 
 class OvertakingWeight extends Weight {
   const OvertakingWeight()
       : super(
           name: 'Overtaking',
+          description: "Prefers progressions that don't have one chord "
+              "overtaking the rest (in duration terms).",
           importance: 4,
           scoringStage: ScoringStage.afterSubstitution,
-          description: WeightDescription.technical,
+          weightDescription: WeightDescription.technical,
         );
 
   static const double overtaking = 1 / 3;

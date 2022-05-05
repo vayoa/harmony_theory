@@ -5,8 +5,9 @@ import 'package:thoery_test/modals/scale_degree_progression.dart';
 /// 0 - 1, that is later multiplied by it's [importance].
 abstract class Weight {
   final String name;
+  final String description;
   final ScoringStage scoringStage;
-  final WeightDescription description;
+  final WeightDescription weightDescription;
 
   /// The max [importance] value a [Weight] can have (inclusive).
   static const int maxImportance = 5;
@@ -19,8 +20,9 @@ abstract class Weight {
   /// [importance] must be between 0 and [maxImportance] (inclusive).
   const Weight({
     required this.name,
-    required this.scoringStage,
     required this.description,
+    required this.scoringStage,
+    required this.weightDescription,
     required this.importance,
   }) : assert(importance >= 0 && importance <= maxImportance);
 

@@ -10,8 +10,10 @@ class HarmonicFunctionWeight extends Weight {
   const HarmonicFunctionWeight()
       : super(
           name: 'HarmonicFunction',
+          description: "Prefers progressions that follow common (classical) "
+              "harmony rules.",
           importance: 5,
-          description: WeightDescription.technical,
+          weightDescription: WeightDescription.technical,
           scoringStage: ScoringStage.afterSubstitution,
         );
 

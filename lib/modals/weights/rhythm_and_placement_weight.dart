@@ -5,9 +5,12 @@ class RhythmAndPlacementWeight extends Weight {
   const RhythmAndPlacementWeight()
       : super(
           name: 'RhythmAndPlacement',
+          description: "Scores down values that get cut by a measure or it's "
+              "half-point. When they're not at the end of a musical sentence "
+              "or fill up multiple measures.",
           importance: 4,
           scoringStage: ScoringStage.afterSubstitution,
-          description: WeightDescription.technical,
+          weightDescription: WeightDescription.technical,
         );
 
   static const int measureCuts = 1;
