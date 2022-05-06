@@ -215,7 +215,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
                 sub,
                 type: type,
                 baseChordPos: baseChordPos,
-                durationToBase: before,
                 realBaseDuration: dur,
                 offsetDur: offset,
                 subChordPos: subChordPos,
@@ -237,7 +236,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   SubstitutionMatch? _getMatch(
     ScaleDegreeProgression sub, {
     required double realBaseDuration,
-    required double durationToBase,
     required int subChordPos,
     required int baseChordPos,
     required int start,
@@ -268,13 +266,14 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       if (baseChordPos != start) {
         baseDurationLeft = durations.real(baseChordPos - 1) - durationToStart;
       }
-      enoughInLeft = baseDurationLeft >= neededDurationLeft;
       // Continue on only if there's enough duration to fit sub in the
       // left side of base from baseChordPose...
-      if (enoughInLeft) {
+      if (baseDurationLeft >= neededDurationLeft) {
         neededDurationRight = sub.sumDurations(subChordPos + 1) * ratio;
+        double durationToBase =
+            (durations.real(baseChordPos) - durations[baseChordPos]);
         baseDurationRight =
-            maxDur - (durationToBase + offsetDur) - realBaseDuration;
+            maxDur - (durationToBase + offsetDur + startDur) - realBaseDuration;
         // Do we have enough duration in right?
         if (baseDurationRight >= neededDurationRight) {
           // Add the location to the list of match locations and continue

@@ -235,7 +235,7 @@ _test() {
 
 _testCut() {
   var base = ScaleDegreeProgression.fromList(
-      [null, null, 'V', 'V', null, 'I', null, null]);
+      [null, null, 'V', 'V', null, null, 'I', null]);
   var sub = ScaleDegreeProgression.fromList(['ii', 'V', 'I', 'ii']);
   print(base);
   print(sub);
