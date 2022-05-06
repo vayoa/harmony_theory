@@ -12,21 +12,8 @@ import 'modals/scale_degree_chord.dart';
 import 'modals/substitution.dart';
 
 void main() {
-  //
-  // var p = ScaleDegreeProgression.fromList(['I', 'I', 'I', 'I', 'I', 'I']);
-  // print(p);
-  // var s = ScaleDegreeProgression.fromList(['I', 'ii', 'V', 'I']);
-  // print(s);
-  // var subs = p.getPossibleSubstitutions(s, startDur: 0.5);
-  // print('subs:');
-  // for (var sub in subs) {
-  //   print(sub.substitutedBase);
-  //   print(sub.substitutedBase.durations);
-  // }
-  // print('done');
-
   _testCut();
-  // _test();
+  _test();
   final ChordProgression _base = ChordProgression.evenTime([
     Chord.parse('Cm'),
     Chord.parse('D#dim'),
