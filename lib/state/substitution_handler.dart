@@ -4,7 +4,7 @@ import 'package:thoery_test/modals/chord_progression.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/substitution.dart';
-import 'package:thoery_test/modals/weights/ClimacticEndingWeight.dart';
+import 'package:thoery_test/modals/weights/climactic_ending_weight.dart';
 import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/important_chords_weight.dart';
 import 'package:thoery_test/modals/weights/in_scale_weight.dart';
@@ -19,15 +19,16 @@ import 'package:tonic/tonic.dart';
 import '../modals/pitch_scale.dart';
 
 abstract class SubstitutionHandler {
-  static const List<Weight> weights = [
-    InScaleWeight(),
-    OvertakingWeight(),
-    UniquesWeight(),
-    HarmonicFunctionWeight(),
-    RhythmAndPlacementWeight(),
-    ImportantChordsWeight(),
-    ClimacticEndingWeight(),
-  ];
+  static List<Weight> weights = [
+    const InScaleWeight(),
+    const OvertakingWeight(),
+    const UniquesWeight(),
+    const HarmonicFunctionWeight(),
+    const RhythmAndPlacementWeight(),
+    const ImportantChordsWeight(),
+    const ClimacticEndingWeight(),
+  ]..sort(
+      (Weight w1, Weight w2) => -1 * w1.importance.compareTo(w2.importance));
 
   static const KeepHarmonicFunctionWeight keepHarmonicFunction =
       KeepHarmonicFunctionWeight();

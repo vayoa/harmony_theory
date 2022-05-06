@@ -22,36 +22,45 @@ class ClimacticEndingWeight extends Weight {
     // 2 - 3.
     // In an 8 measures song, we'd like the wild rhythms to happen more towards
     // the 6th - 7th measures. Which means the range is now 5 - 7.
-    // So the range ends one measure before the last and is of
-    // length -> (measureNum / 4).round().
     double sum = 0.0;
     int points = 0, rangeCount = 0;
     double rangeEnd = 0, rangeBeg = 0;
     String details = "";
-    if (progression.measureCount >= 4) {
-      rangeEnd = progression.duration - progression.timeSignature.decimal;
-      rangeBeg = rangeEnd -
-          ((progression.measureCount / 4).round() *
-              progression.timeSignature.decimal);
+    final double decimal = progression.timeSignature.decimal;
+    final double decimal4 = decimal * 4;
+    final double rangeBeg4 = 2 * decimal, rangeEnd4 = 3 * decimal;
+    if (progression.measureCount == 4) {
+      rangeBeg = rangeBeg4;
+      rangeEnd = rangeEnd4;
+    } else {
+      rangeEnd = progression.duration - decimal;
+      rangeBeg = rangeEnd - ((progression.measureCount / 4).round() * decimal);
+      if (progression.measureCount % 2 != 0 || progression.measureCount <= 2) {
+        rangeBeg += (decimal / 2);
+        rangeEnd += (decimal / 2);
+      }
     }
     for (int i = 0; i < progression.length; i++) {
       double dur = progression.durations[i];
-      if (sum >= rangeBeg && sum < rangeEnd) {
+      double avg = sum / (i + 1);
+      if (sum >= rangeBeg && sum < rangeEnd ||
+          (sum % decimal4 >= rangeBeg4 && sum % decimal4 < rangeEnd4)) {
         rangeCount++;
-        /* TODO: Currently if dur is smaller than the average dur so far,
-                  should be more sophisticated. */
-        double avg = sum / (i + 1);
         if (dur < avg) {
           points++;
-          details += 'Adding points for $dur in range $rangeBeg - $rangeEnd '
-              'smaller than the current avg ($avg). Points are now $points.\n';
+          details +=
+              '+1 for ${progression[i]}($dur) in range $rangeBeg - $rangeEnd '
+              '(or at the end of a musical sentence) smaller than the current '
+              'avg ($avg). Points are now $points.\n';
         }
       }
       sum += dur;
     }
-    details += 'Out of $rangeCount durations in range $rangeBeg - $rangeEnd, '
-        '$points durations were smaller than the average duration so far.';
+    details +=
+        'Out of $rangeCount durations in range $rangeBeg - $rangeEnd (or at '
+        'the end of a musical sentence), $points durations were smaller than '
+        'the average duration so far.';
     return Score(
-        score: rangeCount == 0 ? 0 : points / rangeCount, details: details);
+        score: rangeCount == 0 ? 1.0 : points / rangeCount, details: details);
   }
 }
