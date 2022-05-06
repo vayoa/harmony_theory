@@ -175,10 +175,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       loopEnd = forIndex + 1;
     }
 
-    double durationToStart =
-        durations.real(start) - durations[start] + startDur;
-    double maxDur = durations.real(end - 1);
-    if (endDur != durations[end - 1]) maxDur += -durations[end - 1] + endDur;
+    final double step = timeSignature.step;
 
     for (var baseChordPos = loopStart; baseChordPos < loopEnd; baseChordPos++) {
       double minus = 0;
@@ -189,8 +186,9 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         realBaseDuration = endDur;
       }
       realBaseDuration -= minus;
-      double realDurationToBase =
-          durations.real(baseChordPos) - durations[baseChordPos] + minus;
+      final double maxDur = realBaseDuration;
+      final double before = durations.real(baseChordPos) - realBaseDuration;
+
       for (var subChordPos = 0; subChordPos < sub.length; subChordPos++) {
         // If the two chords are equal.
         // Or if we have a tonicization.
@@ -200,56 +198,101 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           isSubLast: subChordPos == sub.length - 1,
         );
         if (type != null) {
-          // We now check if there's enough space for this progression to
-          // substitute in place for the current chord.
-          // For this to be true there needs to be enough duration to cover the
-          // rest of the progression.
-          final double ratio = realBaseDuration / sub.durations[subChordPos];
-          // TDC: Is this condition even necessary?
-          if (sub.duration * ratio <= duration) {
-            double neededDurationLeft = 0, neededDurationRight = 0;
-            double baseDurationLeft = 0.0, baseDurationRight = 0.0;
-            bool enoughInLeft = false;
-            neededDurationLeft = sub.sumDurations(0, subChordPos) * ratio;
-            // If this is 0 than there's no point on checking the sum since it's
-            // 0... (also there'll be an error with base[baseChordPos - 1] if we
-            // don't check this...)
-            if (baseChordPos != start) {
-              baseDurationLeft =
-                  durations.real(baseChordPos - 1) - durationToStart;
-            }
-            enoughInLeft = baseDurationLeft >= neededDurationLeft;
-            // Continue on only if there's enough duration to fit sub in the
-            // left side of base from baseChordPose...
-            if (enoughInLeft) {
-              neededDurationRight = sub.sumDurations(subChordPos + 1) * ratio;
-              if (subChordPos != end - 1) {
-                baseDurationRight =
-                    maxDur - realDurationToBase - realBaseDuration;
-              }
-              // Do we have enough duration in right?
-              if (baseDurationRight >= neededDurationRight) {
-                // Add the location to the list of match locations and continue
-                // searching.
-                matches.add(
-                  SubstitutionMatch(
-                    baseIndex: baseChordPos,
-                    baseOffset: baseChordPos == start ? startDur : 0.0,
-                    subIndex: subChordPos,
-                    ratio: ratio,
-                    type: type,
-                    // We add seventh only if base contains one.
-                    withSeventh: this[baseChordPos] != null &&
-                        this[baseChordPos]!.requiresAddingSeventh,
-                  ),
-                );
-              }
+          for (int i = 1; i <= maxDur ~/ step; i++) {
+            final double dur = i * step;
+            double offset = 0;
+            for (int j = 0;
+                timeSignature.validDuration(dur) &&
+                    offset + dur <= maxDur &&
+                    timeSignature.validDurationPos(
+                        dur, before + offset + startDur);
+                j++) {
+              // We now check if there's enough space for this progression to
+              // substitute in place for the current chord.
+              // For this to be true there needs to be enough duration to cover the
+              // rest of the progression.
+              SubstitutionMatch? match = _getMatch(
+                sub,
+                type: type,
+                baseChordPos: baseChordPos,
+                durationToBase: before,
+                realBaseDuration: dur,
+                offsetDur: offset,
+                subChordPos: subChordPos,
+                start: start,
+                startDur: startDur,
+                end: end,
+                endDur: endDur,
+              );
+              if (match != null) matches.add(match);
+              offset += step;
             }
           }
         }
       }
     }
     return matches;
+  }
+
+  SubstitutionMatch? _getMatch(
+    ScaleDegreeProgression sub, {
+    required double realBaseDuration,
+    required double durationToBase,
+    required int subChordPos,
+    required int baseChordPos,
+    required int start,
+    required int end,
+    required double offsetDur,
+    required double startDur,
+    required double endDur,
+    required SubstitutionMatchType type,
+  }) {
+    double durationToStart =
+        durations.real(start) - durations[start] + startDur;
+    double maxDur = durations.real(end - 1);
+    if (endDur != durations[end - 1]) maxDur += -durations[end - 1] + endDur;
+    if (baseChordPos == end - 1 && realBaseDuration > endDur) {
+      realBaseDuration = endDur;
+    }
+
+    final double ratio = realBaseDuration / sub.durations[subChordPos];
+    // TDC: Is this condition even necessary?
+    if (sub.duration * ratio <= duration) {
+      double neededDurationLeft = 0, neededDurationRight = 0;
+      double baseDurationLeft = offsetDur, baseDurationRight = 0.0;
+      bool enoughInLeft = false;
+      neededDurationLeft = sub.sumDurations(0, subChordPos) * ratio;
+      // If this is 0 than there's no point on checking the sum since it's
+      // 0... (also there'll be an error with base[baseChordPos - 1] if we
+      // don't check this...)
+      if (baseChordPos != start) {
+        baseDurationLeft = durations.real(baseChordPos - 1) - durationToStart;
+      }
+      enoughInLeft = baseDurationLeft >= neededDurationLeft;
+      // Continue on only if there's enough duration to fit sub in the
+      // left side of base from baseChordPose...
+      if (enoughInLeft) {
+        neededDurationRight = sub.sumDurations(subChordPos + 1) * ratio;
+        baseDurationRight =
+            maxDur - (durationToBase + offsetDur) - realBaseDuration;
+        // Do we have enough duration in right?
+        if (baseDurationRight >= neededDurationRight) {
+          // Add the location to the list of match locations and continue
+          // searching.
+          return SubstitutionMatch(
+            baseIndex: baseChordPos,
+            baseOffset: offsetDur + startDur,
+            subIndex: subChordPos,
+            ratio: ratio,
+            type: type,
+            // We add seventh only if base contains one.
+            withSeventh: this[baseChordPos] != null &&
+                this[baseChordPos]!.requiresAddingSeventh,
+          );
+        }
+      }
+    }
+    return null;
   }
 
   /// Get a comparing rating of this [ScaleDegreeProgression] against another
@@ -358,6 +401,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         double d1 = -1 * relativeMatch.sumDurations(0, chord);
         // First index that could be changed.
         int left = getPlayingIndex(d1, from: baseChord);
+        // If we have an offset that's before base chord's progression...
+        if (match.baseOffset != 0 && baseChord == 0 && left == -1) left = 0;
         // The duration from the matching chord in sub to the end of sub, without
         // the duration of the matching chord itself.
         double d2 = relativeMatch.sumDurations(chord);
@@ -383,6 +428,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         double _durToBaseChord =
             durations.real(baseChord) - durations[baseChord];
         int firstChanged = substitution.getPlayingIndex(_durToBaseChord + d1);
+        if (match.baseOffset != 0 && firstChanged == -1) firstChanged = 0;
         int lastChanged =
             substitution.getPlayingIndex(_durToBaseChord + d2 - halfStep);
         bool different = false;

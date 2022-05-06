@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:thoery_test/extensions/chord_extension.dart';
 import 'package:thoery_test/modals/identifiable.dart';
 import 'package:thoery_test/modals/time_signature.dart';
@@ -484,18 +482,15 @@ class Progression<T> implements Identifiable {
     } else {
       // The duration the current measure has left before being full.
       double left = decimal - (overallDuration % decimal);
-      double currentMinDuration = duration;
-      // If left is 1.0 it's in fact 0.0 (since we have the whole measure left...).
-      if (left != 1 && duration >= left) {
+      // If left is decimal it's in fact 0.0 (since we have the whole measure left...).
+      if (left != decimal && duration >= left) {
         assertDurationValid(value: value, duration: left);
-        currentMinDuration = left;
       }
       // The duration that's left after the cut...
       double end = (overallDuration + duration) % decimal;
       // Since if this is true the rest is valid...
       if (end != 0) {
         assertDurationValid(value: value, duration: end);
-        currentMinDuration = min(currentMinDuration, end);
       }
     }
   }

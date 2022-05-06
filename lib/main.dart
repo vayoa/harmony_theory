@@ -12,8 +12,21 @@ import 'modals/scale_degree_chord.dart';
 import 'modals/substitution.dart';
 
 void main() {
+  //
+  // var p = ScaleDegreeProgression.fromList(['I', 'I', 'I', 'I', 'I', 'I']);
+  // print(p);
+  // var s = ScaleDegreeProgression.fromList(['I', 'ii', 'V', 'I']);
+  // print(s);
+  // var subs = p.getPossibleSubstitutions(s, startDur: 0.5);
+  // print('subs:');
+  // for (var sub in subs) {
+  //   print(sub.substitutedBase);
+  //   print(sub.substitutedBase.durations);
+  // }
+  // print('done');
+
   _testCut();
-  _test();
+  // _test();
   final ChordProgression _base = ChordProgression.evenTime([
     Chord.parse('Cm'),
     Chord.parse('D#dim'),
@@ -193,17 +206,17 @@ _test() {
       progression,
       keepAmount: KeepHarmonicFunctionAmount.low);
   print('subs (low): ${subs.length}');
-  assert(subs.length == 452);
+  assert(subs.length >= 452);
 
   subs = SubstitutionHandler.getRatedSubstitutions(progression,
       keepAmount: KeepHarmonicFunctionAmount.med);
   print('subs (medium): ${subs.length}');
-  assert(subs.length == 452);
+  assert(subs.length >= 452);
 
   subs = SubstitutionHandler.getRatedSubstitutions(progression,
       keepAmount: KeepHarmonicFunctionAmount.high);
   print('subs (high): ${subs.length}');
-  assert(subs.length == 19);
+  assert(subs.length >= 19);
   // print(const NewRhythmWeight().score(progression: baseProg, base: baseProg));
 
   // Substitution sub = SubstitutionHandler.perfectSubstitution(
@@ -228,7 +241,7 @@ _testCut() {
   print(sub);
   int start = 0;
   double startDur = 0.25;
-  int? end = 2;
+  int? end = 3;
   double? endDur = 0.25;
   print(base.getFittingMatchLocations(
     sub,
