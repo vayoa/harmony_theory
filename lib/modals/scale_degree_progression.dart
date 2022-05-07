@@ -399,9 +399,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         // The duration from the beginning of sub to matching chord in sub.
         double d1 = -1 * relativeMatch.sumDurations(0, chord);
         // First index that could be changed.
-        int left = getPlayingIndex(d1, from: baseChord);
-        // If we have an offset that's before base chord's progression...
-        if (match.baseOffset != 0 && baseChord == 0 && left == -1) left = 0;
+        int left = getPlayingIndex(d1 + match.baseOffset, from: baseChord);
         // The duration from the matching chord in sub to the end of sub, without
         // the duration of the matching chord itself.
         double d2 = relativeMatch.sumDurations(chord);
@@ -413,7 +411,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         double bd1 = -1 * sumDurations(left, baseChord) - match.baseOffset;
         double bd2 = sumDurations(baseChord, right + 1) - match.baseOffset;
         if (bd1 != d1) {
-          substitution.add(this[left], -1 * (bd1 - d1));
+          substitution.add(this[left], d1 - bd1);
         }
         substitution.addAll(fillWith(substitution.duration, relativeMatch));
         if (bd2 != d2) {
