@@ -61,6 +61,6 @@ class ClimacticEndingWeight extends Weight {
         'the end of a musical sentence), $points durations were smaller than '
         'the average duration so far.';
     return Score(
-        score: rangeCount == 0 ? 1.0 : points / rangeCount, details: details);
+        score: rangeCount == 0 ? 0.0 : points / rangeCount, details: details);
   }
 }
