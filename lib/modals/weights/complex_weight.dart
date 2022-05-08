@@ -34,7 +34,7 @@ class ComplexWeight extends Weight {
     for (int i = 0; i < progression.length; i++) {
       double duration = progression.durations[i];
       count += duration ~/ decimal;
-      if (count % decimal != 0) count++;
+      if (duration % decimal != 0) count++;
     }
     return count;
   }
