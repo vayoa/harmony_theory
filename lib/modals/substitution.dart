@@ -57,12 +57,15 @@ class Substitution {
   ///
   /// If [keepHarmonicFunction] is true and no [harmonicFunctionBase] is given,
   /// will use [base] as the latter.
+  ///
+  /// If [sound] is null, will default to [Sound.both].
   SubstitutionScore? scoreWith(
     List<Weight> weights, {
     bool keepHarmonicFunction = false,
-    Sound sound = Sound.both,
+    Sound? sound,
     ScaleDegreeProgression? harmonicFunctionBase,
   }) {
+    sound ??= Sound.both;
     double rating = 0.0;
     int length = 0;
     Map<String, Score> details = {};

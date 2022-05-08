@@ -115,6 +115,7 @@ abstract class SubstitutionHandler {
 
   static List<Substitution> getRatedSubstitutions(
     ScaleDegreeProgression base, {
+    Sound? sound,
     KeepHarmonicFunctionAmount? keepAmount,
     ScaleDegreeProgression? harmonicFunctionBase,
     int start = 0,
@@ -133,9 +134,12 @@ abstract class SubstitutionHandler {
     List<Substitution> sorted = [];
     bool shouldCalc = _keepAmount != KeepHarmonicFunctionAmount.low;
     for (Substitution sub in substitutions) {
-      SubstitutionScore? score = sub.scoreWith(weights,
-          keepHarmonicFunction: shouldCalc,
-          harmonicFunctionBase: harmonicFunctionBase);
+      SubstitutionScore? score = sub.scoreWith(
+        weights,
+        keepHarmonicFunction: shouldCalc,
+        sound: sound,
+        harmonicFunctionBase: harmonicFunctionBase,
+      );
       if (score != null) {
         sorted.add(sub);
       }
@@ -190,6 +194,7 @@ abstract class SubstitutionHandler {
   static Substitution substituteBy({
     required ScaleDegreeProgression base,
     required int maxIterations,
+    Sound? sound,
     KeepHarmonicFunctionAmount? keepHarmonicFunction,
     int start = 0,
     double startDur = 0.0,
@@ -201,6 +206,7 @@ abstract class SubstitutionHandler {
     do {
       rated = getRatedSubstitutions(
         prev,
+        sound: sound,
         keepAmount: keepHarmonicFunction,
         harmonicFunctionBase: base,
         start: start,
@@ -218,6 +224,7 @@ abstract class SubstitutionHandler {
   static Substitution perfectSubstitution({
     required ChordProgression base,
     int? maxIterations,
+    Sound? sound,
     KeepHarmonicFunctionAmount? keepHarmonicFunction,
     int start = 0,
     double startDur = 0.0,
@@ -234,6 +241,7 @@ abstract class SubstitutionHandler {
       rated = getRatedSubstitutions(
         prev,
         keepAmount: keepHarmonicFunction,
+        sound: sound,
         harmonicFunctionBase: baseProgression,
         start: start,
         startDur: startDur,
