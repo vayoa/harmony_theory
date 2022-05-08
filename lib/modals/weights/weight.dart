@@ -82,6 +82,6 @@ enum WeightDescription {
 
 enum Sound {
   classic,
-  exotic,
   both,
+  exotic,
 }
