@@ -14,7 +14,6 @@ class HarmonicFunctionWeight extends Weight {
               "harmony rules.",
           importance: 5,
           weightDescription: WeightDescription.technical,
-          scoringStage: ScoringStage.afterSubstitution,
         );
 
   static final HarmonicFunctionBank _harmonicFunctionBank =

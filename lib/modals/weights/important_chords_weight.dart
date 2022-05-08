@@ -11,9 +11,8 @@ class ImportantChordsWeight extends Weight {
           description: "Prefers progressions that don't change the important "
               "values in their base (the first, last and middle tonics) and "
               "the dominants that precede them.",
-          importance: 3,
+          importance: 2,
           weightDescription: WeightDescription.technical,
-          scoringStage: ScoringStage.afterSubstitution,
         );
 
   /// Scores down [progression] if it changed the important tonics in [base],

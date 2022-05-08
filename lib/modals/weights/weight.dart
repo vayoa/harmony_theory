@@ -1,12 +1,13 @@
 import 'package:thoery_test/modals/progression.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 
+import '../substitution.dart';
+
 /// A particular [ScoreGiver] that scores a [Progression] within a range of
 /// 0 - 1, that is later multiplied by it's [importance].
 abstract class Weight {
   final String name;
   final String description;
-  final ScoringStage scoringStage;
   final WeightDescription weightDescription;
 
   /// The max [importance] value a [Weight] can have (inclusive).
@@ -21,7 +22,6 @@ abstract class Weight {
   const Weight({
     required this.name,
     required this.description,
-    required this.scoringStage,
     required this.weightDescription,
     required this.importance,
   }) : assert(importance >= 0 && importance <= maxImportance);
@@ -32,9 +32,11 @@ abstract class Weight {
 
   /// Returns the [progression]'s score after scaling it based on [importance].
   Score scaledScore(
-          {required ScaleDegreeProgression progression,
-          required ScaleDegreeProgression base}) =>
-      score(progression: progression, base: base).scale(importance);
+          {required Substitution substitution, ScaleDegreeProgression? base}) =>
+      score(
+              progression: substitution.substitutedBase,
+              base: base ?? substitution.base)
+          .scale(importance);
 }
 
 class Score {
@@ -62,11 +64,4 @@ enum WeightDescription {
   diatonic,
   exotic,
   technical,
-}
-
-// TDC: This is irrelevant now...
-enum ScoringStage {
-  /// The saved progression will be scored before substituting the base one.
-  beforeSubstitution,
-  afterSubstitution,
 }

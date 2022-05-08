@@ -8,7 +8,6 @@ class UniquesWeight extends Weight {
           description: "Prefers progressions with a higher amount of unique "
               "chords.",
           importance: 2,
-          scoringStage: ScoringStage.afterSubstitution,
           weightDescription: WeightDescription.exotic,
         );
 

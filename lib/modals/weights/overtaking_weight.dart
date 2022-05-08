@@ -9,7 +9,6 @@ class OvertakingWeight extends Weight {
           description: "Prefers progressions that don't have one chord "
               "overtaking the rest (in duration terms).",
           importance: 4,
-          scoringStage: ScoringStage.afterSubstitution,
           weightDescription: WeightDescription.technical,
         );
 

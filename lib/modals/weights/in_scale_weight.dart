@@ -14,7 +14,6 @@ class InScaleWeight extends Weight {
           /* TDC: This can be beforeSubstitution but if it's a tonicized
                   progression the weight will score it before doing the
                   tonicization, which will give wrong results. */
-          scoringStage: ScoringStage.afterSubstitution,
           weightDescription: WeightDescription.diatonic,
         );
 

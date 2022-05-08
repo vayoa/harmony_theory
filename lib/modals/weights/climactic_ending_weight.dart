@@ -9,7 +9,6 @@ class ClimacticEndingWeight extends Weight {
               "Prefers durations that are closer to the time signature's step "
               "to appear more just before the end.",
           importance: 3,
-          scoringStage: ScoringStage.afterSubstitution,
           weightDescription: WeightDescription.technical,
         );
 

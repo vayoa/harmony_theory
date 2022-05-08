@@ -69,7 +69,7 @@ class Substitution {
     if (keepHarmonicFunction) {
       Weight keep = SubstitutionHandler.keepHarmonicFunction;
       Score keepScore = keep.scaledScore(
-          progression: substitutedBase, base: harmonicFunctionBase ?? base);
+          substitution: this, base: harmonicFunctionBase ?? base);
       rating += keepScore.score;
       details[keep.name] = keepScore;
       length += keep.importance;
@@ -83,16 +83,7 @@ class Substitution {
     for (Weight weight in weights) {
       Score weightScore;
       length += weight.importance;
-      switch (weight.scoringStage) {
-        case ScoringStage.beforeSubstitution:
-          weightScore =
-              weight.scaledScore(progression: originalSubstitution, base: base);
-          break;
-        case ScoringStage.afterSubstitution:
-          weightScore =
-              weight.scaledScore(progression: substitutedBase, base: base);
-          break;
-      }
+      weightScore = weight.scaledScore(substitution: this, base: base);
       rating += weightScore.score;
       details[weight.name] = weightScore;
     }

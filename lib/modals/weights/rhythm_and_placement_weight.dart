@@ -9,7 +9,6 @@ class RhythmAndPlacementWeight extends Weight {
               "half-point. When they're not at the end of a musical sentence "
               "or fill up multiple measures.",
           importance: 4,
-          scoringStage: ScoringStage.afterSubstitution,
           weightDescription: WeightDescription.technical,
         );
 
