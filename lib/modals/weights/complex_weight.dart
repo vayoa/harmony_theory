@@ -21,7 +21,11 @@ class ComplexWeight extends Weight {
     int pc = _countChords(progression), bc = _countChords(base);
     final int max = (bc * maxRatio).round();
     return Score(
-        score: pc >= bc ? (pc >= max ? 1.0 : pc / max) : 0.0, details: "");
+      score: pc >= bc ? (pc >= max ? 1.0 : pc / max) : 0.0,
+      details:
+          "Scoring based on counted chords in base ($bc) compared to counted "
+          "chords in the substitution ($pc).",
+    );
   }
 
   int _countChords(ScaleDegreeProgression progression) {
