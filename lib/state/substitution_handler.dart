@@ -5,6 +5,7 @@ import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/substitution.dart';
 import 'package:thoery_test/modals/weights/climactic_ending_weight.dart';
+import 'package:thoery_test/modals/weights/complex_weight.dart';
 import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/important_chords_weight.dart';
 import 'package:thoery_test/modals/weights/in_scale_weight.dart';
@@ -12,6 +13,7 @@ import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/overtaking_weight.dart';
 import 'package:thoery_test/modals/weights/rhythm_and_placement_weight.dart';
 import 'package:thoery_test/modals/weights/uniques_weight.dart';
+import 'package:thoery_test/modals/weights/user_saved_weight.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:tonic/tonic.dart';
@@ -27,6 +29,8 @@ abstract class SubstitutionHandler {
     const RhythmAndPlacementWeight(),
     const ImportantChordsWeight(),
     const ClimacticEndingWeight(),
+    const UserSavedWeight(),
+    const ComplexWeight(),
   ]..sort(
       (Weight w1, Weight w2) => -1 * w1.importance.compareTo(w2.importance));
 

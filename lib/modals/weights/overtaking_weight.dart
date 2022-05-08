@@ -22,6 +22,7 @@ class OvertakingWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
+    String? substitutionEntryTitle,
   }) {
     if (progression.duration < progression.timeSignature.decimal) {
       return Score(

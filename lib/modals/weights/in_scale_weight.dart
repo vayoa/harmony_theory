@@ -14,7 +14,7 @@ class InScaleWeight extends Weight {
           /* TDC: This can be beforeSubstitution but if it's a tonicized
                   progression the weight will score it before doing the
                   tonicization, which will give wrong results. */
-          weightDescription: WeightDescription.diatonic,
+          weightDescription: WeightDescription.classic,
         );
 
   static final List<ScaleDegree> sharps = [
@@ -37,6 +37,7 @@ class InScaleWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
+    String? substitutionEntryTitle,
   }) {
     int count = 0, outCount = 0;
     String details = '';

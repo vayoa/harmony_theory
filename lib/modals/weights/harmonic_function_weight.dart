@@ -50,6 +50,7 @@ class HarmonicFunctionWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
+    String? substitutionEntryTitle,
   }) {
     int maxImportance = HarmonicFunctionBank.maxFunctionImportance;
     int score = 0, count = 0;

@@ -22,21 +22,35 @@ abstract class Weight {
   const Weight({
     required this.name,
     required this.description,
-    required this.weightDescription,
     required this.importance,
+    required this.weightDescription,
   }) : assert(importance >= 0 && importance <= maxImportance);
+
+  bool ofSound(Sound sound) {
+    if (weightDescription == WeightDescription.technical) return true;
+    switch (sound) {
+      case Sound.both:
+        return true;
+      case Sound.classic:
+        return weightDescription == WeightDescription.classic;
+      case Sound.exotic:
+        return weightDescription == WeightDescription.exotic;
+    }
+  }
 
   Score score(
       {required ScaleDegreeProgression progression,
-      required ScaleDegreeProgression base});
+      required ScaleDegreeProgression base,
+      String? substitutionEntryTitle});
 
   /// Returns the [progression]'s score after scaling it based on [importance].
   Score scaledScore(
           {required Substitution substitution, ScaleDegreeProgression? base}) =>
       score(
-              progression: substitution.substitutedBase,
-              base: base ?? substitution.base)
-          .scale(importance);
+        progression: substitution.substitutedBase,
+        base: base ?? substitution.base,
+        substitutionEntryTitle: substitution.title,
+      ).scale(importance);
 }
 
 class Score {
@@ -61,7 +75,13 @@ class Score {
 }
 
 enum WeightDescription {
-  diatonic,
+  classic,
   exotic,
   technical,
+}
+
+enum Sound {
+  classic,
+  exotic,
+  both,
 }

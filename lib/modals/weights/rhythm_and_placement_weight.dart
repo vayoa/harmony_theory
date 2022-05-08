@@ -33,9 +33,11 @@ class RhythmAndPlacementWeight extends Weight {
   ///
   /// All of these are additive.
   @override
-  Score score(
-      {required ScaleDegreeProgression progression,
-      required ScaleDegreeProgression base}) {
+  Score score({
+    required ScaleDegreeProgression progression,
+    required ScaleDegreeProgression base,
+    String? substitutionEntryTitle,
+  }) {
     String details = '';
     int points = 0;
     double decimal = progression.timeSignature.decimal;

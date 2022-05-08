@@ -18,7 +18,7 @@ class Substitution {
   double get rating => score.score;
 
   Substitution({
-    this.title,
+    required this.title,
     required this.substitutedBase,
     required this.originalSubstitution,
     required this.base,
@@ -60,6 +60,7 @@ class Substitution {
   SubstitutionScore? scoreWith(
     List<Weight> weights, {
     bool keepHarmonicFunction = false,
+    Sound sound = Sound.both,
     ScaleDegreeProgression? harmonicFunctionBase,
   }) {
     double rating = 0.0;
@@ -81,11 +82,13 @@ class Substitution {
       }
     }
     for (Weight weight in weights) {
-      Score weightScore;
-      length += weight.importance;
-      weightScore = weight.scaledScore(substitution: this, base: base);
-      rating += weightScore.score;
-      details[weight.name] = weightScore;
+      if (weight.ofSound(sound)) {
+        Score weightScore;
+        length += weight.importance;
+        weightScore = weight.scaledScore(substitution: this, base: base);
+        rating += weightScore.score;
+        details[weight.name] = weightScore;
+      }
     }
     rating / length;
     score = SubstitutionScore(score: rating / length, details: details);

@@ -16,6 +16,7 @@ class UniquesWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
+    String? substitutionEntryTitle,
   }) {
     int unique = progression.values.toSet().length;
     return Score(

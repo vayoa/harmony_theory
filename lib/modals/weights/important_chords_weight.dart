@@ -39,6 +39,7 @@ class ImportantChordsWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
+    String? substitutionEntryTitle,
   }) {
     int points = 0, max = 0;
     String details = '';

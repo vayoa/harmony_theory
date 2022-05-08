@@ -19,6 +19,7 @@ class KeepHarmonicFunctionWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
+    String? substitutionEntryTitle,
   }) {
     // For each chord in base, see which chords are replacing it and score
     // based on how different their harmonic function is from base.

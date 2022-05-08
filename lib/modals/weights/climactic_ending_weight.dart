@@ -13,9 +13,11 @@ class ClimacticEndingWeight extends Weight {
         );
 
   @override
-  Score score(
-      {required ScaleDegreeProgression progression,
-      required ScaleDegreeProgression base}) {
+  Score score({
+    required ScaleDegreeProgression progression,
+    required ScaleDegreeProgression base,
+    String? substitutionEntryTitle,
+  }) {
     // In a 4 measures song, we'd like the wild rhythms to happen more towards
     // the 3rd measure, which means the range of durations from the start is
     // 2 - 3.
