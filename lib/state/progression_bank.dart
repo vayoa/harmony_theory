@@ -78,6 +78,20 @@ abstract class ProgressionBank {
     };
   }
 
+  static void initializeFromComputePass(
+      ProgressionBankComputePass computePass) {
+    _bank = computePass.bank;
+    _substitutionsIDBank = computePass.substitutionsIDBank;
+    _groupedBank = computePass.groupedBank;
+  }
+
+  static ProgressionBankComputePass createComputePass() =>
+      ProgressionBankComputePass(
+        bank: _bank,
+        substitutionsIDBank: _substitutionsIDBank,
+        groupedBank: _groupedBank,
+      );
+
   static Map<String, dynamic> toJson() => {
         'substitutionsTitles': {
           for (MapEntry<int, String> entry in _substitutionsIDBank.entries)
@@ -343,4 +357,16 @@ abstract class ProgressionBank {
     'Augmented Authentic Cadence':
         ScaleDegreeProgression.fromList(['Vaug', 'I']),
   };
+}
+
+class ProgressionBankComputePass {
+  final Map<String, ProgressionBankEntry> bank;
+  final Map<int, String> substitutionsIDBank;
+  final Map<int, List<int>> groupedBank;
+
+  const ProgressionBankComputePass({
+    required this.bank,
+    required this.substitutionsIDBank,
+    required this.groupedBank,
+  });
 }

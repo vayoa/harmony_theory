@@ -37,10 +37,7 @@ abstract class SubstitutionHandler {
   static const KeepHarmonicFunctionWeight keepHarmonicFunction =
       KeepHarmonicFunctionWeight();
 
-  static KeepHarmonicFunctionAmount _keepAmount =
-      KeepHarmonicFunctionAmount.med;
-
-  static KeepHarmonicFunctionAmount get keepAmount => _keepAmount;
+  static KeepHarmonicFunctionAmount keepAmount = KeepHarmonicFunctionAmount.med;
 
   /* TODO: Find a better way to access weights by name (or provide the weight
           object in SubstitutionScore. */
@@ -123,7 +120,7 @@ abstract class SubstitutionHandler {
     int? end,
     double? endDur,
   }) {
-    if (keepAmount != null) _keepAmount = keepAmount;
+    if (keepAmount != null) keepAmount = keepAmount;
     List<Substitution> substitutions = _getPossibleSubstitutions(
       base,
       start: start,
@@ -132,7 +129,7 @@ abstract class SubstitutionHandler {
       endDur: endDur,
     );
     List<Substitution> sorted = [];
-    bool shouldCalc = _keepAmount != KeepHarmonicFunctionAmount.low;
+    bool shouldCalc = keepAmount != KeepHarmonicFunctionAmount.low;
     for (Substitution sub in substitutions) {
       SubstitutionScore? score = sub.scoreWith(
         weights,
