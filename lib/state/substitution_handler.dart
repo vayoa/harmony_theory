@@ -120,7 +120,7 @@ abstract class SubstitutionHandler {
     int? end,
     double? endDur,
   }) {
-    if (keepAmount != null) keepAmount = keepAmount;
+    if (keepAmount != null) SubstitutionHandler.keepAmount = keepAmount;
     List<Substitution> substitutions = _getPossibleSubstitutions(
       base,
       start: start,

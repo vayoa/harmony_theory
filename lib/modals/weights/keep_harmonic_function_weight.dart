@@ -11,7 +11,7 @@ class KeepHarmonicFunctionWeight extends Weight {
           name: 'KeepHarmonicFunction',
           description: "Prefers progressions that retain the harmonic function "
               "of their base.",
-          importance: 5,
+          importance: 4,
           weightDescription: WeightDescription.technical,
         );
 
