@@ -47,7 +47,6 @@ abstract class ProgressionBank {
   }
 
   static void initializeBuiltIn() {
-    // TODO: Make sure no two same ids are in a list in _groupedBank.
     _bank = {};
     _substitutionsIDBank = {};
     _groupedBank = {};
@@ -239,9 +238,6 @@ abstract class ProgressionBank {
     }
   }
 
-  /* TODO: Decide whether to put this method here and whether to always hash
-          'last'...*/
-
   /// [last] will only have effect when [chord.id] is equal to
   /// [ScaleDegreeChord.majorTonicTriad]'s weak hash.
   static int weakIDWithPlace(ScaleDegreeChord chord, [bool last = false]) {
@@ -259,7 +255,6 @@ abstract class ProgressionBank {
     List<int>? ids = _groupedBank[weakIDWithPlace(chord, false)];
     if (ids != null) {
       if (withTonicization && _groupedBank.containsKey(tonicizationID)) {
-        // TODO: Optimize...
         ids.addAll(_groupedBank[tonicizationID]!);
       }
       return [

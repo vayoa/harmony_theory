@@ -11,9 +11,6 @@ class InScaleWeight extends Weight {
           description: "Prefers progressions with values that have notes "
               "closer to the root scale (based on the circle of fifths).",
           importance: 3,
-          /* TDC: This can be beforeSubstitution but if it's a tonicized
-                  progression the weight will score it before doing the
-                  tonicization, which will give wrong results. */
           weightDescription: WeightDescription.classic,
         );
 

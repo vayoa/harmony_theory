@@ -36,7 +36,7 @@ class OvertakingWeight extends Weight {
         final int hash = progression.values[i]!.weakHash;
         final double duration = progression.durations[i];
         if (chordDurations.containsKey(hash)) {
-          // FIXME: Dart stuff...
+          // Dart stuff...
           chordDurations[hash] = chordDurations[hash]! + duration;
         } else {
           chordDurations[hash] = duration;

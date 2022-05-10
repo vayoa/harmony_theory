@@ -11,7 +11,6 @@ class UniquesWeight extends Weight {
           weightDescription: WeightDescription.exotic,
         );
 
-  // TDC: Optimize this a bit more...
   @override
   Score score({
     required ScaleDegreeProgression progression,

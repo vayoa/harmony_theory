@@ -5,6 +5,8 @@ import 'package:tonic/tonic.dart';
 import '../modals/pitch_scale.dart';
 import '../modals/scale_degree_chord.dart';
 
+// ignore_for_file: avoid_print
+
 abstract class ScaleDegreeChordTest {
   static bool test() {
     print('-- Regular --');

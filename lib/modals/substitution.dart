@@ -112,9 +112,7 @@ class Substitution {
     return '-- "$title" $originalSubstitution --\n'
             '$substitutedBase' +
         (scale == null ? ': ' : ' ->\n${substitutedBase.inScale(scale)}:') +
-        ' ${rating.toStringAsFixed(3)} '
-            '(${(substitutedBase.percentMatchedTo(base) * 100).toInt()}% '
-            'equal).\n' +
+        ' ${rating.toStringAsFixed(3)}\n' +
         'base: $base' +
         (scale == null ? '' : ' ->\n${base.inScale(scale)}') +
         '.\n'

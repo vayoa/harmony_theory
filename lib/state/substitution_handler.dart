@@ -39,14 +39,13 @@ abstract class SubstitutionHandler {
 
   static KeepHarmonicFunctionAmount keepAmount = KeepHarmonicFunctionAmount.med;
 
-  /* TODO: Find a better way to access weights by name (or provide the weight
-          object in SubstitutionScore. */
   static final Map<String, Weight> weightsMap = {
     for (Weight weight in weights) weight.name: weight
   };
 
   static ChordProgression inputChords() {
     ChordProgression _chords = ChordProgression.empty();
+    // ignore: avoid_print
     print("Please enter your chords (enter 's' to stop and '-' for a rest):");
     String? input;
     do {
@@ -59,6 +58,7 @@ abstract class SubstitutionHandler {
           _chord = Chord.parse(input);
           _chords.add(_chord, 1 / 4);
         } on FormatException catch (e) {
+          // ignore: avoid_print
           print(e);
         }
       }
@@ -148,16 +148,19 @@ abstract class SubstitutionHandler {
   static MapEntry<PitchScale, ScaleDegreeProgression> getAndPrintBase(
       ChordProgression base,
       {PitchScale? scale}) {
+    // ignore: avoid_print
     print('Your Progression:\n$base.');
 
     // Detect the base progressions' scale
     scale ??= base.krumhanslSchmucklerScales.first;
+    // ignore: avoid_print
     print('Scale Found: $scale.');
 
     // Convert the base progression to roman numerals, we used the most probable
     // scale that was detected (which would be the first in the list).
     final ScaleDegreeProgression baseProgression =
         ScaleDegreeProgression.fromChords(scale, base);
+    // ignore: avoid_print
     print('In Roman Numerals: $baseProgression.\n');
     return MapEntry(scale, baseProgression);
   }
@@ -178,11 +181,13 @@ abstract class SubstitutionHandler {
     List<Substitution> rated =
         getRatedSubstitutions(baseProgression, keepAmount: keepAmount);
 
+    // ignore: avoid_print
     print('Suggestions:');
     String subs = '';
     for (Substitution sub in rated) {
       subs += '${sub.toString(scale: scale)}\n\n';
     }
+    // ignore: avoid_print
     print(subs);
     return rated;
   }
@@ -252,7 +257,6 @@ abstract class SubstitutionHandler {
       }
     } while (again && rated.first.rating != 1.0);
     Substitution result = rated.first.copyWith(base: baseProgression);
-    print(result.toString(scale: scale));
     return result;
   }
 }

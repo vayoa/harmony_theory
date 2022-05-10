@@ -11,20 +11,20 @@ class KrumhanslSchmucklerScaleDetection {
     if (!_initialized) {
       _initialized = true;
       majorAverage =
-          CMajorKeyProfile.fold(0.0, (double prev, double cur) => prev + cur) /
-              CMajorKeyProfile.length;
+          cMajorKeyProfile.fold(0.0, (double prev, double cur) => prev + cur) /
+              cMajorKeyProfile.length;
       minorAverage =
-          CMinorKeyProfile.fold(0.0, (double prev, double cur) => prev + cur) /
-              CMinorKeyProfile.length;
-      majorKeyProfiles = [CMajorKeyProfile];
-      minorKeyProfiles = [CMinorKeyProfile];
+          cMinorKeyProfile.fold(0.0, (double prev, double cur) => prev + cur) /
+              cMinorKeyProfile.length;
+      majorKeyProfiles = [cMajorKeyProfile];
+      minorKeyProfiles = [cMinorKeyProfile];
       // Shift the C key profiles to get the rest of them...
       for (int i = 1; i < 12; i++) {
         List<double> majorKeyProfile = [], minorKeyProfile = [];
         for (int j = 0; j < 12; j++) {
           int next = (12 - i + j) % 12;
-          majorKeyProfile.add(CMajorKeyProfile[next]);
-          minorKeyProfile.add(CMinorKeyProfile[next]);
+          majorKeyProfile.add(cMajorKeyProfile[next]);
+          minorKeyProfile.add(cMinorKeyProfile[next]);
         }
         majorKeyProfiles.add(majorKeyProfile);
         minorKeyProfiles.add(minorKeyProfile);
@@ -56,7 +56,7 @@ class KrumhanslSchmucklerScaleDetection {
   ];
 
   /// We're using the Bellman-Budge chord-based profiles...
-  static const List<double> CMajorKeyProfile = [
+  static const List<double> cMajorKeyProfile = [
     16.80,
     0.86,
     12.95,
@@ -72,7 +72,7 @@ class KrumhanslSchmucklerScaleDetection {
   ];
 
   /// We're using the Bellman-Budge chord-based profiles...
-  static const List<double> CMinorKeyProfile = [
+  static const List<double> cMinorKeyProfile = [
     18.16,
     0.69,
     12.99,
@@ -108,18 +108,13 @@ class KrumhanslSchmucklerScaleDetection {
   static List<double> correlations(List<double> input) {
     assert(input.length == 12);
     List<double> correlations = [];
-    double inputAvg =
-        input.reduce((value, element) => value + element) / input.length;
-    double maxCorrelation = double.negativeInfinity;
     for (int j = 0; j < 2; j++) {
       List<List<double>> profiles = majorKeyProfiles;
-      double avg = majorAverage;
       for (int keyProfile = 0; keyProfile < profiles[j].length; keyProfile++) {
         correlations
             .add(correlationValue(input, profiles[keyProfile], majorAverage));
       }
       profiles = minorKeyProfiles;
-      avg = minorAverage;
     }
     return correlations;
   }

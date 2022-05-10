@@ -121,7 +121,6 @@ class Progression<T> implements Identifiable {
           double nonAbsoluteDuration =
               (durations[i] * ratio) - previousDuration - durationDiff;
           T? val = values[i];
-          double relativeDur = nonAbsoluteDuration * ratio;
           checkValidDuration(
               value: val,
               duration: nonAbsoluteDuration,
@@ -246,7 +245,6 @@ class Progression<T> implements Identifiable {
     );
   }
 
-  // ADC: Convert for absolute durations!!!
   /// Use this only for printing purposes as it can split a chord that goes
   /// over one measures into two chords (thus ruining the original progression).
   List<Progression<T>> splitToMeasures({TimeSignature? timeSignature}) {
@@ -371,9 +369,6 @@ class Progression<T> implements Identifiable {
 
   String durationFormat(double duration) => duration.toString();
 
-  /* TODO: Support chords with duration bigger than a step (like a 1/2 in a 1/4
-      step, which would just not display the second 1/4 of it currently) and
-      chords that move between measures. */
   @override
   String toString([detailed = false]) {
     String output = '';
@@ -385,18 +380,11 @@ class Progression<T> implements Identifiable {
         String durationFormatted =
             detailed ? durationFormat(_durations[i]) : '';
         final val = _values[i];
-        /* FIXME: This is written badly but I can't think of another way to
-                  make it work */
         final String valueFormatted =
             val is Chord ? val.commonName : valueFormat(_values[i]);
         final String formatted = valueFormatted +
             (durationFormatted.isEmpty ? '' : '($durationFormatted)');
         double curDuration = _durations[i];
-        // TODO: Check if there's a better more covering way to do this...
-        // while (curDuration < _timeSignature.decimal && curDuration > step) {
-        //   curDuration -= step;
-        //   output += '$formatted, ';
-        // }
         if (curDuration + stepSum >= step) {
           stepSum = 0.0;
           output += '$formatted, ';

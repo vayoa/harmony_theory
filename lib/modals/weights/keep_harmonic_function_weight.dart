@@ -4,7 +4,6 @@ import 'package:thoery_test/state/substitution_handler.dart';
 
 import '../scale_degree_chord.dart';
 
-// TDC: This needs to be built in instead of a weight...
 class KeepHarmonicFunctionWeight extends Weight {
   const KeepHarmonicFunctionWeight()
       : super(
@@ -23,10 +22,6 @@ class KeepHarmonicFunctionWeight extends Weight {
   }) {
     // For each chord in base, see which chords are replacing it and score
     // based on how different their harmonic function is from base.
-    // TDC: Think about what to do in the case below, whether it's good like this.
-    // If in base we have a 1, 1 and in sub we have a 1.5, 0.5, the 0.5 of the
-    // first 1.5 in the sub wont count as being below the second 1 in base,
-    // since it didn't start playing when it started...
     int baseIndex = 0, subIndex = 0;
     double baseDurSum = 0.0, subDurSum = 0.0;
     HarmonicFunction baseFunction = base.deriveHarmonicFunctionOf(0),

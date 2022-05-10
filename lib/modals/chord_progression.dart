@@ -5,9 +5,6 @@ import 'package:thoery_test/modals/time_signature.dart';
 import 'package:thoery_test/state/krumhansl_schmuckler_scale_detection.dart';
 import 'package:tonic/tonic.dart';
 
-/* TDC: Since this doesn't have any additional data except methods, they might
-        deduct points for this not just being a collection of methods instead
-        of a whole object. */
 class ChordProgression extends Progression<Chord> {
   ChordProgression(
       {required List<Chord?> chords,
@@ -31,63 +28,6 @@ class ChordProgression extends Progression<Chord> {
           timeSignature: progression.timeSignature,
           hasNull: progression.hasNull,
         );
-
-  List<PitchScale> matchWithScales() {
-    List<String> chordNames = values
-        .map((Chord? chord) => chord == null ? 'null' : chord.commonName)
-        .toList();
-    Map<String, int> counts = {};
-    Map<String, int> results = {};
-
-    // for each key, count how many chords of the key match the chords the
-    // user chose
-    Set<String> chordsSet = chordNames.toSet();
-    for (MapEntry entries in ScaleMatchUtilities.keys.entries) {
-      final String key = entries.key;
-      final List<String> keyChords = entries.value;
-      Set<String> keyChordsSet = keyChords.toSet();
-      counts[key] = keyChordsSet.intersection(chordsSet).length;
-    }
-
-    // results is now a Hash of Key => count pairs, e.g. {'A Major': 0,
-    // 'Bb Major': 5, ...}
-    // get the highest count
-    if (counts.isNotEmpty) {
-      var max = counts.entries.reduce((e1, e2) {
-        if (e1.value > e2.value) return e1;
-        return e2;
-      });
-      counts.remove(max.key);
-      // Count the times the chords have the root chord of the scale found.
-      Set<String> maxSet = {ScaleMatchUtilities.getRootChord(max.key)};
-      results[max.key] = chordsSet.intersection(maxSet).length;
-
-      // Add the name of the key if its count is = to the max
-      for (MapEntry<String, int> entry in counts.entries) {
-        if (entry.value == max.value) {
-          // Count the times the chords have the root chord of the scale found.
-          maxSet = {ScaleMatchUtilities.getRootChord(entry.key)};
-          results[entry.key] = chordsSet.intersection(maxSet).length;
-        }
-      }
-    }
-
-    List<String> stringScales = results.keys.toList();
-    stringScales.sort((a, b) => results[a]!.compareTo(results[b]!) * -1);
-
-    /*FIXME: We should cast as soon as we add. This is a prototype anyways so
-           it doesn't matter. */
-    List<PitchScale> scales = [];
-    for (String scale in stringScales) {
-      final List<String> parts = scale.split(' ');
-      parts[1] = parts[1] == 'Major' ? 'Diatonic Major' : 'Natural Minor';
-      scales.add(PitchScale(
-        pattern: ScalePattern.findByName(parts[1]),
-        tonic: Pitch.parse(parts[0]),
-      ));
-    }
-    return scales;
-  }
 
   List<PitchScale> get krumhanslSchmucklerScales {
     KrumhanslSchmucklerScaleDetection.initialize();

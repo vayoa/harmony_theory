@@ -18,7 +18,6 @@ class ImportantChordsWeight extends Weight {
   /// Scores down [progression] if it changed the important tonics in [base],
   /// as well as changing the dominant that goes to them (if present) to
   /// something that's not a dominant.
-  //TODO: Maybe change the thing below
   /// NOTE: by saying tonics I mean any chord that has a tonic root and can
   /// be tonicized!
   /// An important tonic is a tonic at the beginning, middle and end of a
@@ -29,12 +28,6 @@ class ImportantChordsWeight extends Weight {
   /// We also give special treatments to a I or a vi as tonics in the beginning
   /// or end of the base progression (if they exist) meaning that changing them
   /// would subtract more points than changing another tonic.
-  // TODO:
-  /// להיזהר, בסולם מינור Am
-  /// A יכול להיות דומיננטה ל-D
-  // להוריד פחות על האמצע
-  // אם רוצה תוריד הכי הרבה על האחרון, ואז ראשון ואז אמצע
-  // להעלות את החשיבות של המשקולת, שים לב שאפשר להתעלל באמצע
   @override
   Score score({
     required ScaleDegreeProgression progression,
@@ -193,7 +186,6 @@ class ImportantChordsWeight extends Weight {
     return Score(score: finalScore, details: details);
   }
 
-  //TODO: Maybe change this and the explanation above.
   bool _isTonic(ScaleDegreeChord? chord) =>
       chord != null &&
       (chord.rootDegree == ScaleDegree.tonic ||
