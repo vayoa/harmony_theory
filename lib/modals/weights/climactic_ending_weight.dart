@@ -18,7 +18,7 @@ class ClimacticEndingWeight extends Weight {
   static const int endRange = 2;
   static const int sentenceRange = 1;
   static const int badInRange = -3;
-  static const int outRange = -1;
+  static const int outRange = -2;
   static const double rangeBeg4Point = 2.0;
   static const double rangeEnd4Point = 3.5;
 
