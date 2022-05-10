@@ -2,6 +2,7 @@
 
 import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
+import 'package:thoery_test/modals/weights/climactic_ending_weight.dart';
 import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
@@ -14,6 +15,16 @@ import 'modals/scale_degree_chord.dart';
 import 'modals/substitution.dart';
 
 void main() {
+  var p = ScaleDegreeProgression.fromList(
+    ['I', 'iii', 'ii', 'V', 'V7', 'I'],
+    durations: [2.0, 0.25, 0.5, 0.25, 0.25, 0.5],
+  );
+  print(p);
+
+  print(const ClimacticEndingWeight().score(progression: p, base: p));
+
+  print('done\n');
+
   _testCut();
   _test();
   final ChordProgression _base = ChordProgression.evenTime([
@@ -140,20 +151,6 @@ _test() {
       keepAmount: KeepHarmonicFunctionAmount.high);
   print('subs (high): ${subs.length}');
   assert(subs.length >= 19);
-  // print(const NewRhythmWeight().score(progression: baseProg, base: baseProg));
-
-  // Substitution sub = SubstitutionHandler.perfectSubstitution(
-  //     base: base, bank: bank, maxIterations: 1000);
-  // for (ScaleDegreeChord? chord in sub.substitutedBase.values) {
-  //   if (chord != null) {
-  //     print('$chord: ' +
-  //         chord
-  //             .deriveHarmonicFunction(inMinor: sub.substitutedBase.inMinor)
-  //             .name);
-  //   }
-  // }
-
-  // _basicMatchingTest();
 }
 
 _testCut() {
