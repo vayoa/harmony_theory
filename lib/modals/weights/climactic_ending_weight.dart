@@ -18,7 +18,6 @@ class ClimacticEndingWeight extends Weight {
   static const int endRange = 2;
   static const int sentenceRange = 1;
   static const int badInRange = -3;
-  static const int outRange = -2;
   static const double rangeBeg4Point = 2.0;
   static const double rangeEnd4Point = 3.5;
 
@@ -54,6 +53,8 @@ class ClimacticEndingWeight extends Weight {
     final double rangeEnd4 = rangeEnd4Point * decimal;
     final double rangeEnd = progression.duration - (decimal / 2);
     final double rangeBeg = progression.duration - (decimal * 2);
+    final int maxDistance = rangeBeg.ceil();
+    bool check4 = progression.duration % 4 == 0;
 
     double diff = 0.0;
     double sum = 0.0;
@@ -72,8 +73,8 @@ class ClimacticEndingWeight extends Weight {
       // if it is in range
       bool inEndRange = sum >= rangeBeg && sum < rangeEnd;
       // if it is in the 4 range...
-      bool in4Range = progression.duration % 4 == 0 &&
-          (sum % decimal4 >= rangeBeg4 && sum % decimal4 < rangeEnd4);
+      bool in4Range =
+          check4 && (sum % decimal4 >= rangeBeg4 && sum % decimal4 < rangeEnd4);
       if (inEndRange || in4Range) {
         if (dur <= last) {
           bool smaller = dur < last;
@@ -94,8 +95,16 @@ class ClimacticEndingWeight extends Weight {
         }
       } // if it is out of range and is equal to step.
       else if (dur == step) {
-        points += outRange;
-        details += '$outRange for ${progression[i]}($dur) at $sum away from '
+        double distance = min((sum - rangeBeg).abs(), (sum - rangeEnd).abs());
+        if (check4) {
+          distance = min(
+              distance,
+              min(((sum % decimal4) - rangeBeg4).abs(),
+                  ((sum % decimal4) - rangeBeg4).abs()));
+        }
+        int sub = distance.ceil();
+        points -= sub;
+        details += '-$sub for ${progression[i]}($dur) at $sum away from '
             'start equal to step. Points are now '
             '$points.\n';
       }
@@ -106,7 +115,7 @@ class ClimacticEndingWeight extends Weight {
     }
 
     int maxPoints = (max(endRange, sentenceRange) + smallerAdd) * count;
-    int minPoints = min(outRange, badInRange) * -1 * count;
+    int minPoints = max(maxDistance, -1 * badInRange) * count;
     details += 'Out of $count durations, between -$minPoints and $maxPoints, '
         'the progression got $points.';
     return Score(
