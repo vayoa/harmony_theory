@@ -9,7 +9,6 @@ class RhythmAndPlacementWeight extends Weight {
               "half-point. When they're not at the end of a musical sentence "
               "or fill up multiple measures.",
           importance: 4,
-          scoringStage: ScoringStage.afterSubstitution,
           weightDescription: WeightDescription.technical,
         );
 
@@ -34,9 +33,11 @@ class RhythmAndPlacementWeight extends Weight {
   ///
   /// All of these are additive.
   @override
-  Score score(
-      {required ScaleDegreeProgression progression,
-      required ScaleDegreeProgression base}) {
+  Score score({
+    required ScaleDegreeProgression progression,
+    required ScaleDegreeProgression base,
+    String? substitutionEntryTitle,
+  }) {
     String details = '';
     int points = 0;
     double decimal = progression.timeSignature.decimal;

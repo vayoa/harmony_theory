@@ -14,19 +14,15 @@ class HarmonicFunctionWeight extends Weight {
               "harmony rules.",
           importance: 5,
           weightDescription: WeightDescription.technical,
-          scoringStage: ScoringStage.afterSubstitution,
         );
 
   static final HarmonicFunctionBank _harmonicFunctionBank =
       HarmonicFunctionBank();
 
-  // TODO: Check this with yuval
   // Int values range from 1 - maxFunctionImportance.
-  // Boolean is true if we're in minor.
   static Map<int, Map<int, int>> get sortedFunctions =>
       _harmonicFunctionBank.sortedFunctions;
 
-  // TDC: Write this better...
   ScaleDegreeChord prepareForCheck(
       ScaleDegreeChord chord, ScaleDegreeChord other) {
     if (chord is TonicizedScaleDegreeChord &&
@@ -51,6 +47,7 @@ class HarmonicFunctionWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
+    String? substitutionEntryTitle,
   }) {
     int maxImportance = HarmonicFunctionBank.maxFunctionImportance;
     int score = 0, count = 0;
@@ -177,7 +174,6 @@ class HarmonicFunctionBank {
       3: ['I'],
     },
     'vi': {
-      // TODO: Not sure about the score here, should be lower then a ii -> V.
       1: ['IV', 'iii', 'V', 'I'],
       2: ['ii'],
     },

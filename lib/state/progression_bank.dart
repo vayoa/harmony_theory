@@ -47,7 +47,6 @@ abstract class ProgressionBank {
   }
 
   static void initializeBuiltIn() {
-    // TODO: Make sure no two same ids are in a list in _groupedBank.
     _bank = {};
     _substitutionsIDBank = {};
     _groupedBank = {};
@@ -77,6 +76,20 @@ abstract class ProgressionBank {
         int.parse(entry.key): entry.value.cast<int>(),
     };
   }
+
+  static void initializeFromComputePass(
+      ProgressionBankComputePass computePass) {
+    _bank = computePass.bank;
+    _substitutionsIDBank = computePass.substitutionsIDBank;
+    _groupedBank = computePass.groupedBank;
+  }
+
+  static ProgressionBankComputePass createComputePass() =>
+      ProgressionBankComputePass(
+        bank: _bank,
+        substitutionsIDBank: _substitutionsIDBank,
+        groupedBank: _groupedBank,
+      );
 
   static Map<String, dynamic> toJson() => {
         'substitutionsTitles': {
@@ -225,9 +238,6 @@ abstract class ProgressionBank {
     }
   }
 
-  /* TODO: Decide whether to put this method here and whether to always hash
-          'last'...*/
-
   /// [last] will only have effect when [chord.id] is equal to
   /// [ScaleDegreeChord.majorTonicTriad]'s weak hash.
   static int weakIDWithPlace(ScaleDegreeChord chord, [bool last = false]) {
@@ -245,7 +255,6 @@ abstract class ProgressionBank {
     List<int>? ids = _groupedBank[weakIDWithPlace(chord, false)];
     if (ids != null) {
       if (withTonicization && _groupedBank.containsKey(tonicizationID)) {
-        // TODO: Optimize...
         ids.addAll(_groupedBank[tonicizationID]!);
       }
       return [
@@ -343,4 +352,16 @@ abstract class ProgressionBank {
     'Augmented Authentic Cadence':
         ScaleDegreeProgression.fromList(['Vaug', 'I']),
   };
+}
+
+class ProgressionBankComputePass {
+  final Map<String, ProgressionBankEntry> bank;
+  final Map<int, String> substitutionsIDBank;
+  final Map<int, List<int>> groupedBank;
+
+  const ProgressionBankComputePass({
+    required this.bank,
+    required this.substitutionsIDBank,
+    required this.groupedBank,
+  });
 }

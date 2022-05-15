@@ -73,7 +73,6 @@ class ScaleDegree implements Identifiable {
       throw FormatException("invalid ScaleDegree name: $degree");
     }
     _degree = index - 1;
-    // TODO: Test offset handling.
     if (offsetStr.isNotEmpty) {
       if (offsetStr.startsWith(RegExp(r'[#b♯♭𝄪𝄫]'))) {
         _accidentals = offsetStr[0].allMatches(offsetStr).length *
@@ -100,7 +99,6 @@ class ScaleDegree implements Identifiable {
   static final vii = ScaleDegree.parse('vii');
   static final vi = ScaleDegree.parse('vi');
 
-  // TODO: This only works for major based modes...,
   /// Returns a new [ScaleDegree] converted from the [fromMode] mode to [toMode]
   /// mode.
   /// Ionian's (Major) mode number is 0 and so on...

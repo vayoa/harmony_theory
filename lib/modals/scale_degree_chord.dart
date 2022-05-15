@@ -26,26 +26,6 @@ class ScaleDegreeChord implements Identifiable {
       r"^([#b♯♭𝄪𝄫]*(?:III|II|IV|I|VII|VI|V))(.*)$",
       caseSensitive: false);
 
-  static const List<String> _majorChordPatternNames = [
-    'Major',
-    'Minor',
-    'Minor',
-    'Major',
-    'Major',
-    'Minor',
-    'Diminished',
-  ];
-
-  static const List<String> _major7sChordPatternNames = [
-    'Major 7th',
-    'Minor 7th',
-    'Minor 7th',
-    'Major 7th',
-    'Dominant 7th',
-    'Minor 7th',
-    'Diminished 7♭5',
-  ];
-
   static const List<String> _canBeTonicizedPatterns = [
     'Major',
     'Minor',
@@ -83,7 +63,8 @@ class ScaleDegreeChord implements Identifiable {
     if (match == null) {
       throw FormatException("invalid ScaleDegreeChord name: $chord");
     }
-    // If the degree is lowercased (meaning the chord contains a minor triad.
+    // If the degree is a lowercase letter (meaning the chord contains a minor
+    // triad).
     ChordPattern _cPattern = ChordPattern.parse(match[2]!.replaceAll('b', '♭'));
     if (match[1]!.toLowerCase() == match[1]) {
       // We don't want to change any of the generated chord patterns (for some
@@ -91,7 +72,6 @@ class ScaleDegreeChord implements Identifiable {
       // ChordPattern.
       // The ... operator de-folds the list.
       final List<Interval> _intervals = [..._cPattern.intervals];
-      // TODO: Make sure this is stable.
       // Make the 2nd interval (the one between the root and the 3rd) minor.
       _intervals[1] = Interval.m3;
       _cPattern = ChordPattern.fromIntervals(_intervals);
@@ -120,11 +100,9 @@ class ScaleDegreeChord implements Identifiable {
 
   int get degreesLength => _pattern.intervals.length;
 
-  // FIXME: Optimize this!
   /// Returns true if the chord is diatonic in the major scale.
   bool get isDiatonic => degrees.every((degree) => degree.isDiatonic);
 
-  // TODO: Optimize this...
   bool get canBeTonic {
     if (_canBeTonicizedPatterns.contains(_pattern.name)) return true;
     final List<Interval> _intervals = _pattern.intervals;
@@ -158,15 +136,6 @@ class ScaleDegreeChord implements Identifiable {
     return false;
   }
 
-  // TODO: This only works for major based modes...
-  /// Returns a new [ScaleDegreeChord] representing the current
-  /// [ScaleDegreeChord] in a different mode (from [fromMode] to [toMode]),
-  /// i.e it's mode equivalent.
-  /// Ionian's (Major) mode number is 0 and so on...
-  /// Example: ii.modeShift(0, 5) [major to minor] => iv.
-  ScaleDegreeChord modeShift(int fromMode, int toMode) =>
-      ScaleDegreeChord.raw(_pattern, rootDegree.modeShift(fromMode, toMode));
-
   /// Returns a new [ScaleDegreeChord] converted such that [tonic] is the new
   /// tonic. Everything is still represented in the major scale, besides to degree the function is called on...
   ///
@@ -197,7 +166,6 @@ class ScaleDegreeChord implements Identifiable {
     }
   }
 
-  // TDC: Not sure about this...
   /// Will return a new [ScaleDegreeChord] with an added 7th if possible.
   /// [harmonicFunction] can be given for slightly more relevant results.
   ScaleDegreeChord addSeventh({HarmonicFunction? harmonicFunction}) {
@@ -344,7 +312,6 @@ class ScaleDegreeChord implements Identifiable {
     if (defaultFunctions.containsKey(weakHash)) {
       Map<List<int>?, HarmonicFunction> forChord = defaultFunctions[weakHash]!;
       if (next != null) {
-        int nextHash = next.weakHash;
         for (MapEntry<List<int>?, HarmonicFunction> entry in forChord.entries) {
           if (entry.key != null && entry.key!.contains(weakHash)) {
             return entry.value;
@@ -373,10 +340,6 @@ class ScaleDegreeChord implements Identifiable {
     ScaleDegreeChord.iii: {
       null: HarmonicFunction.tonic,
     },
-    /*TODO: Are you sure about this? this means that a V - I could be replaced
-            by a III - I and vice versa - although other weights would take
-            care of that.
-     */
     ScaleDegreeChord.parse('III'): {
       null: HarmonicFunction.dominant,
     },
@@ -389,12 +352,10 @@ class ScaleDegreeChord implements Identifiable {
     ScaleDegreeChord.V: {
       null: HarmonicFunction.dominant,
     },
-    // TODO: Could also be sub. do the same with viidim.
     ScaleDegreeChord.vi: {
       null: HarmonicFunction.tonic,
       ['V', 'V7', 'viidim']: HarmonicFunction.subDominant,
     },
-    // TODO: Instead, check where it's going, if to C it's dom and to Am it's sub etc...
     ScaleDegreeChord.viidim: {
       null: HarmonicFunction.dominant,
       ['I']: HarmonicFunction.dominant,
@@ -415,6 +376,8 @@ class ScaleDegreeChord implements Identifiable {
   static final ScaleDegreeChord majorTonicTriad = ScaleDegreeChord.parse('I');
   static final ScaleDegreeChord ii = ScaleDegreeChord.parse('ii');
   static final ScaleDegreeChord iii = ScaleDegreeChord.parse('iii');
+
+  // ignore: non_constant_identifier_names
   static final ScaleDegreeChord IV = ScaleDegreeChord.parse('IV');
   static final ScaleDegreeChord V = ScaleDegreeChord.parse('V');
   static final ScaleDegreeChord vi = ScaleDegreeChord.parse('vi');

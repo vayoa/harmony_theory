@@ -18,7 +18,7 @@ class Substitution {
   double get rating => score.score;
 
   Substitution({
-    this.title,
+    required this.title,
     required this.substitutedBase,
     required this.originalSubstitution,
     required this.base,
@@ -57,11 +57,15 @@ class Substitution {
   ///
   /// If [keepHarmonicFunction] is true and no [harmonicFunctionBase] is given,
   /// will use [base] as the latter.
+  ///
+  /// If [sound] is null, will default to [Sound.both].
   SubstitutionScore? scoreWith(
     List<Weight> weights, {
     bool keepHarmonicFunction = false,
+    Sound? sound,
     ScaleDegreeProgression? harmonicFunctionBase,
   }) {
+    sound ??= Sound.both;
     double rating = 0.0;
     int length = 0;
     Map<String, Score> details = {};
@@ -69,7 +73,7 @@ class Substitution {
     if (keepHarmonicFunction) {
       Weight keep = SubstitutionHandler.keepHarmonicFunction;
       Score keepScore = keep.scaledScore(
-          progression: substitutedBase, base: harmonicFunctionBase ?? base);
+          substitution: this, base: harmonicFunctionBase ?? base);
       rating += keepScore.score;
       details[keep.name] = keepScore;
       length += keep.importance;
@@ -81,20 +85,13 @@ class Substitution {
       }
     }
     for (Weight weight in weights) {
-      Score weightScore;
-      length += weight.importance;
-      switch (weight.scoringStage) {
-        case ScoringStage.beforeSubstitution:
-          weightScore =
-              weight.scaledScore(progression: originalSubstitution, base: base);
-          break;
-        case ScoringStage.afterSubstitution:
-          weightScore =
-              weight.scaledScore(progression: substitutedBase, base: base);
-          break;
+      if (weight.ofSound(sound)) {
+        Score weightScore;
+        length += weight.importance;
+        weightScore = weight.scaledScore(substitution: this, base: base);
+        rating += weightScore.score;
+        details[weight.name] = weightScore;
       }
-      rating += weightScore.score;
-      details[weight.name] = weightScore;
     }
     rating / length;
     score = SubstitutionScore(score: rating / length, details: details);
@@ -115,9 +112,7 @@ class Substitution {
     return '-- "$title" $originalSubstitution --\n'
             '$substitutedBase' +
         (scale == null ? ': ' : ' ->\n${substitutedBase.inScale(scale)}:') +
-        ' ${rating.toStringAsFixed(3)} '
-            '(${(substitutedBase.percentMatchedTo(base) * 100).toInt()}% '
-            'equal).\n' +
+        ' ${rating.toStringAsFixed(3)}\n' +
         'base: $base' +
         (scale == null ? '' : ' ->\n${base.inScale(scale)}') +
         '.\n'

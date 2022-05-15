@@ -9,7 +9,6 @@ class OvertakingWeight extends Weight {
           description: "Prefers progressions that don't have one chord "
               "overtaking the rest (in duration terms).",
           importance: 4,
-          scoringStage: ScoringStage.afterSubstitution,
           weightDescription: WeightDescription.technical,
         );
 
@@ -23,6 +22,7 @@ class OvertakingWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
+    String? substitutionEntryTitle,
   }) {
     if (progression.duration < progression.timeSignature.decimal) {
       return Score(
@@ -36,7 +36,7 @@ class OvertakingWeight extends Weight {
         final int hash = progression.values[i]!.weakHash;
         final double duration = progression.durations[i];
         if (chordDurations.containsKey(hash)) {
-          // FIXME: Dart stuff...
+          // Dart stuff...
           chordDurations[hash] = chordDurations[hash]! + duration;
         } else {
           chordDurations[hash] = duration;

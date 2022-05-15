@@ -5,6 +5,7 @@ import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/substitution.dart';
 import 'package:thoery_test/modals/weights/climactic_ending_weight.dart';
+import 'package:thoery_test/modals/weights/complex_weight.dart';
 import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/important_chords_weight.dart';
 import 'package:thoery_test/modals/weights/in_scale_weight.dart';
@@ -12,6 +13,7 @@ import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
 import 'package:thoery_test/modals/weights/overtaking_weight.dart';
 import 'package:thoery_test/modals/weights/rhythm_and_placement_weight.dart';
 import 'package:thoery_test/modals/weights/uniques_weight.dart';
+import 'package:thoery_test/modals/weights/user_saved_weight.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
 import 'package:thoery_test/state/progression_bank.dart';
 import 'package:tonic/tonic.dart';
@@ -27,25 +29,23 @@ abstract class SubstitutionHandler {
     const RhythmAndPlacementWeight(),
     const ImportantChordsWeight(),
     const ClimacticEndingWeight(),
+    const UserSavedWeight(),
+    const ComplexWeight(),
   ]..sort(
       (Weight w1, Weight w2) => -1 * w1.importance.compareTo(w2.importance));
 
   static const KeepHarmonicFunctionWeight keepHarmonicFunction =
       KeepHarmonicFunctionWeight();
 
-  static KeepHarmonicFunctionAmount _keepAmount =
-      KeepHarmonicFunctionAmount.med;
+  static KeepHarmonicFunctionAmount keepAmount = KeepHarmonicFunctionAmount.med;
 
-  static KeepHarmonicFunctionAmount get keepAmount => _keepAmount;
-
-  /* TODO: Find a better way to access weights by name (or provide the weight
-          object in SubstitutionScore. */
   static final Map<String, Weight> weightsMap = {
     for (Weight weight in weights) weight.name: weight
   };
 
   static ChordProgression inputChords() {
     ChordProgression _chords = ChordProgression.empty();
+    // ignore: avoid_print
     print("Please enter your chords (enter 's' to stop and '-' for a rest):");
     String? input;
     do {
@@ -58,6 +58,7 @@ abstract class SubstitutionHandler {
           _chord = Chord.parse(input);
           _chords.add(_chord, 1 / 4);
         } on FormatException catch (e) {
+          // ignore: avoid_print
           print(e);
         }
       }
@@ -111,6 +112,7 @@ abstract class SubstitutionHandler {
 
   static List<Substitution> getRatedSubstitutions(
     ScaleDegreeProgression base, {
+    Sound? sound,
     KeepHarmonicFunctionAmount? keepAmount,
     ScaleDegreeProgression? harmonicFunctionBase,
     int start = 0,
@@ -118,7 +120,7 @@ abstract class SubstitutionHandler {
     int? end,
     double? endDur,
   }) {
-    if (keepAmount != null) _keepAmount = keepAmount;
+    if (keepAmount != null) SubstitutionHandler.keepAmount = keepAmount;
     List<Substitution> substitutions = _getPossibleSubstitutions(
       base,
       start: start,
@@ -127,11 +129,14 @@ abstract class SubstitutionHandler {
       endDur: endDur,
     );
     List<Substitution> sorted = [];
-    bool shouldCalc = _keepAmount != KeepHarmonicFunctionAmount.low;
+    bool shouldCalc = keepAmount != KeepHarmonicFunctionAmount.low;
     for (Substitution sub in substitutions) {
-      SubstitutionScore? score = sub.scoreWith(weights,
-          keepHarmonicFunction: shouldCalc,
-          harmonicFunctionBase: harmonicFunctionBase);
+      SubstitutionScore? score = sub.scoreWith(
+        weights,
+        keepHarmonicFunction: shouldCalc,
+        sound: sound,
+        harmonicFunctionBase: harmonicFunctionBase,
+      );
       if (score != null) {
         sorted.add(sub);
       }
@@ -143,16 +148,19 @@ abstract class SubstitutionHandler {
   static MapEntry<PitchScale, ScaleDegreeProgression> getAndPrintBase(
       ChordProgression base,
       {PitchScale? scale}) {
+    // ignore: avoid_print
     print('Your Progression:\n$base.');
 
     // Detect the base progressions' scale
     scale ??= base.krumhanslSchmucklerScales.first;
+    // ignore: avoid_print
     print('Scale Found: $scale.');
 
     // Convert the base progression to roman numerals, we used the most probable
     // scale that was detected (which would be the first in the list).
     final ScaleDegreeProgression baseProgression =
         ScaleDegreeProgression.fromChords(scale, base);
+    // ignore: avoid_print
     print('In Roman Numerals: $baseProgression.\n');
     return MapEntry(scale, baseProgression);
   }
@@ -173,11 +181,13 @@ abstract class SubstitutionHandler {
     List<Substitution> rated =
         getRatedSubstitutions(baseProgression, keepAmount: keepAmount);
 
+    // ignore: avoid_print
     print('Suggestions:');
     String subs = '';
     for (Substitution sub in rated) {
       subs += '${sub.toString(scale: scale)}\n\n';
     }
+    // ignore: avoid_print
     print(subs);
     return rated;
   }
@@ -186,6 +196,7 @@ abstract class SubstitutionHandler {
   static Substitution substituteBy({
     required ScaleDegreeProgression base,
     required int maxIterations,
+    Sound? sound,
     KeepHarmonicFunctionAmount? keepHarmonicFunction,
     int start = 0,
     double startDur = 0.0,
@@ -197,6 +208,7 @@ abstract class SubstitutionHandler {
     do {
       rated = getRatedSubstitutions(
         prev,
+        sound: sound,
         keepAmount: keepHarmonicFunction,
         harmonicFunctionBase: base,
         start: start,
@@ -214,6 +226,7 @@ abstract class SubstitutionHandler {
   static Substitution perfectSubstitution({
     required ChordProgression base,
     int? maxIterations,
+    Sound? sound,
     KeepHarmonicFunctionAmount? keepHarmonicFunction,
     int start = 0,
     double startDur = 0.0,
@@ -230,6 +243,7 @@ abstract class SubstitutionHandler {
       rated = getRatedSubstitutions(
         prev,
         keepAmount: keepHarmonicFunction,
+        sound: sound,
         harmonicFunctionBase: baseProgression,
         start: start,
         startDur: startDur,
@@ -243,7 +257,6 @@ abstract class SubstitutionHandler {
       }
     } while (again && rated.first.rating != 1.0);
     Substitution result = rated.first.copyWith(base: baseProgression);
-    print(result.toString(scale: scale));
     return result;
   }
 }

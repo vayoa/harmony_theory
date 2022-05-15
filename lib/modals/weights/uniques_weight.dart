@@ -8,15 +8,14 @@ class UniquesWeight extends Weight {
           description: "Prefers progressions with a higher amount of unique "
               "chords.",
           importance: 2,
-          scoringStage: ScoringStage.afterSubstitution,
           weightDescription: WeightDescription.exotic,
         );
 
-  // TDC: Optimize this a bit more...
   @override
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
+    String? substitutionEntryTitle,
   }) {
     int unique = progression.values.toSet().length;
     return Score(

@@ -33,6 +33,27 @@ class TimeSignature {
       (duration % decimal == 0) ||
       duration >= step && (log(duration / step) / ln2) % 1 == 0;
 
+  bool validDurationPos(double duration, double durationTo) {
+    if (durationTo < 0 || duration < 0) return false;
+    if ((durationTo % decimal) + duration <= decimal) {
+      return validDuration(duration);
+    } else {
+      // The duration the current measure has left before being full.
+      double left = decimal - (durationTo % decimal);
+      // If left is decimal it's in fact 0.0 (since we have the whole measure left...).
+      if (left != decimal && duration >= left) {
+        return validDuration(left);
+      }
+      // The duration that's left after the cut...
+      double end = (durationTo + duration) % decimal;
+      // Since if this is true the rest is valid...
+      if (end != 0) {
+        return validDuration(end);
+      }
+    }
+    return false;
+  }
+
   @override
   bool operator ==(Object other) =>
       other is TimeSignature &&
