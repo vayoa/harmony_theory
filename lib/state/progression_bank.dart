@@ -3,7 +3,7 @@ import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/state/progression_bank_entry.dart';
 
-import '../modals/progression.dart';
+import '../modals/quantized_progression.dart';
 
 abstract class ProgressionBank {
   /// Key - entry title, value - entry.
@@ -219,7 +219,7 @@ abstract class ProgressionBank {
       _bank.containsKey(title) &&
       idFreeInSubs(title, _bank[title]!.progression.id);
 
-  static bool canBeSubstitution(Progression progression) =>
+  static bool canBeSubstitution(QuantizedProgression progression) =>
       progression.length >= 2 && progression.length <= 8;
 
   static void changeUseInSubstitutions(

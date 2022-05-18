@@ -1,18 +1,18 @@
 import 'package:thoery_test/modals/double_progression/double_progression.dart';
-import 'package:thoery_test/modals/progression.dart';
+import 'package:thoery_test/modals/quantized_progression.dart';
 
 class DoubleProgressionIterator<T, E>
     extends Iterator<DoubleProgressionEntry<T, E>> {
-  final Progression<T> _upper;
-  final Progression<E> _lower;
+  final QuantizedProgression<T> _upper;
+  final QuantizedProgression<E> _lower;
   int _upperIndex;
   int _lowerIndex;
   double _upperDurSum;
   double _lowerDurSum;
 
   DoubleProgressionIterator({
-    required Progression<T> upper,
-    required Progression<E> lower,
+    required QuantizedProgression<T> upper,
+    required QuantizedProgression<E> lower,
   })  : _upper = upper,
         _lower = lower,
         _upperIndex = -1,

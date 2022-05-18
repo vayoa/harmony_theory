@@ -1,9 +1,9 @@
-import 'package:thoery_test/modals/progression.dart';
+import 'package:thoery_test/modals/quantized_progression.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 
 import '../substitution.dart';
 
-/// A particular [ScoreGiver] that scores a [Progression] within a range of
+/// A particular [ScoreGiver] that scores a [QuantizedProgression] within a range of
 /// 0 - 1, that is later multiplied by it's [importance].
 abstract class Weight {
   final String name;

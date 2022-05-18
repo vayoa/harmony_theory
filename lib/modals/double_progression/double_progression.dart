@@ -2,11 +2,11 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:thoery_test/modals/double_progression/double_progression_iterator.dart';
-import 'package:thoery_test/modals/progression.dart';
+import 'package:thoery_test/modals/quantized_progression.dart';
 
 class DoubleProgression<T, E> with IterableMixin<DoubleProgressionEntry<T, E>> {
-  final Progression<T> upper;
-  final Progression<E> lower;
+  final QuantizedProgression<T> upper;
+  final QuantizedProgression<E> lower;
 
   DoubleProgression({required this.upper, required this.lower})
       : assert(upper.timeSignature == lower.timeSignature);

@@ -1,6 +1,6 @@
 import 'package:thoery_test/modals/absolute_durations.dart';
 import 'package:thoery_test/modals/pitch_scale.dart';
-import 'package:thoery_test/modals/progression.dart';
+import 'package:thoery_test/modals/quantized_progression.dart';
 import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/substitution.dart';
@@ -14,7 +14,7 @@ import 'exceptions.dart';
 
 /// A class representing a harmonic progression, built by [ScaleDegreeChord].
 /// The mode of the progression will always be Ionian (Major).
-class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
+class ScaleDegreeProgression extends QuantizedProgression<ScaleDegreeChord> {
   ScaleDegreeProgression(List<ScaleDegreeChord?> base, List<double> durations,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : super(base, durations, timeSignature: timeSignature);
@@ -24,7 +24,7 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       : this([], [], timeSignature: timeSignature);
 
   ScaleDegreeProgression.fromProgression(
-      Progression<ScaleDegreeChord?> progression)
+      QuantizedProgression<ScaleDegreeChord?> progression)
       : super.raw(
           values: progression.values,
           durations: progression.durations,
@@ -53,9 +53,10 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
                     base.length, (index) => 1 / timeSignature.denominator),
             timeSignature: timeSignature);
 
-  ScaleDegreeProgression.fromChords(PitchScale scale, Progression<Chord> chords)
+  ScaleDegreeProgression.fromChords(
+      PitchScale scale, QuantizedProgression<Chord> chords)
       : this.fromProgression(
-          Progression<ScaleDegreeChord>.raw(
+          QuantizedProgression<ScaleDegreeChord>.raw(
             values: chords.values
                 .map((Chord? chord) =>
                     chord == null ? null : ScaleDegreeChord(scale, chord))

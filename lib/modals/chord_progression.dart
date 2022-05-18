@@ -1,11 +1,11 @@
 import 'package:thoery_test/extensions/chord_extension.dart';
 import 'package:thoery_test/modals/pitch_scale.dart';
-import 'package:thoery_test/modals/progression.dart';
+import 'package:thoery_test/modals/quantized_progression.dart';
 import 'package:thoery_test/modals/time_signature.dart';
 import 'package:thoery_test/state/krumhansl_schmuckler_scale_detection.dart';
 import 'package:tonic/tonic.dart';
 
-class ChordProgression extends Progression<Chord> {
+class ChordProgression extends QuantizedProgression<Chord> {
   ChordProgression(
       {required List<Chord?> chords,
       required List<double> durations,
@@ -17,11 +17,7 @@ class ChordProgression extends Progression<Chord> {
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : super.evenTime(chords, timeSignature: timeSignature);
 
-  ChordProgression.empty(
-      {TimeSignature timeSignature = const TimeSignature.evenTime()})
-      : super.empty(timeSignature: timeSignature);
-
-  ChordProgression.fromProgression(Progression<Chord?> progression)
+  ChordProgression.fromProgression(QuantizedProgression<Chord?> progression)
       : super.raw(
           values: progression.values,
           durations: progression.durations,
@@ -52,9 +48,6 @@ class ChordProgression extends Progression<Chord> {
   @override
   String notNullValueFormat(Chord value) => value.commonName;
 
-  @override
-  ChordProgression inTimeSignature(TimeSignature timeSignature) =>
-      ChordProgression.fromProgression(super.inTimeSignature(timeSignature));
 }
 
 abstract class ScaleMatchUtilities {
