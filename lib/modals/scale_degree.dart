@@ -1,4 +1,4 @@
-import 'package:thoery_test/extensions/scale_extension.dart';
+import 'package:thoery_test/extensions/scale_pattern_extension.dart';
 import 'package:thoery_test/modals/identifiable.dart';
 import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:tonic/tonic.dart';
@@ -60,10 +60,6 @@ class ScaleDegree implements Identifiable {
     _accidentals = accidentals;
   }
 
-  /// Returns a [ScaleDegree] from the given [Interval], based on a major scale!
-  ScaleDegree.fromInterval(Interval interval)
-      : this(ScalePatternExtension.majorKey, interval);
-
   ScaleDegree.parse(String degree) {
     final int startIndex = degree.indexOf(RegExp(r'i|v', caseSensitive: false));
     String degreeStr = degree.substring(startIndex);
@@ -98,15 +94,6 @@ class ScaleDegree implements Identifiable {
   static final V = ScaleDegree.parse('V');
   static final vii = ScaleDegree.parse('vii');
   static final vi = ScaleDegree.parse('vi');
-
-  /// Returns a new [ScaleDegree] converted from the [fromMode] mode to [toMode]
-  /// mode.
-  /// Ionian's (Major) mode number is 0 and so on...
-  /// Example: I.modeShift(0, 5) [major to minor] => VI.
-  ScaleDegree modeShift(int fromMode, int toMode) {
-    assert(fromMode >= 0 && fromMode <= 7 && toMode >= 0 && toMode <= 7);
-    return ScaleDegree.raw((_degree + (toMode - fromMode)) % 7, _accidentals);
-  }
 
   /// We assume we're shifting from a scale where I is the tonic.
   ScaleDegree shiftFor(ScaleDegree other) {

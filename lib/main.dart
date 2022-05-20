@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, unused_element
+// ignore_for_file: avoid_print
 
 import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
@@ -7,7 +7,7 @@ import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:tonic/tonic.dart';
 
-import 'extensions/scale_extension.dart';
+import 'extensions/scale_pattern_extension.dart';
 import 'modals/chord_progression.dart';
 import 'modals/scale_degree.dart';
 import 'modals/scale_degree_chord.dart';
@@ -47,30 +47,6 @@ void main() {
   var degree = ScaleDegree.parse('VII');
 
   print(degree.inScale(eb));
-}
-
-void _testBaseClasses() {
-  var p = ScaleDegreeProgression.fromList(['ii', 'V', 'V', 'I'],
-      durations: [1, 2, 2.25, 1.25]);
-
-  p.add(ScaleDegreeChord.majorTonicTriad, 1.75);
-
-  print(p.values);
-  print(p.durations);
-  print('${p.duration}\n');
-
-  var np = ScaleDegreeProgression.fromList(['I', 'V'], durations: [1, 1.25]);
-
-  print(np.values);
-  print(np.durations);
-  print(np.duration);
-  print('${np.duration}\n');
-
-  p.addAll(np);
-
-  print(p.values);
-  print(p.durations);
-  print(p.duration);
 }
 
 _test() {

@@ -34,6 +34,4 @@ extension ScalePatternExtension on ScalePattern {
     }
     return false;
   }
-
-  int get hashEx => Object.hashAll(intervals);
 }

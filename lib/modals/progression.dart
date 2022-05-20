@@ -245,8 +245,6 @@ class Progression<T> implements Identifiable {
     );
   }
 
-  /// Use this only for printing purposes as it can split a chord that goes
-  /// over one measures into two chords (thus ruining the original progression).
   List<Progression<T>> splitToMeasures({TimeSignature? timeSignature}) {
     timeSignature ??= _timeSignature;
     final double decimal = _timeSignature.decimal;
@@ -495,14 +493,4 @@ class Progression<T> implements Identifiable {
 
   static bool adjacentValuesEqual<T>(T val, T next) =>
       val is Chord ? val.equals(next) : val == next;
-}
-
-class ProgressionEntry<T> {
-  final T? value;
-  final double duration;
-
-  const ProgressionEntry({required this.value, required this.duration});
-
-  @override
-  String toString() => '$value($duration)';
 }

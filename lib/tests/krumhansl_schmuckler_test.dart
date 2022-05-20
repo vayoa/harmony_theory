@@ -1,4 +1,4 @@
-import 'package:thoery_test/extensions/scale_extension.dart';
+import 'package:thoery_test/extensions/scale_pattern_extension.dart';
 import 'package:thoery_test/modals/chord_progression.dart';
 import 'package:tonic/tonic.dart';
 

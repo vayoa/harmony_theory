@@ -1,5 +1,5 @@
 import 'package:thoery_test/extensions/pitch_extension.dart';
-import 'package:thoery_test/extensions/scale_extension.dart';
+import 'package:thoery_test/extensions/scale_pattern_extension.dart';
 import 'package:tonic/tonic.dart';
 
 /// The same as [Scale], but has a [Pitch] as its tonic instead of a
@@ -17,9 +17,6 @@ class PitchScale {
             pattern: minor
                 ? ScalePatternExtension.minorKey
                 : ScalePatternExtension.majorKey);
-
-  PitchScale get switchPattern =>
-      PitchScale.common(tonic: tonic, minor: !isMinor);
 
   List<Interval> get intervals => pattern.intervals;
 
