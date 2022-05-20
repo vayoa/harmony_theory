@@ -29,11 +29,14 @@ class PitchScale {
   /// tonic for the minor scale.
   Pitch get majorTonic => pattern.isMinor ? tonic + Interval.m3 : tonic;
 
+  PitchScale get switchPattern =>
+      PitchScale.common(tonic: tonic, minor: !isMinor);
+
   @override
   operator ==(Object other) =>
       other is PitchScale &&
-          tonic.octavelessEqual(other.tonic) &&
-          pattern.equals(other.pattern);
+      tonic.octavelessEqual(other.tonic) &&
+      pattern.equals(other.pattern);
 
   @override
   int get hashCode => Object.hash(Object.hashAll(pattern.intervals),
