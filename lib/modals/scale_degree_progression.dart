@@ -198,12 +198,10 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           for (int i = 1; i <= maxDur ~/ step; i++) {
             final double dur = i * step;
             double offset = 0;
-            for (int j = 0;
-                timeSignature.validDuration(dur) &&
-                    offset + dur <= maxDur &&
-                    timeSignature.validDurationPos(
-                        dur, before + offset + startDur);
-                j++) {
+            while (timeSignature.validDuration(dur) &&
+                offset + dur <= maxDur &&
+                timeSignature.validDurationPos(
+                    dur, before + offset + startDur)) {
               // We now check if there's enough space for this progression to
               // substitute in place for the current chord.
               // For this to be true there needs to be enough duration to cover the
