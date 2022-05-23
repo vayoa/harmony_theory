@@ -1,7 +1,6 @@
 import 'package:thoery_test/modals/absolute_durations.dart';
 import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:thoery_test/modals/progression.dart';
-import 'package:thoery_test/modals/scale_degree.dart';
 import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/substitution.dart';
 import 'package:thoery_test/modals/substitution_match.dart';
@@ -38,7 +37,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
 
   /// Gets a list of [String] each representing a ScaleDegreeChord and returns
   /// a new [ScaleDegreeProgression].
-  /// If [scalePattern] isn't specified, it will be [ScaleDegree.majorKey].
   ScaleDegreeProgression.fromList(
     List<String?> base, {
     List<double>? durations,
@@ -419,25 +417,6 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
       }
     }
     return _chords;
-  }
-
-  List<HarmonicFunction> get deriveHarmonicFunctions {
-    List<HarmonicFunction> harmonicFunctions = [];
-    for (int i = 0; i < length - 1; i++) {
-      ScaleDegreeChord? chord = this[i];
-      if (chord != null) {
-        harmonicFunctions.add(chord.deriveHarmonicFunction(next: this[i + 1]));
-      } else {
-        harmonicFunctions.add(HarmonicFunction.undefined);
-      }
-    }
-    ScaleDegreeChord? last = values.last;
-    if (last != null) {
-      harmonicFunctions.add(last.deriveHarmonicFunction());
-    } else {
-      harmonicFunctions.add(HarmonicFunction.undefined);
-    }
-    return harmonicFunctions;
   }
 
   HarmonicFunction deriveHarmonicFunctionOf(int index) {
