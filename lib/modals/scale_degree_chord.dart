@@ -58,7 +58,18 @@ class ScaleDegreeChord implements Identifiable {
             intervals: chord._pattern.intervals),
         _rootDegree = ScaleDegree.copy(chord._rootDegree);
 
-  ScaleDegreeChord.parse(String chord) {
+  factory ScaleDegreeChord.parse(String chord) {
+    List<String> split = chord.split(r'/');
+    if (split.length == 1) {
+      return _parseInternal(chord);
+    } else {
+      return TonicizedScaleDegreeChord(
+          tonic: _parseInternal(split[1]),
+          tonicizedToTonic: _parseInternal(split[0]));
+    }
+  }
+
+  static ScaleDegreeChord _parseInternal(String chord) {
     final match = chordNamePattern.matchAsPrefix(chord);
     if (match == null) {
       throw FormatException("invalid ScaleDegreeChord name: $chord");
@@ -76,8 +87,7 @@ class ScaleDegreeChord implements Identifiable {
       _intervals[1] = Interval.m3;
       _cPattern = ChordPattern.fromIntervals(_intervals);
     }
-    _pattern = _cPattern;
-    _rootDegree = ScaleDegree.parse(match[1]!);
+    return ScaleDegreeChord.raw(_cPattern, ScaleDegree.parse(match[1]!));
   }
 
   ScaleDegreeChord.fromJson(Map<String, dynamic> json)
