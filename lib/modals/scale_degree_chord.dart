@@ -63,9 +63,7 @@ class ScaleDegreeChord implements Identifiable {
     if (split.length == 1) {
       return _parseInternal(chord);
     } else {
-      return TonicizedScaleDegreeChord(
-          tonic: _parseInternal(split[1]),
-          tonicizedToTonic: _parseInternal(split[0]));
+      return _parseInternal(split[0]).tonicizedFor(_parseInternal(split[1]));
     }
   }
 
