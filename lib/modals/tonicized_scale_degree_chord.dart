@@ -23,14 +23,6 @@ class TonicizedScaleDegreeChord extends ScaleDegreeChord {
             tonicizedToMajorScale:
                 tonicizedToMajorScale ?? tonicizedToTonic.tonicizedFor(tonic));
 
-  TonicizedScaleDegreeChord.shifted(
-      {required ScaleDegreeChord tonic,
-      required ScaleDegreeChord tonicizedToMajorScale})
-      : this.raw(
-            tonic: tonic,
-            tonicizedToTonic: tonicizedToMajorScale.shiftFor(tonic),
-            tonicizedToMajorScale: tonicizedToMajorScale);
-
   TonicizedScaleDegreeChord.fromJson(Map<String, dynamic> json)
       : tonic = ScaleDegreeChord.fromJson(json['tonic']),
         tonicizedToTonic = ScaleDegreeChord.fromJson(json['toTonic']),

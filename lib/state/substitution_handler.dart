@@ -140,6 +140,7 @@ abstract class SubstitutionHandler {
         end: end,
         endDur: endDur,
       );
+      if (prev == rated.first.substitutedBase) break;
       prev = rated.first.substitutedBase;
       maxIterations--;
     } while (maxIterations > 0);

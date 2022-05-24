@@ -8,8 +8,8 @@ class ClimacticEndingWeight extends Weight {
       : super(
           name: 'ClimacticEnding',
           description: "Prefers durations that are closer to the time "
-              "signature's step to appear more just before the end in a "
-              "descending manner.",
+              "signature's step to appear more just before the end (or at the "
+              "end of a musical sentence) in a descending manner.",
           importance: 2,
           weightDescription: WeightDescription.technical,
         );
