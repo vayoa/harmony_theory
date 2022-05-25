@@ -49,6 +49,8 @@ class TimeSignature {
       // Since if this is true the rest is valid...
       if (end != 0) {
         return validDuration(end);
+      } else {
+        return true;
       }
     }
     return false;

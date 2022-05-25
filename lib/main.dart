@@ -7,46 +7,12 @@ import 'package:thoery_test/state/progression_bank.dart';
 import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:tonic/tonic.dart';
 
-import 'extensions/scale_pattern_extension.dart';
 import 'modals/chord_progression.dart';
-import 'modals/scale_degree.dart';
-import 'modals/scale_degree_chord.dart';
 import 'modals/substitution.dart';
 
 void main() {
   _testCut();
   _test();
-  final ChordProgression _base = ChordProgression.evenTime([
-    Chord.parse('Cm'),
-    Chord.parse('D#dim'),
-    Chord.parse('G#'),
-    Chord.parse('Bdim'),
-    Chord.parse('E'),
-    Chord.parse('A'),
-    Chord.parse('D'),
-    Chord.parse('Em'),
-    Chord.parse('Em'),
-    Chord.parse('Dm'),
-    Chord.parse('G'),
-    Chord.parse('Cm'),
-  ]);
-
-  PitchScale scale = PitchScale(
-      tonic: Pitch.parse('C'), pattern: ScalePatternExtension.minorKey);
-
-  var b = ScaleDegreeProgression.fromChords(scale, _base);
-
-  print(_base);
-  print('$b\n');
-
-  Pitch tonic = Pitch.parse('E');
-  var eb = PitchScale(tonic: tonic, pattern: ScalePatternExtension.majorKey);
-
-  print(ScaleDegreeChord(eb, Chord.parse('D#dim')));
-
-  var degree = ScaleDegree.parse('VII');
-
-  print(degree.inScale(eb));
 }
 
 _test() {
