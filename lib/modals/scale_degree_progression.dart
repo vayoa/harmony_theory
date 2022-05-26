@@ -357,10 +357,11 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         // after overlaps etc...).
         final double _durToBaseChord =
             durations.real(baseChord) - durations[baseChord];
-        int firstChanged = substitution
-            .getPlayingIndex(_durToBaseChord + d1 + match.baseOffset);
-        int lastChanged = substitution.getPlayingIndex(
-            _durToBaseChord + d2 - halfStep + match.baseOffset);
+        final double changedStart = _durToBaseChord + d1 + match.baseOffset;
+        int firstChanged = substitution.getPlayingIndex(changedStart);
+        final double changedEnd =
+            _durToBaseChord + d2 - halfStep + match.baseOffset;
+        int lastChanged = substitution.getPlayingIndex(changedEnd);
         bool different = false;
         for (int i = firstChanged; !different && i <= lastChanged; i++) {
           different = i >= length ||
@@ -374,8 +375,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
               substitutedBase: substitution,
               base: this,
               match: match,
-              firstChangedIndex: firstChanged,
-              lastChangedIndex: lastChanged,
+              changedStart: changedStart,
+              changedEnd: changedEnd,
               title: substitutionTitle,
             ),
           );

@@ -12,8 +12,8 @@ class Substitution {
   final ScaleDegreeProgression base;
   SubstitutionScore score;
   final SubstitutionMatch match;
-  final int firstChangedIndex;
-  final int lastChangedIndex;
+  final double changedStart;
+  final double changedEnd;
 
   double get rating => score.score;
 
@@ -22,8 +22,8 @@ class Substitution {
     required this.substitutedBase,
     required this.originalSubstitution,
     required this.base,
-    required this.firstChangedIndex,
-    required this.lastChangedIndex,
+    required this.changedStart,
+    required this.changedEnd,
     required this.match,
     SubstitutionScore? score,
   }) : score = score ?? SubstitutionScore.empty();
@@ -33,8 +33,8 @@ class Substitution {
     ScaleDegreeProgression? substitutedBase,
     ScaleDegreeProgression? originalSubstitution,
     ScaleDegreeProgression? base,
-    int? firstChangedIndex,
-    int? lastChangedIndex,
+    double? changedStart,
+    double? changedEnd,
     SubstitutionScore? score,
     SubstitutionMatch? match,
   }) =>
@@ -44,8 +44,8 @@ class Substitution {
         originalSubstitution: originalSubstitution ?? this.originalSubstitution,
         base: base ?? this.base,
         score: score ?? this.score,
-        firstChangedIndex: firstChangedIndex ?? this.firstChangedIndex,
-        lastChangedIndex: lastChangedIndex ?? this.lastChangedIndex,
+        changedStart: changedStart ?? this.changedStart,
+        changedEnd: changedEnd ?? this.changedEnd,
         match: match ?? this.match,
       );
 
@@ -117,7 +117,7 @@ class Substitution {
         (scale == null ? '' : ' ->\n${base.inScale(scale)}') +
         '.\n'
             '${score.toString(detailed)}\n'
-            'Details: $match Changed Range: $firstChangedIndex - ${lastChangedIndex + 1}.';
+            'Details: $match Changed Range: $changedStart - $changedEnd.';
   }
 
   int compareTo(Substitution other) => score.compareTo(other.score);
