@@ -359,9 +359,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
             durations.real(baseChord) - durations[baseChord];
         final double changedStart = _durToBaseChord + d1 + match.baseOffset;
         int firstChanged = substitution.getPlayingIndex(changedStart);
-        final double changedEnd =
-            _durToBaseChord + d2 - halfStep + match.baseOffset;
-        int lastChanged = substitution.getPlayingIndex(changedEnd);
+        final double changedEnd = _durToBaseChord + d2 + match.baseOffset;
+        int lastChanged = substitution.getPlayingIndex(changedEnd - halfStep);
         bool different = false;
         for (int i = firstChanged; !different && i <= lastChanged; i++) {
           different = i >= length ||
