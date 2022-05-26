@@ -355,12 +355,12 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         }
         // Calculate the new first + last changed indexes (could be changed
         // after overlaps etc...).
-        double _durToBaseChord =
+        final double _durToBaseChord =
             durations.real(baseChord) - durations[baseChord];
-        int firstChanged = substitution.getPlayingIndex(_durToBaseChord + d1);
-        if (match.baseOffset != 0 && firstChanged == -1) firstChanged = 0;
-        int lastChanged =
-            substitution.getPlayingIndex(_durToBaseChord + d2 - halfStep);
+        int firstChanged = substitution
+            .getPlayingIndex(_durToBaseChord + d1 + match.baseOffset);
+        int lastChanged = substitution.getPlayingIndex(
+            _durToBaseChord + d2 - halfStep + match.baseOffset);
         bool different = false;
         for (int i = firstChanged; !different && i <= lastChanged; i++) {
           different = i >= length ||
