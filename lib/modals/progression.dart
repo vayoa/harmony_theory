@@ -433,6 +433,15 @@ class Progression<T> implements Identifiable {
       {List<Progression<T>>? measures}) {
     measures ??= splitToMeasures();
     Progression<T> start = Progression<T>.empty(timeSignature: _timeSignature);
+    // If for example we want to replace null(1.25) at the first measure
+    // [null(1.0)] with null(0.75) we should be able to but not doing this
+    // won't let us...
+    if (measures.length - 1 > index &&
+        adjacentValuesEqual(
+            newMeasure.values.last, measures[index + 1].values.first)) {
+      newMeasure.addAll(measures[index + 1]);
+      measures.removeAt(index + 1);
+    }
     for (int i = 0; i < index; i++) {
       start.addAll(measures[i]);
     }
