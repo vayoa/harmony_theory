@@ -436,7 +436,9 @@ class Progression<T> implements Identifiable {
     // If for example we want to replace null(1.25) at the first measure
     // [null(1.0)] with null(0.75) we should be able to but not doing this
     // won't let us...
-    if (measures.length - 1 > index &&
+    if (!newMeasure.isEmpty &&
+        measures.length - 1 > index &&
+        !measures[index + 1].isEmpty &&
         adjacentValuesEqual(
             newMeasure.values.last, measures[index + 1].values.first)) {
       newMeasure.addAll(measures[index + 1]);

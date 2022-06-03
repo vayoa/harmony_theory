@@ -11,8 +11,12 @@ import 'modals/chord_progression.dart';
 import 'modals/substitution.dart';
 
 void main() {
-  _testCut();
-  _test();
+  var p = ScaleDegreeProgression([null], [1.25]);
+  var p2 = ScaleDegreeProgression.empty();
+  print(p.replaceMeasure(0, p2));
+
+  // _testCut();
+  // _test();
 }
 
 _test() {
