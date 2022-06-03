@@ -16,6 +16,9 @@ extension ChordPatternExtension on ChordPattern {
     return false;
   }
 
+  bool get hasMinor3rd =>
+      intervals.length >= 2 && intervals[1].equals(Interval.m3);
+
   static ChordPattern fromFullName(String fullName) =>
       chordPatternSpecs[fullName]!;
 

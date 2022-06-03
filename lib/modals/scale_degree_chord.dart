@@ -205,7 +205,7 @@ class ScaleDegreeChord implements Identifiable {
   }
 
   String get rootDegreeString {
-    if (_pattern.intervals[1] == Interval.m3) {
+    if (_pattern.hasMinor3rd) {
       return _rootDegree.toString().toLowerCase();
     }
     return _rootDegree.toString();
@@ -213,7 +213,7 @@ class ScaleDegreeChord implements Identifiable {
 
   String get patternString {
     String _patternStr = _pattern.abbr;
-    if (_pattern.intervals[1] == Interval.m3) {
+    if (_pattern.hasMinor3rd) {
       switch (_pattern.fullName) {
         case 'Minor':
           _patternStr = '';
