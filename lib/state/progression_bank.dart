@@ -220,7 +220,9 @@ abstract class ProgressionBank {
       idFreeInSubs(title, _bank[title]!.progression.id);
 
   static bool canBeSubstitution(Progression progression) =>
-      progression.length >= 2 && progression.length <= 8;
+      progression.length >= 2 &&
+      progression.length <= 8 &&
+      !(progression.length == 1 && progression.values.first == null);
 
   static void changeUseInSubstitutions(
       {required String title, required bool useInSubstitutions}) {
