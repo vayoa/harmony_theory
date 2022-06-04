@@ -496,7 +496,7 @@ class Progression<T> implements Identifiable {
     required T? value,
     required double duration,
   }) {
-    if (!_timeSignature.validDuration(duration)) {
+    if (value != null && !_timeSignature.validDuration(duration)) {
       throw NonValidDuration(
           value: value, duration: duration, timeSignature: _timeSignature);
     }
