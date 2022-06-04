@@ -147,8 +147,7 @@ abstract class ProgressionBank {
         groupedBank: _groupedBank,
       );
 
-  static Map<String, dynamic> toJson() =>
-      {
+  static Map<String, dynamic> toJson() => {
         'ver': _version,
         'substitutionsTitles': {
           for (MapEntry<int, String> entry in _substitutionsIDBank.entries)
@@ -517,6 +516,12 @@ class EntryLocation {
   }
 
   @override
+  bool operator ==(Object other) =>
+      other is EntryLocation &&
+      other.package == package &&
+      other.title == title;
+
+  @override
   String toString([String separator = ProgressionBank.packageSeparator]) =>
       package + separator + title;
 }
@@ -529,4 +534,10 @@ class PackagedProgression {
     required this.location,
     required this.progression,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      other is PackagedProgression &&
+      other.location == location &&
+      other.progression == progression;
 }
