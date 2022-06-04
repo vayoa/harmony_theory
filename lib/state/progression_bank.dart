@@ -49,8 +49,7 @@ abstract class ProgressionBank {
         results.add(
           PackagedProgression(
               location: location,
-              progression:
-                  _bank[location.package]![location.title]!.progression),
+              progression: getAtLocation(location)!.progression),
         );
       }
       return results;
@@ -176,11 +175,17 @@ abstract class ProgressionBank {
       package != builtInPackageName &&
       !package.contains(packageSeparator);
 
+  static ProgressionBankEntry? getAtLocation(EntryLocation location) =>
+      _bank[location.package]?[location.title];
+
+  static bool isBuiltIn(EntryLocation location) =>
+      location.package == ProgressionBank.builtInPackageName;
+
   /// Moves the entry at [location] to [newPackage].
   /// If [newPackage] doesn't exists, creates it.
   static int move(
       {required EntryLocation location, required String newPackage}) {
-    ProgressionBankEntry entry = _bank[location.package]![location.title]!;
+    ProgressionBankEntry entry = getAtLocation(location)!;
     int? id = remove(package: location.package, title: location.title);
     id = add(
       package: location.package,
@@ -522,6 +527,9 @@ class EntryLocation {
       other.title == title;
 
   @override
+  int get hashCode => Object.hash(package, title);
+
+  @override
   String toString([String separator = ProgressionBank.packageSeparator]) =>
       package + separator + title;
 }
@@ -540,4 +548,7 @@ class PackagedProgression {
       other is PackagedProgression &&
       other.location == location &&
       other.progression == progression;
+
+  @override
+  int get hashCode => Object.hash(location, progression);
 }

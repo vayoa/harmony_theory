@@ -19,8 +19,8 @@ class UserSavedWeight extends Weight {
     required ScaleDegreeProgression base,
     EntryLocation? location,
   }) {
-    final bool builtIn = location != null &&
-        location.package == ProgressionBank.builtInPackageName;
+    final bool builtIn =
+        location != null && ProgressionBank.isBuiltIn(location);
     return Score(
       score: builtIn ? 0.0 : 1.0,
       details: builtIn
