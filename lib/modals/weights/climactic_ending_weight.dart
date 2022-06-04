@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
+import 'package:thoery_test/state/progression_bank.dart';
 
 class ClimacticEndingWeight extends Weight {
   const ClimacticEndingWeight()
@@ -29,7 +30,7 @@ class ClimacticEndingWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
-    String? substitutionEntryTitle,
+    EntryLocation? location,
   }) {
     if (progression.duration < 3.0) {
       return Score(

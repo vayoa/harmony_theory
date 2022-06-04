@@ -1,6 +1,8 @@
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
 
+import '../../state/progression_bank.dart';
+
 class UniquesWeight extends Weight {
   const UniquesWeight()
       : super(
@@ -15,7 +17,7 @@ class UniquesWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
-    String? substitutionEntryTitle,
+    EntryLocation? location,
   }) {
     int unique = progression.values.toSet().length;
     return Score(

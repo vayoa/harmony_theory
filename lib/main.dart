@@ -11,12 +11,12 @@ import 'modals/chord_progression.dart';
 import 'modals/substitution.dart';
 
 void main() {
+  ProgressionBank.initializeBuiltIn();
   _testCut();
   _test();
 }
 
 _test() {
-  ProgressionBank.initializeBuiltIn();
   // Chords for "יונתן הקטן".
   ChordProgression base = ChordProgression(
     chords: [

@@ -4,6 +4,7 @@ import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
 import 'package:tonic/tonic.dart';
 
+import '../../state/progression_bank.dart';
 import '../scale_degree_chord.dart';
 
 class HarmonicFunctionWeight extends Weight {
@@ -47,7 +48,7 @@ class HarmonicFunctionWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
-    String? substitutionEntryTitle,
+    EntryLocation? location,
   }) {
     int maxImportance = HarmonicFunctionBank.maxFunctionImportance;
     int score = 0, count = 0;

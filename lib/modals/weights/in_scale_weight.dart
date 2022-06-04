@@ -2,6 +2,7 @@ import 'package:thoery_test/modals/scale_degree_chord.dart';
 import 'package:thoery_test/modals/scale_degree_progression.dart';
 import 'package:thoery_test/modals/weights/weight.dart';
 
+import '../../state/progression_bank.dart';
 import '../scale_degree.dart';
 
 class InScaleWeight extends Weight {
@@ -34,7 +35,7 @@ class InScaleWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
-    String? substitutionEntryTitle,
+    EntryLocation? location,
   }) {
     int count = 0, outCount = 0;
     String details = '';

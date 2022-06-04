@@ -53,7 +53,6 @@ class TimeSignature {
         return true;
       }
     }
-    return false;
   }
 
   @override
