@@ -244,7 +244,7 @@ abstract class ProgressionBank {
     if (_bank.containsKey(package) && _bank[package]!.containsKey(title)) {
       ProgressionBankEntry entry = _bank[package]![title]!;
       id ??= entry.progression.id;
-      _bank.remove(title);
+      _bank[package]!.remove(title);
       if (entry.usedInSubstitutions &&
           nameToLocation(package, title) == _substitutionsIDBank[id]) {
         _substitutionsIDBank.remove(id);
