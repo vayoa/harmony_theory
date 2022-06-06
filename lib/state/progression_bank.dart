@@ -186,12 +186,17 @@ abstract class ProgressionBank {
   static int move(
       {required EntryLocation location, required String newPackage}) {
     ProgressionBankEntry entry = getAtLocation(location)!;
-    int? id = remove(package: location.package, title: location.title);
-    id = add(
+    int? id = remove(
       package: location.package,
+      title: location.title,
+      removeFromGroups: false,
+    );
+    id = add(
+      package: newPackage,
       title: location.title,
       entry: entry,
       id: id,
+      addToGroups: false,
     );
     return id;
   }
@@ -207,12 +212,15 @@ abstract class ProgressionBank {
   /// If another entry in the bank has the same [title] in the same [package],
   /// will override that entry with the new one ([entry]).
   ///
+  /// If [addToGroups] is false, we won't add the progression to [_groupedBank].
+  ///
   /// Will return the id of the progression.
   static int add({
     String package = defaultPackageName,
     required String title,
     required ProgressionBankEntry entry,
     int? id,
+    bool addToGroups = true,
   }) {
     // Remove the entry if currently present.
     int? removedID = remove(package: package, title: title, id: id);
@@ -224,9 +232,11 @@ abstract class ProgressionBank {
     _bank[package]![title] = entry;
     if (entry.usedInSubstitutions) {
       _addProgToGroups(
-          progression: entry.progression,
-          location: nameToLocation(package, title),
-          id: id);
+        progression: entry.progression,
+        location: nameToLocation(package, title),
+        id: id,
+        addToGroups: addToGroups,
+      );
     }
     return id;
   }
@@ -238,9 +248,16 @@ abstract class ProgressionBank {
   /// If no such entry exists in the [package] (only checks for it's title),
   /// will do nothing.
   ///
+  /// If [removeFromGroups] is false, we won't remove the progression from
+  /// [_groupedBank].
+  ///
   /// Will return the id of the progression if removed.
-  static int? remove(
-      {required String package, required String title, int? id}) {
+  static int? remove({
+    required String package,
+    required String title,
+    int? id,
+    bool removeFromGroups = true,
+  }) {
     if (_bank.containsKey(package) && _bank[package]!.containsKey(title)) {
       ProgressionBankEntry entry = _bank[package]![title]!;
       id ??= entry.progression.id;
@@ -248,7 +265,9 @@ abstract class ProgressionBank {
       if (entry.usedInSubstitutions &&
           nameToLocation(package, title) == _substitutionsIDBank[id]) {
         _substitutionsIDBank.remove(id);
-        _removeProgFromGroups(entry.progression, id);
+        if (removeFromGroups) {
+          _removeProgFromGroups(entry.progression, id);
+        }
       }
       return id;
     }
@@ -258,25 +277,31 @@ abstract class ProgressionBank {
   /// Gets [progression] and [location] (entry's LOCATION).
   /// Adds the progression to it's relevant groups ([_groupedBank]) and to
   /// [_substitutionsIDBank] to be later used in substitutions.
-  static void _addProgToGroups(
-      {required ScaleDegreeProgression progression,
-      required String location,
-      int? id}) {
+  ///
+  /// If [addToGroups] is false, we won't add the progression to [_groupedBank].
+  static void _addProgToGroups({
+    required ScaleDegreeProgression progression,
+    required String location,
+    int? id,
+    bool addToGroups = true,
+  }) {
     id ??= progression.id;
     if (!_substitutionsIDBank.containsKey(location)) {
       _substitutionsIDBank[id] = location;
     }
-    for (int i = 0; i < progression.length; i++) {
-      ScaleDegreeChord? chord = progression[i];
-      final Map<int, ScaleDegreeChord> addedChords = {};
-      if (chord != null) {
-        int weakChordID = weakIDWithPlace(chord, i == progression.length - 1);
-        if (!addedChords.containsKey(weakChordID)) {
-          addedChords[weakChordID] = chord;
-          if (_groupedBank.containsKey(weakChordID)) {
-            _groupedBank[weakChordID]!.add(id);
-          } else {
-            _groupedBank[weakChordID] = [id];
+    if (addToGroups) {
+      for (int i = 0; i < progression.length; i++) {
+        ScaleDegreeChord? chord = progression[i];
+        final Map<int, ScaleDegreeChord> addedChords = {};
+        if (chord != null) {
+          int weakChordID = weakIDWithPlace(chord, i == progression.length - 1);
+          if (!addedChords.containsKey(weakChordID)) {
+            addedChords[weakChordID] = chord;
+            if (_groupedBank.containsKey(weakChordID)) {
+              _groupedBank[weakChordID]!.add(id);
+            } else {
+              _groupedBank[weakChordID] = [id];
+            }
           }
         }
       }
