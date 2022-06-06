@@ -274,6 +274,13 @@ abstract class ProgressionBank {
     return null;
   }
 
+  /// Removes [package] and all of the entries it contains.
+  static void removePackage(String package) {
+    for (String title in _bank[package]!.keys) {
+      remove(package: package, title: title);
+    }
+  }
+
   /// Gets [progression] and [location] (entry's LOCATION).
   /// Adds the progression to it's relevant groups ([_groupedBank]) and to
   /// [_substitutionsIDBank] to be later used in substitutions.
