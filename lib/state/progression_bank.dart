@@ -10,6 +10,7 @@ abstract class ProgressionBank {
   static const String defaultPackageName = 'General';
   static const String builtInPackageName = 'Built-In';
   static const String packageSeparator = r'\';
+  static const int maxTitleCharacters = 35;
 
   static late String _version;
 
@@ -138,6 +139,48 @@ abstract class ProgressionBank {
     _groupedBank = computePass.groupedBank;
   }
 
+  /* TODO: Maybe save substitutions and groups also when exporting to save
+          calculation time... */
+  static void importPackages(Map<String, dynamic> json) {
+    // We use the bank of the exported package...
+    json = Map<String, dynamic>.from(json['bank']);
+
+    try {
+      // Merge all entries -> no complications, if theres already one used in
+      // substitutions don't use the other, if theres already one named like
+      // another add a number to the last (if can't trim and add).
+      for (MapEntry<String, dynamic> package in json.entries) {
+        final bool existingPackage = bank.containsKey(package.key);
+        Map<String, dynamic> packageJson =
+            Map<String, dynamic>.from(package.value);
+        for (MapEntry<String, dynamic> savedEntry in packageJson.entries) {
+          String title = savedEntry.key;
+          ProgressionBankEntry entry =
+              ProgressionBankEntry.fromJson(json: savedEntry.value);
+          int id = entry.progression.id;
+          if (entry.usedInSubstitutions &&
+              _substitutionsIDBank.containsKey(id)) {
+            entry = entry.copyWith(usedInSubstitutions: false);
+          }
+          if (existingPackage &&
+              bank[package.key]!.containsKey(savedEntry.key)) {
+            int num = (int.tryParse(title[title.length - 1]) ?? 1) + 1;
+            String add = ' $num';
+            if (title.length + add.length > maxTitleCharacters) {
+              title = title.substring(0, title.length - add.length - 3) +
+                  '...' +
+                  add;
+            }
+          }
+
+          add(package: package.key, title: title, entry: entry, id: id);
+        }
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static ProgressionBankComputePass createComputePass() =>
       ProgressionBankComputePass(
         version: _version,
@@ -167,6 +210,18 @@ abstract class ProgressionBank {
         }
       };
 
+  static Map<String, dynamic> exportPackages(List<String> packages) {
+    Map<String, dynamic> json = {'ver': _version, 'bank': {}};
+    for (String package in packages) {
+      Map<String, dynamic> packageJson = {};
+      for (String entry in _bank[package]!.keys) {
+        packageJson[entry] = _bank[package]![entry]!.toJson();
+      }
+      json['bank'][package] = packageJson;
+    }
+    return json;
+  }
+
   static String nameToLocation(String package, String name) =>
       package + packageSeparator + name;
 
@@ -184,8 +239,10 @@ abstract class ProgressionBank {
 
   /// Moves the entry at [location] to [newPackage].
   /// If [newPackage] doesn't exists, creates it.
-  static int move(
-      {required EntryLocation location, required String newPackage}) {
+  static int move({
+    required EntryLocation location,
+    required String newPackage,
+  }) {
     ProgressionBankEntry entry = getAtLocation(location)!;
     int? id = remove(
       package: location.package,
