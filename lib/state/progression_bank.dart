@@ -279,6 +279,7 @@ abstract class ProgressionBank {
     for (String title in _bank[package]!.keys) {
       remove(package: package, title: title);
     }
+    _bank.remove(package);
   }
 
   /// Gets [progression] and [location] (entry's LOCATION).
