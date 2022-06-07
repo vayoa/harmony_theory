@@ -171,9 +171,7 @@ abstract class ProgressionBank {
       package + packageSeparator + name;
 
   static bool packageNameValid(String package) =>
-      package != defaultPackageName &&
-      package != builtInPackageName &&
-      !package.contains(packageSeparator);
+      !bank.containsKey(package) && !package.contains(packageSeparator);
 
   static ProgressionBankEntry? getAtLocation(EntryLocation location) =>
       _bank[location.package]?[location.title];
