@@ -258,11 +258,12 @@ abstract class ProgressionBank {
     required String title,
     int? id,
     bool removeFromGroups = true,
+    bool removeFromBank = true,
   }) {
     if (_bank.containsKey(package) && _bank[package]!.containsKey(title)) {
       ProgressionBankEntry entry = _bank[package]![title]!;
       id ??= entry.progression.id;
-      _bank[package]!.remove(title);
+      if (removeFromBank) _bank[package]!.remove(title);
       if (entry.usedInSubstitutions &&
           nameToLocation(package, title) == _substitutionsIDBank[id]) {
         _substitutionsIDBank.remove(id);
@@ -277,9 +278,12 @@ abstract class ProgressionBank {
 
   /// Removes [package] and all of the entries it contains.
   static void removePackage(String package) {
-    for (String title in _bank[package]!.keys) {
-      remove(package: package, title: title);
-    }
+    // To avoid concurrent modification during iteration error (this function
+    // copies the keys to remove for us...).
+    _bank[package]!.removeWhere((key, value) {
+      remove(package: package, title: key, removeFromBank: false);
+      return true;
+    });
     _bank.remove(package);
   }
 
