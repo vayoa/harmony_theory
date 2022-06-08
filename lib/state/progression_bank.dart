@@ -207,11 +207,12 @@ abstract class ProgressionBank {
         }
       };
 
-  static Map<String, dynamic> exportPackages(List<String> packages) {
+  static Map<String, dynamic> exportPackages(
+      Map<String, List<String>> packages) {
     Map<String, dynamic> json = {'ver': _version, 'bank': {}};
-    for (String package in packages) {
+    for (String package in packages.keys) {
       Map<String, dynamic> packageJson = {};
-      for (String entry in _bank[package]!.keys) {
+      for (String entry in packages[package]!) {
         packageJson[entry] = _bank[package]![entry]!.toJson();
       }
       json['bank'][package] = packageJson;
