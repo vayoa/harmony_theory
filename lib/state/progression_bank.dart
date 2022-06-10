@@ -77,7 +77,7 @@ abstract class ProgressionBank {
   static void initializeFromJson(Map<String, dynamic> json) {
     // During the beta version the version field wasn't saved, and so this
     // initializes it...
-    _version = json['ver'] ?? allBankVersions[0];
+    _version = jsonVersion(json);
     // If the version the database saved is the last version out...
     if (_version == allBankVersions.last) {
       _substitutionsIDBank = {
@@ -102,14 +102,15 @@ abstract class ProgressionBank {
     }
   }
 
-  static bool migrationRequired(Map<String, dynamic> json) {
-    // During the beta version the version field wasn't saved, and so this
-    // initializes it...
-    String version = json['ver'] ?? allBankVersions[0];
-    // If the version the database saved isn't the last version out, we need
-    // to migrate...
-    return _version != allBankVersions.last;
-  }
+  // During the beta version the version field wasn't saved, and so this
+  // initializes it...
+  static String jsonVersion(Map<String, dynamic> json) =>
+      json['ver'] ?? allBankVersions[0];
+
+  // If the version the database saved isn't the last version out, we need
+  // to migrate...
+  static bool migrationRequired(Map<String, dynamic> json) =>
+      jsonVersion(json) != allBankVersions.last;
 
   /// Migrates the database [json] represents from previous versions to the
   /// current database scheme.
