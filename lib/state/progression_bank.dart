@@ -102,6 +102,15 @@ abstract class ProgressionBank {
     }
   }
 
+  static bool migrationRequired(Map<String, dynamic> json) {
+    // During the beta version the version field wasn't saved, and so this
+    // initializes it...
+    String version = json['ver'] ?? allBankVersions[0];
+    // If the version the database saved isn't the last version out, we need
+    // to migrate...
+    return _version != allBankVersions.last;
+  }
+
   /// Migrates the database [json] represents from previous versions to the
   /// current database scheme.
   static void migrator(Map<String, dynamic> json) {
