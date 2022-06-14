@@ -1,18 +1,18 @@
-import 'package:thoery_test/modals/scale_degree_chord.dart';
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/substitution.dart';
-import 'package:thoery_test/modals/weights/climactic_ending_weight.dart';
-import 'package:thoery_test/modals/weights/complex_weight.dart';
-import 'package:thoery_test/modals/weights/harmonic_function_weight.dart';
-import 'package:thoery_test/modals/weights/important_chords_weight.dart';
-import 'package:thoery_test/modals/weights/in_scale_weight.dart';
-import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
-import 'package:thoery_test/modals/weights/overtaking_weight.dart';
-import 'package:thoery_test/modals/weights/rhythm_and_placement_weight.dart';
-import 'package:thoery_test/modals/weights/uniques_weight.dart';
-import 'package:thoery_test/modals/weights/user_saved_weight.dart';
-import 'package:thoery_test/modals/weights/weight.dart';
-import 'package:thoery_test/state/progression_bank.dart';
+import '../modals/scale_degree_chord.dart';
+import '../modals/scale_degree_progression.dart';
+import '../modals/substitution.dart';
+import '../modals/weights/climactic_ending_weight.dart';
+import '../modals/weights/complex_weight.dart';
+import '../modals/weights/harmonic_function_weight.dart';
+import '../modals/weights/important_chords_weight.dart';
+import '../modals/weights/in_scale_weight.dart';
+import '../modals/weights/keep_harmonic_function_weight.dart';
+import '../modals/weights/overtaking_weight.dart';
+import '../modals/weights/rhythm_and_placement_weight.dart';
+import '../modals/weights/uniques_weight.dart';
+import '../modals/weights/user_saved_weight.dart';
+import '../modals/weights/weight.dart';
+import 'progression_bank.dart';
 
 abstract class SubstitutionHandler {
   static List<Weight> weights = [

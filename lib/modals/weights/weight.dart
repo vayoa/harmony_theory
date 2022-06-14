@@ -1,7 +1,6 @@
-import 'package:thoery_test/modals/progression.dart';
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/state/progression_bank.dart';
-
+import '../../state/progression_bank.dart';
+import '../progression.dart';
+import '../scale_degree_progression.dart';
 import '../substitution.dart';
 
 /// A particular [ScoreGiver] that scores a [Progression] within a range of

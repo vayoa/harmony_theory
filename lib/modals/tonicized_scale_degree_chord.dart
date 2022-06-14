@@ -1,4 +1,4 @@
-import 'package:thoery_test/modals/scale_degree_chord.dart';
+import 'scale_degree_chord.dart';
 
 class TonicizedScaleDegreeChord extends ScaleDegreeChord {
   // This can't be just a degree because a tonicized scale degree chord where

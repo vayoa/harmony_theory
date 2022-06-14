@@ -1,5 +1,6 @@
-import 'package:thoery_test/modals/identifiable.dart';
 import 'package:tonic/tonic.dart';
+
+import '../../modals/identifiable.dart';
 
 extension IntervalExtension on Interval {
   bool equals(Object other) =>

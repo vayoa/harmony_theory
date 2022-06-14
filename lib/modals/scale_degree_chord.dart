@@ -1,12 +1,13 @@
 import 'dart:convert';
 
-import 'package:thoery_test/extensions/chord_extension.dart';
-import 'package:thoery_test/extensions/interval_extension.dart';
-import 'package:thoery_test/modals/identifiable.dart';
-import 'package:thoery_test/modals/pitch_scale.dart';
-import 'package:thoery_test/modals/scale_degree.dart';
-import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
 import 'package:tonic/tonic.dart';
+
+import '../extensions/chord_extension.dart';
+import '../extensions/interval_extension.dart';
+import 'identifiable.dart';
+import 'pitch_scale.dart';
+import 'scale_degree.dart';
+import 'tonicized_scale_degree_chord.dart';
 
 class ScaleDegreeChord implements Identifiable {
   late final ChordPattern _pattern;

@@ -1,5 +1,5 @@
-import 'package:thoery_test/modals/scale_degree_chord.dart';
-import 'package:thoery_test/modals/scale_degree_progression.dart';
+import 'scale_degree_chord.dart';
+import 'scale_degree_progression.dart';
 
 class SubstitutionMatch {
   final int baseIndex;

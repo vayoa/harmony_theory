@@ -1,7 +1,7 @@
-import 'package:thoery_test/extensions/chord_extension.dart';
-import 'package:thoery_test/extensions/scale_pattern_extension.dart';
 import 'package:tonic/tonic.dart';
 
+import '../extensions/chord_extension.dart';
+import '../extensions/scale_pattern_extension.dart';
 import '../modals/pitch_scale.dart';
 import '../modals/scale_degree_chord.dart';
 

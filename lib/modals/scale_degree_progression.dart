@@ -1,16 +1,16 @@
-import 'package:thoery_test/modals/absolute_durations.dart';
-import 'package:thoery_test/modals/pitch_scale.dart';
-import 'package:thoery_test/modals/progression.dart';
-import 'package:thoery_test/modals/scale_degree_chord.dart';
-import 'package:thoery_test/modals/substitution.dart';
-import 'package:thoery_test/modals/substitution_match.dart';
-import 'package:thoery_test/modals/time_signature.dart';
-import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
-import 'package:thoery_test/state/progression_bank.dart';
 import 'package:tonic/tonic.dart';
 
+import '../state/progression_bank.dart';
+import 'absolute_durations.dart';
 import 'chord_progression.dart';
 import 'exceptions.dart';
+import 'pitch_scale.dart';
+import 'progression.dart';
+import 'scale_degree_chord.dart';
+import 'substitution.dart';
+import 'substitution_match.dart';
+import 'time_signature.dart';
+import 'tonicized_scale_degree_chord.dart';
 
 /// A class representing a harmonic progression, built by [ScaleDegreeChord].
 /// The mode of the progression will always be Ionian (Major).

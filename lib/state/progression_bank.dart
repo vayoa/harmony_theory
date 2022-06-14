@@ -1,9 +1,8 @@
-import 'package:thoery_test/modals/identifiable.dart';
-import 'package:thoery_test/modals/scale_degree_chord.dart';
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/state/progression_bank_entry.dart';
-
+import '../modals/identifiable.dart';
 import '../modals/progression.dart';
+import '../modals/scale_degree_chord.dart';
+import '../modals/scale_degree_progression.dart';
+import 'progression_bank_entry.dart';
 
 abstract class ProgressionBank {
   static const List<String> allBankVersions = ['beta', '1.0'];

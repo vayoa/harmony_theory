@@ -1,4 +1,4 @@
-import 'package:thoery_test/modals/scale_degree_progression.dart';
+import '../modals/scale_degree_progression.dart';
 
 class ProgressionBankEntry {
   final ScaleDegreeProgression progression;

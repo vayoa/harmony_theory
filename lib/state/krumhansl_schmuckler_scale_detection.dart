@@ -1,9 +1,9 @@
 import 'dart:math';
 
-import 'package:thoery_test/extensions/scale_pattern_extension.dart';
-import 'package:thoery_test/modals/chord_progression.dart';
 import 'package:tonic/tonic.dart';
 
+import '../extensions/scale_pattern_extension.dart';
+import '../modals/chord_progression.dart';
 import '../modals/pitch_scale.dart';
 
 class KrumhanslSchmucklerScaleDetection {

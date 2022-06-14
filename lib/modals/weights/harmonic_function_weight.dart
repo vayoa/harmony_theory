@@ -1,11 +1,11 @@
-import 'package:thoery_test/extensions/interval_extension.dart';
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/tonicized_scale_degree_chord.dart';
-import 'package:thoery_test/modals/weights/weight.dart';
 import 'package:tonic/tonic.dart';
 
+import '../../extensions/interval_extension.dart';
 import '../../state/progression_bank.dart';
 import '../scale_degree_chord.dart';
+import '../scale_degree_progression.dart';
+import '../tonicized_scale_degree_chord.dart';
+import 'weight.dart';
 
 class HarmonicFunctionWeight extends Weight {
   const HarmonicFunctionWeight()

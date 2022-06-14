@@ -1,6 +1,7 @@
-import 'package:thoery_test/extensions/interval_extension.dart';
-import 'package:thoery_test/extensions/pitch_extension.dart';
 import 'package:tonic/tonic.dart';
+
+import 'interval_extension.dart';
+import 'pitch_extension.dart';
 
 extension ChordPatternExtension on ChordPattern {
   equals(Object? other) {

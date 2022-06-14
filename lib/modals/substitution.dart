@@ -1,11 +1,10 @@
-import 'package:thoery_test/modals/pitch_scale.dart';
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/substitution_match.dart';
-import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
-import 'package:thoery_test/modals/weights/weight.dart';
-import 'package:thoery_test/state/substitution_handler.dart';
-
 import '../state/progression_bank.dart';
+import '../state/substitution_handler.dart';
+import 'pitch_scale.dart';
+import 'scale_degree_progression.dart';
+import 'substitution_match.dart';
+import 'weights/keep_harmonic_function_weight.dart';
+import 'weights/weight.dart';
 
 class Substitution {
   final EntryLocation? location;

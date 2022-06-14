@@ -1,14 +1,14 @@
 // ignore_for_file: avoid_print
 
-import 'package:thoery_test/modals/pitch_scale.dart';
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
-import 'package:thoery_test/state/progression_bank.dart';
-import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:tonic/tonic.dart';
 
 import 'modals/chord_progression.dart';
+import 'modals/pitch_scale.dart';
+import 'modals/scale_degree_progression.dart';
 import 'modals/substitution.dart';
+import 'modals/weights/keep_harmonic_function_weight.dart';
+import 'state/progression_bank.dart';
+import 'state/substitution_handler.dart';
 
 void main() {
   ProgressionBank.initializeBuiltIn();

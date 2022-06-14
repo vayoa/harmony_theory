@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/weights/weight.dart';
-import 'package:thoery_test/state/progression_bank.dart';
+import '../../state/progression_bank.dart';
+import '../scale_degree_progression.dart';
+import 'weight.dart';
 
 class ClimacticEndingWeight extends Weight {
   const ClimacticEndingWeight()
