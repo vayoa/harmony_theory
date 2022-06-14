@@ -1,5 +1,6 @@
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/weights/weight.dart';
+import '../../state/progression_bank.dart';
+import '../scale_degree_progression.dart';
+import 'weight.dart';
 
 class RhythmAndPlacementWeight extends Weight {
   const RhythmAndPlacementWeight()
@@ -36,7 +37,7 @@ class RhythmAndPlacementWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
-    String? substitutionEntryTitle,
+    EntryLocation? location,
   }) {
     String details = '';
     int points = 0;

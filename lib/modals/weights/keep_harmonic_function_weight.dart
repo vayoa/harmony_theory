@@ -1,8 +1,8 @@
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/weights/weight.dart';
-import 'package:thoery_test/state/substitution_handler.dart';
-
+import '../../state/progression_bank.dart';
+import '../../state/substitution_handler.dart';
 import '../scale_degree_chord.dart';
+import '../scale_degree_progression.dart';
+import 'weight.dart';
 
 class KeepHarmonicFunctionWeight extends Weight {
   const KeepHarmonicFunctionWeight()
@@ -18,7 +18,7 @@ class KeepHarmonicFunctionWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
-    String? substitutionEntryTitle,
+    EntryLocation? location,
   }) {
     // For each chord in base, see which chords are replacing it and score
     // based on how different their harmonic function is from base.

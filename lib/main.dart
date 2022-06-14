@@ -1,22 +1,22 @@
 // ignore_for_file: avoid_print
 
-import 'package:thoery_test/modals/pitch_scale.dart';
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
-import 'package:thoery_test/state/progression_bank.dart';
-import 'package:thoery_test/state/substitution_handler.dart';
 import 'package:tonic/tonic.dart';
 
 import 'modals/chord_progression.dart';
+import 'modals/pitch_scale.dart';
+import 'modals/scale_degree_progression.dart';
 import 'modals/substitution.dart';
+import 'modals/weights/keep_harmonic_function_weight.dart';
+import 'state/progression_bank.dart';
+import 'state/substitution_handler.dart';
 
 void main() {
+  ProgressionBank.initializeBuiltIn();
   _testCut();
   _test();
 }
 
 _test() {
-  ProgressionBank.initializeBuiltIn();
   // Chords for "יונתן הקטן".
   ChordProgression base = ChordProgression(
     chords: [
@@ -71,17 +71,17 @@ _test() {
       progression,
       keepAmount: KeepHarmonicFunctionAmount.low);
   print('subs (low): ${subs.length}');
-  assert(subs.length >= 452);
+  assert(subs.length >= 1128);
 
   subs = SubstitutionHandler.getRatedSubstitutions(progression,
       keepAmount: KeepHarmonicFunctionAmount.med);
   print('subs (medium): ${subs.length}');
-  assert(subs.length >= 452);
+  assert(subs.length >= 1128);
 
   subs = SubstitutionHandler.getRatedSubstitutions(progression,
       keepAmount: KeepHarmonicFunctionAmount.high);
   print('subs (high): ${subs.length}');
-  assert(subs.length >= 19);
+  assert(subs.length >= 32);
 }
 
 _testCut() {

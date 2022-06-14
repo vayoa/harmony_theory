@@ -1,6 +1,6 @@
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/weights/weight.dart';
-import 'package:thoery_test/state/progression_bank.dart';
+import '../../state/progression_bank.dart';
+import '../scale_degree_progression.dart';
+import 'weight.dart';
 
 class UserSavedWeight extends Weight {
   const UserSavedWeight()
@@ -17,10 +17,10 @@ class UserSavedWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
-    String? substitutionEntryTitle,
+    EntryLocation? location,
   }) {
-    final bool builtIn = substitutionEntryTitle == null ||
-        ProgressionBank.bank[substitutionEntryTitle]!.builtIn;
+    final bool builtIn =
+        location != null && ProgressionBank.isBuiltIn(location);
     return Score(
       score: builtIn ? 0.0 : 1.0,
       details: builtIn

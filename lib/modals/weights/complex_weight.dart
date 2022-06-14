@@ -1,5 +1,6 @@
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/weights/weight.dart';
+import '../../state/progression_bank.dart';
+import '../scale_degree_progression.dart';
+import 'weight.dart';
 
 class ComplexWeight extends Weight {
   const ComplexWeight()
@@ -14,10 +15,11 @@ class ComplexWeight extends Weight {
   static const double maxRatio = 2.0;
 
   @override
-  Score score(
-      {required ScaleDegreeProgression progression,
-      required ScaleDegreeProgression base,
-      String? substitutionEntryTitle}) {
+  Score score({
+    required ScaleDegreeProgression progression,
+    required ScaleDegreeProgression base,
+    EntryLocation? location,
+  }) {
     int pc = _countChords(progression), bc = _countChords(base);
     final int max = (bc * maxRatio).round();
     return Score(

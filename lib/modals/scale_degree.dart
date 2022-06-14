@@ -1,7 +1,8 @@
-import 'package:thoery_test/extensions/scale_pattern_extension.dart';
-import 'package:thoery_test/modals/identifiable.dart';
-import 'package:thoery_test/modals/pitch_scale.dart';
 import 'package:tonic/tonic.dart';
+
+import '../extensions/scale_pattern_extension.dart';
+import 'identifiable.dart';
+import 'pitch_scale.dart';
 
 class ScaleDegree implements Identifiable {
   static const List<String> degrees = [

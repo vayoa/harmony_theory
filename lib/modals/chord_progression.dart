@@ -1,9 +1,10 @@
-import 'package:thoery_test/extensions/chord_extension.dart';
-import 'package:thoery_test/modals/pitch_scale.dart';
-import 'package:thoery_test/modals/progression.dart';
-import 'package:thoery_test/modals/time_signature.dart';
-import 'package:thoery_test/state/krumhansl_schmuckler_scale_detection.dart';
 import 'package:tonic/tonic.dart';
+
+import '../extensions/chord_extension.dart';
+import '../state/krumhansl_schmuckler_scale_detection.dart';
+import 'pitch_scale.dart';
+import 'progression.dart';
+import 'time_signature.dart';
 
 class ChordProgression extends Progression<Chord> {
   ChordProgression(

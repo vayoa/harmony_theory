@@ -1,6 +1,7 @@
-import 'package:thoery_test/extensions/pitch_extension.dart';
-import 'package:thoery_test/extensions/scale_pattern_extension.dart';
 import 'package:tonic/tonic.dart';
+
+import '../extensions/pitch_extension.dart';
+import '../extensions/scale_pattern_extension.dart';
 
 /// The same as [Scale], but has a [Pitch] as its tonic instead of a
 /// [PitchClass]. To allow notes that represent the same pitch (but with a

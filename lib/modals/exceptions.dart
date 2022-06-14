@@ -1,4 +1,4 @@
-import 'package:thoery_test/modals/time_signature.dart';
+import 'time_signature.dart';
 
 class NonPositiveDuration<T> implements Exception {
   final T? value;

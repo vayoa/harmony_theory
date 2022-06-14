@@ -1,4 +1,4 @@
-import 'package:thoery_test/modals/identifiable.dart';
+import 'identifiable.dart';
 
 class AbsoluteDurations implements Identifiable {
   late final List<double> _real;

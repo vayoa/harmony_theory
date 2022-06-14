@@ -1,8 +1,8 @@
-import 'package:thoery_test/modals/scale_degree_chord.dart';
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/weights/weight.dart';
-
+import '../../state/progression_bank.dart';
 import '../scale_degree.dart';
+import '../scale_degree_chord.dart';
+import '../scale_degree_progression.dart';
+import 'weight.dart';
 
 class ImportantChordsWeight extends Weight {
   const ImportantChordsWeight()
@@ -32,7 +32,7 @@ class ImportantChordsWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
-    String? substitutionEntryTitle,
+    EntryLocation? location,
   }) {
     int points = 0, max = 0;
     String details = '';

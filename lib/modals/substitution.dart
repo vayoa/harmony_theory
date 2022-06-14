@@ -1,12 +1,13 @@
-import 'package:thoery_test/modals/pitch_scale.dart';
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/substitution_match.dart';
-import 'package:thoery_test/modals/weights/keep_harmonic_function_weight.dart';
-import 'package:thoery_test/modals/weights/weight.dart';
-import 'package:thoery_test/state/substitution_handler.dart';
+import '../state/progression_bank.dart';
+import '../state/substitution_handler.dart';
+import 'pitch_scale.dart';
+import 'scale_degree_progression.dart';
+import 'substitution_match.dart';
+import 'weights/keep_harmonic_function_weight.dart';
+import 'weights/weight.dart';
 
 class Substitution {
-  final String? title;
+  final EntryLocation? location;
   final ScaleDegreeProgression substitutedBase;
   final ScaleDegreeProgression originalSubstitution;
   final ScaleDegreeProgression base;
@@ -18,7 +19,7 @@ class Substitution {
   double get rating => score.score;
 
   Substitution({
-    required this.title,
+    required this.location,
     required this.substitutedBase,
     required this.originalSubstitution,
     required this.base,
@@ -29,7 +30,7 @@ class Substitution {
   }) : score = score ?? SubstitutionScore.empty();
 
   Substitution copyWith({
-    String? title,
+    EntryLocation? location,
     ScaleDegreeProgression? substitutedBase,
     ScaleDegreeProgression? originalSubstitution,
     ScaleDegreeProgression? base,
@@ -39,7 +40,7 @@ class Substitution {
     SubstitutionMatch? match,
   }) =>
       Substitution(
-        title: title ?? this.title,
+        location: location ?? this.location,
         substitutedBase: substitutedBase ?? this.substitutedBase,
         originalSubstitution: originalSubstitution ?? this.originalSubstitution,
         base: base ?? this.base,
@@ -109,7 +110,7 @@ class Substitution {
 
   @override
   String toString({PitchScale? scale, bool detailed = false}) {
-    return '-- "$title" $originalSubstitution --\n'
+    return '-- "$location" $originalSubstitution --\n'
             '$substitutedBase' +
         (scale == null ? ': ' : ' ->\n${substitutedBase.inScale(scale)}:') +
         ' ${rating.toStringAsFixed(3)}\n' +

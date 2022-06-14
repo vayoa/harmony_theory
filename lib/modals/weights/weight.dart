@@ -1,6 +1,6 @@
-import 'package:thoery_test/modals/progression.dart';
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-
+import '../../state/progression_bank.dart';
+import '../progression.dart';
+import '../scale_degree_progression.dart';
 import '../substitution.dart';
 
 /// A particular [ScoreGiver] that scores a [Progression] within a range of
@@ -38,10 +38,11 @@ abstract class Weight {
     }
   }
 
-  Score score(
-      {required ScaleDegreeProgression progression,
-      required ScaleDegreeProgression base,
-      String? substitutionEntryTitle});
+  Score score({
+    required ScaleDegreeProgression progression,
+    required ScaleDegreeProgression base,
+    EntryLocation? location,
+  });
 
   /// Returns the [progression]'s score after scaling it based on [importance].
   Score scaledScore(
@@ -49,7 +50,7 @@ abstract class Weight {
       score(
         progression: substitution.substitutedBase,
         base: base ?? substitution.base,
-        substitutionEntryTitle: substitution.title,
+        location: substitution.location,
       ).scale(importance);
 }
 

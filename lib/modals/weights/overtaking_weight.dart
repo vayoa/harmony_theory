@@ -1,6 +1,7 @@
-import 'package:thoery_test/modals/scale_degree_chord.dart';
-import 'package:thoery_test/modals/scale_degree_progression.dart';
-import 'package:thoery_test/modals/weights/weight.dart';
+import '../../state/progression_bank.dart';
+import '../scale_degree_chord.dart';
+import '../scale_degree_progression.dart';
+import 'weight.dart';
 
 class OvertakingWeight extends Weight {
   const OvertakingWeight()
@@ -22,7 +23,7 @@ class OvertakingWeight extends Weight {
   Score score({
     required ScaleDegreeProgression progression,
     required ScaleDegreeProgression base,
-    String? substitutionEntryTitle,
+    EntryLocation? location,
   }) {
     if (progression.duration < progression.timeSignature.decimal) {
       return Score(

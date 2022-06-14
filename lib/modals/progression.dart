@@ -1,10 +1,10 @@
-import 'package:thoery_test/extensions/chord_extension.dart';
-import 'package:thoery_test/modals/identifiable.dart';
-import 'package:thoery_test/modals/time_signature.dart';
 import 'package:tonic/tonic.dart';
 
+import '../extensions/chord_extension.dart';
 import 'absolute_durations.dart';
 import 'exceptions.dart';
+import 'identifiable.dart';
+import 'time_signature.dart';
 
 /// Describes a progression of any sort - a set of values, each with a duration.
 ///

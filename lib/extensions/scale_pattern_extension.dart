@@ -1,5 +1,6 @@
-import 'package:thoery_test/extensions/interval_extension.dart';
 import 'package:tonic/tonic.dart';
+
+import 'interval_extension.dart';
 
 extension ScalePatternExtension on ScalePattern {
   static final ScalePattern majorKey =
