@@ -1,8 +1,8 @@
 import 'package:tonic/tonic.dart';
 
-import '../extensions/chord_extension.dart';
-import '../state/krumhansl_schmuckler_scale_detection.dart';
-import 'pitch_scale.dart';
+import '../../extensions/chord_extension.dart';
+import '../../state/krumhansl_schmuckler_scale_detection.dart';
+import '../theory_base/pitch_scale.dart';
 import 'progression.dart';
 import 'time_signature.dart';
 

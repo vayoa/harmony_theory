@@ -1,7 +1,7 @@
 import '../../state/progression_bank.dart';
-import '../scale_degree.dart';
-import '../scale_degree_chord.dart';
-import '../scale_degree_progression.dart';
+import '../theory_base/scale_degree/scale_degree.dart';
+import '../theory_base/scale_degree/scale_degree_chord.dart';
+import '../progression/scale_degree_progression.dart';
 import 'weight.dart';
 
 class ImportantChordsWeight extends Weight {
@@ -188,7 +188,7 @@ class ImportantChordsWeight extends Weight {
 
   bool _isTonic(ScaleDegreeChord? chord) =>
       chord != null &&
-      (chord.rootDegree == ScaleDegree.tonic ||
-          chord.rootDegree == ScaleDegree.vi) &&
+      (chord.root == ScaleDegree.tonic ||
+          chord.root == ScaleDegree.vi) &&
       chord.canBeTonic;
 }

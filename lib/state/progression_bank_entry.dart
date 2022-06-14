@@ -1,4 +1,4 @@
-import '../modals/scale_degree_progression.dart';
+import '../modals/progression/scale_degree_progression.dart';
 
 class ProgressionBankEntry {
   final ScaleDegreeProgression progression;

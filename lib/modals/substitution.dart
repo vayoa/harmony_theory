@@ -1,7 +1,7 @@
 import '../state/progression_bank.dart';
 import '../state/substitution_handler.dart';
-import 'pitch_scale.dart';
-import 'scale_degree_progression.dart';
+import 'theory_base/pitch_scale.dart';
+import 'progression/scale_degree_progression.dart';
 import 'substitution_match.dart';
 import 'weights/keep_harmonic_function_weight.dart';
 import 'weights/weight.dart';

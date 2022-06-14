@@ -1,5 +1,5 @@
 import '../../state/progression_bank.dart';
-import '../scale_degree_progression.dart';
+import '../progression/scale_degree_progression.dart';
 import 'weight.dart';
 
 class RhythmAndPlacementWeight extends Weight {

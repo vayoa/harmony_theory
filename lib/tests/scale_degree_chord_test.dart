@@ -2,8 +2,8 @@ import 'package:tonic/tonic.dart';
 
 import '../extensions/chord_extension.dart';
 import '../extensions/scale_pattern_extension.dart';
-import '../modals/pitch_scale.dart';
-import '../modals/scale_degree_chord.dart';
+import '../modals/theory_base/pitch_scale.dart';
+import '../modals/theory_base/scale_degree/scale_degree_chord.dart';
 
 // ignore_for_file: avoid_print
 

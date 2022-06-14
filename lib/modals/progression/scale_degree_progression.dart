@@ -1,16 +1,16 @@
 import 'package:tonic/tonic.dart';
 
-import '../state/progression_bank.dart';
+import '../../state/progression_bank.dart';
 import 'absolute_durations.dart';
 import 'chord_progression.dart';
 import 'exceptions.dart';
-import 'pitch_scale.dart';
+import '../theory_base/pitch_scale.dart';
 import 'progression.dart';
-import 'scale_degree_chord.dart';
-import 'substitution.dart';
-import 'substitution_match.dart';
+import '../theory_base/scale_degree/scale_degree_chord.dart';
+import '../substitution.dart';
+import '../substitution_match.dart';
 import 'time_signature.dart';
-import 'tonicized_scale_degree_chord.dart';
+import '../theory_base/scale_degree/tonicized_scale_degree_chord.dart';
 
 /// A class representing a harmonic progression, built by [ScaleDegreeChord].
 /// The mode of the progression will always be Ionian (Major).

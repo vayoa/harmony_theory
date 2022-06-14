@@ -1,4 +1,4 @@
-import 'identifiable.dart';
+import '../identifiable.dart';
 
 class AbsoluteDurations implements Identifiable {
   late final List<double> _real;

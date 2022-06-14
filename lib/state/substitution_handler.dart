@@ -1,5 +1,5 @@
-import '../modals/scale_degree_chord.dart';
-import '../modals/scale_degree_progression.dart';
+import '../modals/theory_base/scale_degree/scale_degree_chord.dart';
+import '../modals/progression/scale_degree_progression.dart';
 import '../modals/substitution.dart';
 import '../modals/weights/climactic_ending_weight.dart';
 import '../modals/weights/complex_weight.dart';

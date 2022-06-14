@@ -1,5 +1,5 @@
-import 'scale_degree_chord.dart';
-import 'scale_degree_progression.dart';
+import 'theory_base/scale_degree/scale_degree_chord.dart';
+import 'progression/scale_degree_progression.dart';
 
 class SubstitutionMatch {
   final int baseIndex;

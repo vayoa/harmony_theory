@@ -20,6 +20,9 @@ extension ChordPatternExtension on ChordPattern {
   bool get hasMinor3rd =>
       intervals.length >= 2 && intervals[1].equals(Interval.m3);
 
+  ChordPattern copy() => ChordPattern(
+      name: name, fullName: fullName, abbrs: abbrs, intervals: intervals);
+
   static ChordPattern fromFullName(String fullName) =>
       chordPatternSpecs[fullName]!;
 

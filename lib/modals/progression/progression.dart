@@ -1,9 +1,9 @@
 import 'package:tonic/tonic.dart';
 
-import '../extensions/chord_extension.dart';
+import '../../extensions/chord_extension.dart';
 import 'absolute_durations.dart';
 import 'exceptions.dart';
-import 'identifiable.dart';
+import '../identifiable.dart';
 import 'time_signature.dart';
 
 /// Describes a progression of any sort - a set of values, each with a duration.

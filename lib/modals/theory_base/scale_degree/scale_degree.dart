@@ -1,8 +1,8 @@
 import 'package:tonic/tonic.dart';
 
-import '../extensions/scale_pattern_extension.dart';
-import 'identifiable.dart';
-import 'pitch_scale.dart';
+import '../../../extensions/scale_pattern_extension.dart';
+import '../../identifiable.dart';
+import '../pitch_scale.dart';
 
 class ScaleDegree implements Identifiable {
   static const List<String> degrees = [

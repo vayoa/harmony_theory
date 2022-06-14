@@ -11,7 +11,7 @@ class TonicizedScaleDegreeChord extends ScaleDegreeChord {
       required this.tonicizedToTonic,
       required ScaleDegreeChord tonicizedToMajorScale})
       : super.raw(
-            tonicizedToMajorScale.pattern, tonicizedToMajorScale.rootDegree);
+            tonicizedToMajorScale.pattern, tonicizedToMajorScale.root);
 
   TonicizedScaleDegreeChord(
       {required ScaleDegreeChord tonic,
@@ -36,5 +36,5 @@ class TonicizedScaleDegreeChord extends ScaleDegreeChord {
       };
 
   @override
-  String toString() => '$tonicizedToTonic/${tonic.rootDegreeString}';
+  String toString() => '$tonicizedToTonic/${tonic.rootString}';
 }

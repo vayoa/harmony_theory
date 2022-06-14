@@ -2,9 +2,9 @@ import 'package:tonic/tonic.dart';
 
 import '../../extensions/interval_extension.dart';
 import '../../state/progression_bank.dart';
-import '../scale_degree_chord.dart';
-import '../scale_degree_progression.dart';
-import '../tonicized_scale_degree_chord.dart';
+import '../theory_base/scale_degree/scale_degree_chord.dart';
+import '../progression/scale_degree_progression.dart';
+import '../theory_base/scale_degree/tonicized_scale_degree_chord.dart';
 import 'weight.dart';
 
 class HarmonicFunctionWeight extends Weight {
@@ -28,7 +28,7 @@ class HarmonicFunctionWeight extends Weight {
       ScaleDegreeChord chord, ScaleDegreeChord other) {
     if (chord is TonicizedScaleDegreeChord &&
         other is TonicizedScaleDegreeChord) {
-      if (chord.tonic.rootDegree == other.tonic.rootDegree) {
+      if (chord.tonic.root == other.tonic.root) {
         return chord.tonicizedToTonic;
       } else {
         return chord;
@@ -72,12 +72,10 @@ class HarmonicFunctionWeight extends Weight {
               ' ${sorted[next]} points for'
                   ' ${progression[currPos]!} -> ${progression[nextPos]!} (now $score)\n';
         } else {
-          Interval upFromCurrent = progression[nextPos]!
-              .rootDegree
-              .from(progression[currPos]!.rootDegree);
-          Interval downFromCurrent = progression[currPos]!
-              .rootDegree
-              .from(progression[nextPos]!.rootDegree);
+          Interval upFromCurrent =
+              progression[nextPos]!.root.from(progression[currPos]!.root);
+          Interval downFromCurrent =
+              progression[currPos]!.root.from(progression[nextPos]!.root);
           if (upFromCurrent.equals(Interval.P4)) {
             score += 2;
             details += 'Adding 2 points for'

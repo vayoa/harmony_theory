@@ -1,7 +1,7 @@
 import '../modals/identifiable.dart';
-import '../modals/progression.dart';
-import '../modals/scale_degree_chord.dart';
-import '../modals/scale_degree_progression.dart';
+import '../modals/progression/progression.dart';
+import '../modals/theory_base/scale_degree/scale_degree_chord.dart';
+import '../modals/progression/scale_degree_progression.dart';
 import 'progression_bank_entry.dart';
 
 abstract class ProgressionBank {

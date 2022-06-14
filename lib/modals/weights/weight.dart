@@ -1,6 +1,6 @@
 import '../../state/progression_bank.dart';
-import '../progression.dart';
-import '../scale_degree_progression.dart';
+import '../progression/progression.dart';
+import '../progression/scale_degree_progression.dart';
 import '../substitution.dart';
 
 /// A particular [ScoreGiver] that scores a [Progression] within a range of
