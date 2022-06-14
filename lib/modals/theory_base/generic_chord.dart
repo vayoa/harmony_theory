@@ -1,13 +1,10 @@
-import 'dart:convert';
-
 import 'package:tonic/tonic.dart';
 
 import '../../extensions/chord_extension.dart';
-import '../identifiable.dart';
 import 'scale_degree/scale_degree.dart';
 import 'scale_degree/scale_degree_chord.dart';
 
-abstract class GenericChord<T extends Identifiable> implements Identifiable {
+abstract class GenericChord<T> {
   late final ChordPattern _pattern;
 
   late final T _root;
@@ -83,7 +80,4 @@ abstract class GenericChord<T extends Identifiable> implements Identifiable {
   @override
   int get hashCode => Object.hash(_pattern.fullName, _root);
 
-  @override
-  int get id => Identifiable.hash2(
-      Identifiable.hashAllInts(utf8.encode(_pattern.fullName)), _root.id);
 }
