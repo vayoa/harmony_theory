@@ -1,16 +1,15 @@
-import 'package:tonic/tonic.dart';
-
 import '../../state/progression_bank.dart';
+import '../pitch_chord.dart';
+import '../substitution.dart';
+import '../substitution_match.dart';
+import '../theory_base/pitch_scale.dart';
+import '../theory_base/scale_degree/scale_degree_chord.dart';
+import '../theory_base/scale_degree/tonicized_scale_degree_chord.dart';
 import 'absolute_durations.dart';
 import 'chord_progression.dart';
 import 'exceptions.dart';
-import '../theory_base/pitch_scale.dart';
 import 'progression.dart';
-import '../theory_base/scale_degree/scale_degree_chord.dart';
-import '../substitution.dart';
-import '../substitution_match.dart';
 import 'time_signature.dart';
-import '../theory_base/scale_degree/tonicized_scale_degree_chord.dart';
 
 /// A class representing a harmonic progression, built by [ScaleDegreeChord].
 /// The mode of the progression will always be Ionian (Major).
@@ -52,11 +51,11 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
                     base.length, (index) => 1 / timeSignature.denominator),
             timeSignature: timeSignature);
 
-  ScaleDegreeProgression.fromChords(PitchScale scale, Progression<Chord> chords)
+  ScaleDegreeProgression.fromChords(PitchScale scale, Progression<PitchChord> chords)
       : this.fromProgression(
           Progression<ScaleDegreeChord>.raw(
             values: chords.values
-                .map((Chord? chord) =>
+                .map((PitchChord? chord) =>
                     chord == null ? null : ScaleDegreeChord(scale, chord))
                 .toList(),
             durations: chords.durations,

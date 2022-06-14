@@ -2,6 +2,7 @@
 
 import 'package:tonic/tonic.dart';
 
+import 'modals/pitch_chord.dart';
 import 'modals/progression/chord_progression.dart';
 import 'modals/theory_base/pitch_scale.dart';
 import 'modals/progression/scale_degree_progression.dart';
@@ -20,24 +21,24 @@ _test() {
   // Chords for "יונתן הקטן".
   ChordProgression base = ChordProgression(
     chords: [
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('Dm'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
+      PitchChord.parse('Dm'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
     ],
     durations: [
       1 / 4 * 2,

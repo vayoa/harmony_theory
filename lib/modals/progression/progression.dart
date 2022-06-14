@@ -378,8 +378,7 @@ class Progression<T> implements Identifiable {
         String durationFormatted =
             detailed ? durationFormat(_durations[i]) : '';
         final val = _values[i];
-        final String valueFormatted =
-            val is Chord ? val.commonName : valueFormat(_values[i]);
+        final String valueFormatted = valueFormat(_values[i]);
         final String formatted = valueFormatted +
             (durationFormatted.isEmpty ? '' : '($durationFormatted)');
         double curDuration = _durations[i];
@@ -502,6 +501,6 @@ class Progression<T> implements Identifiable {
     }
   }
 
-  static bool adjacentValuesEqual<T>(T val, T next) =>
-      val is Chord ? val.equals(next) : val == next;
+  // TODO: Remove this. We needed it before we wrote PitchChord...
+  static bool adjacentValuesEqual<T>(T val, T next) => val == next;
 }

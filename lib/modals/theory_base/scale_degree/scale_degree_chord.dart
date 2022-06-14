@@ -6,6 +6,7 @@ import 'package:tonic/tonic.dart';
 import '../../../extensions/chord_extension.dart';
 import '../../../extensions/interval_extension.dart';
 import '../../identifiable.dart';
+import '../../pitch_chord.dart';
 import '../pitch_scale.dart';
 import 'scale_degree.dart';
 import 'tonicized_scale_degree_chord.dart';
@@ -27,7 +28,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
   ScaleDegreeChord.raw(ChordPattern pattern, ScaleDegree rootDegree)
       : super(pattern, rootDegree);
 
-  factory ScaleDegreeChord(PitchScale scale, Chord chord) {
+  factory ScaleDegreeChord(PitchScale scale, PitchChord chord) {
     ChordPattern pattern = chord.pattern;
     Pitch cRoot = chord.root, tRoot = scale.majorTonic;
     int semitones = (cRoot.semitones - tRoot.semitones) % 12;
@@ -180,8 +181,8 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     return root.toString();
   }
 
-  Chord inScale(PitchScale scale) =>
-      Chord(pattern: pattern, root: root.inScale(scale));
+  PitchChord inScale(PitchScale scale) =>
+      PitchChord(pattern: pattern, root: root.inScale(scale));
 
   @override
   bool operator ==(Object other) =>

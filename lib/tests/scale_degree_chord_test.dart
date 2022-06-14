@@ -1,7 +1,7 @@
 import 'package:tonic/tonic.dart';
 
-import '../extensions/chord_extension.dart';
 import '../extensions/scale_pattern_extension.dart';
+import '../modals/pitch_chord.dart';
 import '../modals/theory_base/pitch_scale.dart';
 import '../modals/theory_base/scale_degree/scale_degree_chord.dart';
 
@@ -22,7 +22,7 @@ abstract class ScaleDegreeChordTest {
           Pitch converted = _possiblePitches[j];
           String name = '${converted.letterName}${converted.accidentalsString}';
           try {
-            chords.add(ScaleDegreeChord(scale, Chord.parse(name)));
+            chords.add(ScaleDegreeChord(scale, PitchChord.parse(name)));
             inScale.add('$name: ${chords.last}');
           } catch (e) {
             print('$converted in $scale failed:');
@@ -47,7 +47,7 @@ abstract class ScaleDegreeChordTest {
         in reverse.entries) {
       List<String> chords = entry.value
           .map((ScaleDegreeChord sdc) =>
-              '$sdc: ${sdc.inScale(entry.key).commonName}')
+              '$sdc: ${sdc.inScale(entry.key).toString()}')
           .toList();
       print('${entry.key}: $chords');
     }
