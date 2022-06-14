@@ -1,4 +1,4 @@
-# thoery_test
+# harmony_theory
 
 A new Flutter project.
 
