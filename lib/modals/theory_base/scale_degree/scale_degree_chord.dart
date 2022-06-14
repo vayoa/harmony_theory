@@ -10,7 +10,8 @@ import '../pitch_scale.dart';
 import 'scale_degree.dart';
 import 'tonicized_scale_degree_chord.dart';
 
-class ScaleDegreeChord extends GenericChord<ScaleDegree> {
+class ScaleDegreeChord extends GenericChord<ScaleDegree>
+    implements Identifiable {
   static final RegExp chordNamePattern = RegExp(
       r"^([#b♯♭𝄪𝄫]*(?:III|II|IV|I|VII|VI|V))(.*)$",
       caseSensitive: false);

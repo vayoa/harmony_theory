@@ -1,9 +1,6 @@
-import 'package:harmony_theory/modals/identifiable.dart';
-
 import 'scale_degree_chord.dart';
 
-class TonicizedScaleDegreeChord extends ScaleDegreeChord
-    implements Identifiable {
+class TonicizedScaleDegreeChord extends ScaleDegreeChord {
   // This can't be just a degree because a tonicized scale degree chord where
   // tonicizedToTonic is I can be minor/major....
   final ScaleDegreeChord tonic;
@@ -13,14 +10,15 @@ class TonicizedScaleDegreeChord extends ScaleDegreeChord
       {required this.tonic,
       required this.tonicizedToTonic,
       required ScaleDegreeChord tonicizedToMajorScale})
-      : super.raw(tonicizedToMajorScale.pattern, tonicizedToMajorScale.root);
+      : super.raw(
+            tonicizedToMajorScale.pattern, tonicizedToMajorScale.root);
 
   TonicizedScaleDegreeChord(
       {required ScaleDegreeChord tonic,
       required ScaleDegreeChord tonicizedToTonic,
       ScaleDegreeChord? tonicizedToMajorScale})
       : this.raw(
-            tonic: tonic,
+      tonic: tonic,
             tonicizedToTonic: tonicizedToTonic,
             tonicizedToMajorScale:
                 tonicizedToMajorScale ?? tonicizedToTonic.tonicizedFor(tonic));
