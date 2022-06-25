@@ -132,7 +132,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
       : super(
           ChordPatternExtension.fromFullName(json['p']),
           ScaleDegree.fromJson(json['rd']),
-          bass: json['b'],
+          bass: json['b'] == null ? null : ScaleDegree.fromJson(json['b']),
         );
 
   Map<String, dynamic> toJson() => {
