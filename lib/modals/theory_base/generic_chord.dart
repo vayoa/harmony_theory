@@ -9,16 +9,24 @@ abstract class GenericChord<T> {
 
   late final T _root;
 
+  late final T? _bass;
+
   /*
   TODO: Implement inversions. i.e. V4/2. Maybe take a look at this:
         https://music.stackexchange.com/questions/73537/using-roman-numeral-notation-with-notes-in-the-bass-not-figured-bass
   */
 
-  GenericChord(this._pattern, this._root);
+  GenericChord(this._pattern, T root, {T? bass})
+      : _root = root,
+        _bass = bass == root ? null : bass;
 
   ChordPattern get pattern => _pattern;
 
   T get root => _root;
+
+  T get bass => _bass ?? _root;
+
+  bool get hasDifferentBass => _bass != null;
 
   /// Returns a list of [ScaleDegree] that represents the degrees that make up
   /// the [ScaleDegreeChord] in the major scale.
@@ -67,10 +75,11 @@ abstract class GenericChord<T> {
     return _patternStr;
   }
 
+  String get bassString => '/$bass';
+
   @override
-  String toString() {
-    return rootString + patternString;
-  }
+  String toString() =>
+      rootString + patternString + (bass == null ? '' : bassString);
 
   @override
   bool operator ==(Object other) =>
@@ -79,5 +88,4 @@ abstract class GenericChord<T> {
 
   @override
   int get hashCode => Object.hash(_pattern.fullName, _root);
-
 }

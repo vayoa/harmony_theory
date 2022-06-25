@@ -8,11 +8,16 @@ import 'theory_base/scale_degree/scale_degree_chord.dart';
 /// Our implementation of a regular chord (built of [Pitch]...), with possible
 /// inversions.
 class PitchChord extends GenericChord<Pitch> {
-  static final Pattern chordNamePattern =
-      RegExp(r"^([a-gA-G],*'*[#b♯♭𝄪𝄫]*)\s*(.*)$");
+  // TODO: Improve this regex...
+  static final Pattern chordNamePattern = RegExp(
+      r"^([a-gA-G],*'*[#b♯♭𝄪𝄫]*)\s*([^\/]*)(\/[a-gA-G],*'*[#b♯♭𝄪𝄫]*)?$");
 
-  PitchChord({required ChordPattern pattern, required Pitch root})
-      : super(pattern, root);
+  PitchChord({
+    required ChordPattern pattern,
+    required Pitch root,
+    Pitch? bass,
+    Interval? bassToRoot,
+  }) : super(pattern, root, bass: bass);
 
   factory PitchChord.parse(String name) {
     name = name.replaceAll('b', '♭').replaceAll('#', '♯');
@@ -20,6 +25,7 @@ class PitchChord extends GenericChord<Pitch> {
     if (match == null) throw FormatException("invalid Chord name: $name");
     String pitch = match[1]!;
     String pattern = match[2]!;
+    String? bass = match[3]?.substring(1);
     switch (pattern) {
       case 'm7':
         pattern = 'min7';
@@ -28,9 +34,14 @@ class PitchChord extends GenericChord<Pitch> {
         pattern = 'dom7';
         break;
     }
+    final Pitch rootPitch = Pitch.parse(pitch);
+    Pitch? bassPitch = bass != null ? Pitch.parse(bass) : null;
     return PitchChord(
       pattern: ChordPattern.parse(pattern),
-      root: Pitch.parse(pitch),
+      root: rootPitch,
+      bass: bassPitch,
+      // TDC: Doesn't always work (Interval.fromSemitones errors)...
+      bassToRoot: bassPitch == null ? null : rootPitch - bassPitch,
     );
   }
 
@@ -51,6 +62,9 @@ class PitchChord extends GenericChord<Pitch> {
 
   @override
   String get patternString => pattern.abbr == 'min7' ? 'm7' : pattern.abbr;
+
+  @override
+  String get bassString => '/' + bass.commonName;
 
   @override
   bool operator ==(Object other) {

@@ -45,6 +45,18 @@ class ScaleDegree implements Identifiable {
             intervalNumber: interval.number,
             intervalSemitones: interval.semitones);
 
+  factory ScaleDegree.fromPitch(PitchScale scale, Pitch pitch) {
+    Pitch tRoot = scale.majorTonic;
+    int semitones = (pitch.semitones - tRoot.semitones) % 12;
+    int number = 1 + pitch.letterIndex - tRoot.letterIndex;
+    if (number <= 0) number += 7;
+    return ScaleDegree.rawInterval(
+      scalePattern: scale.pattern,
+      intervalNumber: number,
+      intervalSemitones: semitones,
+    );
+  }
+
   /// A separate function from the default constructor to avoid
   /// [Interval.fromSemitones] construction errors we don't care about.
   /// Will always assume it gets the parameters for a degree in a major scale.

@@ -1,20 +1,22 @@
 import 'dart:convert';
 
-import 'package:harmony_theory/modals/theory_base/generic_chord.dart';
 import 'package:tonic/tonic.dart';
 
 import '../../../extensions/chord_extension.dart';
 import '../../../extensions/interval_extension.dart';
 import '../../identifiable.dart';
 import '../../pitch_chord.dart';
+import '../generic_chord.dart';
 import '../pitch_scale.dart';
 import 'scale_degree.dart';
 import 'tonicized_scale_degree_chord.dart';
 
 class ScaleDegreeChord extends GenericChord<ScaleDegree>
     implements Identifiable {
+  static const int maxInversionNumbers = 2;
+
   static final RegExp chordNamePattern = RegExp(
-      r"^([#b♯♭𝄪𝄫]*(?:III|II|IV|I|VII|VI|V))(.*)$",
+      r"^([#b♯♭𝄪𝄫]*(?:III|II|IV|I|VII|VI|V))([^\^]*)(?:\^([#b♯♭𝄪𝄫]*\d))?$",
       caseSensitive: false);
 
   static const List<String> _canBeTonicizedPatterns = [
@@ -25,35 +27,34 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     'Dominant 7th',
   ];
 
-  ScaleDegreeChord.raw(ChordPattern pattern, ScaleDegree rootDegree)
-      : super(pattern, rootDegree);
+  ScaleDegreeChord(PitchScale scale, PitchChord chord)
+      : this.raw(
+          chord.pattern,
+          ScaleDegree.fromPitch(scale, chord.root),
+          bass: !chord.hasDifferentBass
+              ? null
+              : ScaleDegree.fromPitch(scale, chord.bass),
+        );
 
-  factory ScaleDegreeChord(PitchScale scale, PitchChord chord) {
-    ChordPattern pattern = chord.pattern;
-    Pitch cRoot = chord.root, tRoot = scale.majorTonic;
-    int semitones = (cRoot.semitones - tRoot.semitones) % 12;
-    int number = 1 + cRoot.letterIndex - tRoot.letterIndex;
-    if (number <= 0) number += 7;
-    ScaleDegree rootDegree = ScaleDegree.rawInterval(
-        scalePattern: scale.pattern,
-        intervalNumber: number,
-        intervalSemitones: semitones);
-    return ScaleDegreeChord.raw(pattern, rootDegree);
-  }
+  ScaleDegreeChord.raw(ChordPattern pattern, ScaleDegree rootDegree,
+      {ScaleDegree? bass})
+      : super(pattern, rootDegree, bass: bass);
 
   ScaleDegreeChord.copy(ScaleDegreeChord chord)
       : super(
-            ChordPattern(
-                name: chord.pattern.name,
-                fullName: chord.pattern.fullName,
-                abbrs: chord.pattern.abbrs,
-                intervals: chord.pattern.intervals),
-            ScaleDegree.copy(chord.root));
+          ChordPattern(
+              name: chord.pattern.name,
+              fullName: chord.pattern.fullName,
+              abbrs: chord.pattern.abbrs,
+              intervals: chord.pattern.intervals),
+          ScaleDegree.copy(chord.root),
+          bass: ScaleDegree.copy(chord.bass),
+        );
 
-  factory ScaleDegreeChord.parse(String chord) {
-    List<String> split = chord.split(r'/');
+  factory ScaleDegreeChord.parse(String name) {
+    List<String> split = name.split(r'/');
     if (split.length == 1) {
-      return _parseInternal(chord);
+      return _parseInternal(name);
     } else {
       return _parseInternal(split[0]).tonicizedFor(_parseInternal(split[1]));
     }
@@ -77,16 +78,66 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
       _intervals[1] = Interval.m3;
       _cPattern = ChordPattern.fromIntervals(_intervals);
     }
-    return ScaleDegreeChord.raw(_cPattern, ScaleDegree.parse(match[1]!));
+    ScaleDegree rootDegree = ScaleDegree.parse(match[1]!);
+    String? bass = match[3];
+    return ScaleDegreeChord.raw(
+      _cPattern,
+      rootDegree,
+      bass: _parseBass(bass, rootDegree, _cPattern),
+    );
+  }
+
+  /// Returns [degree, accidentals].
+  static ScaleDegree? _parseBass(
+      String? name, ScaleDegree root, ChordPattern pattern) {
+    if (name == null || name.isEmpty) return null;
+    int degree, accidentals;
+    final int startIndex = name.indexOf(RegExp(r'\d', caseSensitive: false));
+    String degreeStr = name.substring(startIndex);
+    String offsetStr = name.substring(0, startIndex);
+    degree = int.parse(degreeStr) - 1;
+    if (degree < 0 || degree > 7) {
+      throw FormatException("invalid bass interval name: $name");
+    }
+    if (offsetStr.isNotEmpty) {
+      if (offsetStr.startsWith(RegExp(r'[#b♯♭𝄪𝄫]'))) {
+        accidentals = offsetStr[0].allMatches(offsetStr).length *
+            (offsetStr[0].contains(RegExp(r'[b♭𝄫]')) ? -1 : 1);
+      } else {
+        throw FormatException("invalid bass interval name: $name");
+      }
+    } else {
+      accidentals = 0;
+    }
+    if (degree == 0 && accidentals == 0) return null;
+    Interval regular;
+    // If the number is odd and there's such degree in the pattern use it from the pattern...
+    // degree is the number parsed - 1...
+    /* TODO: Make a harmonic analysis to choose which interval to use on the
+             7th when the chord doesn't have one - for instance a V should have
+             a min7 like other minor chords instead of a maj7 like other maj
+             chords etc... */
+    if (degree % 2 == 0 && degree ~/ 2 < pattern.intervals.length) {
+      regular = pattern.intervals[degree ~/ 2];
+    } else {
+      // else default it to major / perfect...
+      regular = Interval(number: degree + 1);
+    }
+    ScaleDegree bass = root.add(regular);
+    return ScaleDegree.raw(bass.degree, bass.accidentals + accidentals);
   }
 
   ScaleDegreeChord.fromJson(Map<String, dynamic> json)
-      : super(ChordPatternExtension.fromFullName(json['p']),
-            ScaleDegree.fromJson(json['rd']));
+      : super(
+          ChordPatternExtension.fromFullName(json['p']),
+          ScaleDegree.fromJson(json['rd']),
+          bass: json['b'],
+        );
 
   Map<String, dynamic> toJson() => {
         'rd': root.toJson(),
         'p': pattern.fullName,
+        if (hasDifferentBass) 'b': bass.toJson(),
       };
 
   @override
@@ -133,8 +184,11 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     return TonicizedScaleDegreeChord(
       tonic: tonic,
       tonicizedToTonic: ScaleDegreeChord.copy(this),
-      tonicizedToMajorScale:
-          ScaleDegreeChord.raw(pattern, root.tonicizedFor(tonic.root)),
+      tonicizedToMajorScale: ScaleDegreeChord.raw(
+        pattern,
+        root.tonicizedFor(tonic.root),
+        bass: bass.tonicizedFor(tonic.root),
+      ),
     );
   }
 
@@ -181,8 +235,55 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     return root.toString();
   }
 
-  PitchChord inScale(PitchScale scale) =>
-      PitchChord(pattern: pattern, root: root.inScale(scale));
+  List<int> get inversionNumbers {
+    Interval bassToRoot = bass.from(root);
+    int first = degrees[0].from(bass).number;
+    int third = degrees[1].from(bass).number;
+    switch (bassToRoot.number) {
+      case 3:
+        if (patternLength > 3) {
+          return [third, degrees.last.from(bass).number];
+        } else {
+          return [third];
+        }
+      case 5:
+        if (patternLength > 3) {
+          return [first, degrees.last.from(bass).number];
+        } else {
+          return [third, first];
+        }
+      case 7:
+        return [third, first];
+      default:
+        return [
+          for (int i = 0; i < patternLength; i++)
+            if (pattern.intervals[i] != bassToRoot) degrees[i].from(bass).number
+        ]..sort((a, b) => -1 * a.compareTo(b));
+    }
+  }
+
+  static const String _upperBass = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+  static const String _lowerBass = '₀₁₂₃₄₅₆₇₈₉';
+
+  @override
+  String get bassString {
+    List<int> nums = inversionNumbers;
+    switch (nums.length) {
+      case 1:
+      case 2:
+        String str = '', bass = _upperBass;
+        for (int i = 0; i < nums.length; i++) {
+          str += bass[nums[i]];
+          bass = _lowerBass;
+        }
+        return str;
+      default:
+        return '^(${nums.join('-')})';
+    }
+  }
+
+  PitchChord inScale(PitchScale scale) => PitchChord(
+      pattern: pattern, root: root.inScale(scale), bass: bass.inScale(scale));
 
   @override
   bool operator ==(Object other) =>
@@ -331,7 +432,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
   static final ScaleDegreeChord ii = ScaleDegreeChord.parse('ii');
   static final ScaleDegreeChord iii = ScaleDegreeChord.parse('iii');
 
-  // ignore: non_constant_identifier_names
+// ignore: non_constant_identifier_names
   static final ScaleDegreeChord IV = ScaleDegreeChord.parse('IV');
   static final ScaleDegreeChord V = ScaleDegreeChord.parse('V');
   static final ScaleDegreeChord vi = ScaleDegreeChord.parse('vi');

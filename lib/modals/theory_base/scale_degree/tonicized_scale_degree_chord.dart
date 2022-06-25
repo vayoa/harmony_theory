@@ -6,22 +6,26 @@ class TonicizedScaleDegreeChord extends ScaleDegreeChord {
   final ScaleDegreeChord tonic;
   final ScaleDegreeChord tonicizedToTonic;
 
-  TonicizedScaleDegreeChord.raw(
-      {required this.tonic,
-      required this.tonicizedToTonic,
-      required ScaleDegreeChord tonicizedToMajorScale})
-      : super.raw(
-            tonicizedToMajorScale.pattern, tonicizedToMajorScale.root);
+  TonicizedScaleDegreeChord.raw({
+    required this.tonic,
+    required this.tonicizedToTonic,
+    required ScaleDegreeChord tonicizedToMajorScale,
+  }) : super.raw(
+          tonicizedToMajorScale.pattern,
+          tonicizedToMajorScale.root,
+          bass: tonicizedToMajorScale.bass,
+        );
 
-  TonicizedScaleDegreeChord(
-      {required ScaleDegreeChord tonic,
-      required ScaleDegreeChord tonicizedToTonic,
-      ScaleDegreeChord? tonicizedToMajorScale})
-      : this.raw(
-      tonic: tonic,
-            tonicizedToTonic: tonicizedToTonic,
-            tonicizedToMajorScale:
-                tonicizedToMajorScale ?? tonicizedToTonic.tonicizedFor(tonic));
+  TonicizedScaleDegreeChord({
+    required ScaleDegreeChord tonic,
+    required ScaleDegreeChord tonicizedToTonic,
+    ScaleDegreeChord? tonicizedToMajorScale,
+  }) : this.raw(
+          tonic: tonic,
+          tonicizedToTonic: tonicizedToTonic,
+          tonicizedToMajorScale:
+              tonicizedToMajorScale ?? tonicizedToTonic.tonicizedFor(tonic),
+        );
 
   TonicizedScaleDegreeChord.fromJson(Map<String, dynamic> json)
       : tonic = ScaleDegreeChord.fromJson(json['tonic']),
