@@ -79,7 +79,7 @@ abstract class GenericChord<T> {
 
   @override
   String toString() =>
-      rootString + patternString + (bass == null ? '' : bassString);
+      rootString + patternString + (hasDifferentBass ? bassString : '');
 
   @override
   bool operator ==(Object other) =>
