@@ -64,7 +64,7 @@ class PitchChord extends GenericChord<Pitch> {
   String get patternString => pattern.abbr == 'min7' ? 'm7' : pattern.abbr;
 
   @override
-  String get bassString => '/' + bass.commonName;
+  String get bassString => hasDifferentBass ? ('/' + bass.commonName) : '';
 
   @override
   bool operator ==(Object other) {

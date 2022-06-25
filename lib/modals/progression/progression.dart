@@ -1,9 +1,6 @@
-import 'package:tonic/tonic.dart';
-
-import '../../extensions/chord_extension.dart';
+import '../identifiable.dart';
 import 'absolute_durations.dart';
 import 'exceptions.dart';
-import '../identifiable.dart';
 import 'time_signature.dart';
 
 /// Describes a progression of any sort - a set of values, each with a duration.
@@ -377,7 +374,6 @@ class Progression<T> implements Identifiable {
       for (var i = 0; i < length; i++) {
         String durationFormatted =
             detailed ? durationFormat(_durations[i]) : '';
-        final val = _values[i];
         final String valueFormatted = valueFormat(_values[i]);
         final String formatted = valueFormatted +
             (durationFormatted.isEmpty ? '' : '($durationFormatted)');

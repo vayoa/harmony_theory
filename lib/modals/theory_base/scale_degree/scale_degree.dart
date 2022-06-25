@@ -154,8 +154,18 @@ class ScaleDegree implements Identifiable {
     return ScaleDegree.raw(number, fromTonic.semitones - _semitones[number]);
   }
 
-  Interval from(ScaleDegree other) => Interval.fromSemitones(
-      (_semitonesFromTonicInMajor - other._semitonesFromTonicInMajor) % 12);
+  /* TDC: Some intervals can't be parsed (like a doubly-augmented 4th), we might
+          need to rewrite the Interval class to support them. */
+  Interval from(ScaleDegree other) {
+    var number = ((degree - other.degree) % 7) + 1;
+    var semitones =
+        (_semitonesFromTonicInMajor - other._semitonesFromTonicInMajor) % 12;
+    if (number == 1 && semitones == 11) number = 8;
+    return Interval.fromSemitones(
+      semitones,
+      number: number,
+    );
+  }
 
   int get _semitonesFromTonicInMajor {
     int semitones =

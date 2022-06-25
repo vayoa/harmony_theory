@@ -75,7 +75,7 @@ abstract class GenericChord<T> {
     return _patternStr;
   }
 
-  String get bassString => '/$bass';
+  String get bassString => hasDifferentBass ? '/$bass' : '';
 
   @override
   String toString() =>

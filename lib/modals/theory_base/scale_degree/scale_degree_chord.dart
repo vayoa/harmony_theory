@@ -111,7 +111,8 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     }
     if (degree == 0 && accidentals == 0) return null;
     Interval regular;
-    // If the number is odd and there's such degree in the pattern use it from the pattern...
+    // If the number is odd and there's such degree in the pattern use it from
+    // the pattern...
     // degree is the number parsed - 1...
     /* TODO: Make a harmonic analysis to choose which interval to use on the
              7th when the chord doesn't have one - for instance a V should have
@@ -242,9 +243,9 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     switch (bassToRoot.number) {
       case 3:
         if (patternLength > 3) {
-          return [third, degrees.last.from(bass).number];
+          return [first, degrees.last.from(bass).number];
         } else {
-          return [third];
+          return [first];
         }
       case 5:
         if (patternLength > 3) {
@@ -267,6 +268,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
 
   @override
   String get bassString {
+    if (!hasDifferentBass) return '';
     List<int> nums = inversionNumbers;
     switch (nums.length) {
       case 1:
@@ -280,6 +282,35 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
       default:
         return '^(${nums.join('-')})';
     }
+  }
+
+  /* TDC: For basses that don't create an inversion we need a clearer
+          and less confusing toString()... */
+  @override
+  String toString() =>
+      rootString + (hasDifferentBass ? bassString : patternString);
+
+  String get inputString =>
+      rootString + patternString + (hasDifferentBass ? _generateInputBass : '');
+
+  String get _generateInputBass {
+    Interval bassToRoot = bass.from(root);
+    int degree = bassToRoot.number, accidentals;
+    List<int> nums =
+        pattern.intervals.map((e) => e.number).toList(growable: false);
+    int index = nums.indexOf(degree);
+    Interval d;
+    if (index == -1) {
+      /* TODO: Make a harmonic analysis to choose which interval to use on the
+             7th when the chord doesn't have one - for instance a V should have
+             a min7 like other minor chords instead of a maj7 like other maj
+             chords etc... */
+      d = Interval(number: degree);
+    } else {
+      d = pattern.intervals[index];
+    }
+    accidentals = bassToRoot.semitones - d.semitones;
+    return '^${(accidentals < 0 ? 'b' : '#') * accidentals.abs()}$degree';
   }
 
   PitchChord inScale(PitchScale scale) => PitchChord(
