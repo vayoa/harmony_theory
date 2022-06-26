@@ -17,7 +17,7 @@ jobs:
           repo: harmony_dashboard
           github_token: ${{ secrets.WEB_DEPLOYMENT_ACCESS_TOKEN }}
           workflow_file_name: web.yml
-          ref: master
+          ref: feat/inversions
       - name: Deploy Web Dashboard
         run: |
           echo "Deploy Web Dashboard"
