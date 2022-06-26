@@ -4,7 +4,7 @@ import 'package:harmony_theory/modals/theory_base/scale_degree/scale_degree_chor
 
 import '../modals/pitch_chord.dart';
 
-class ParsingTest {
+abstract class ParsingTest {
   static ParsingTestResult test(String name) {
     bool pitch = name.startsWith(RegExp(r'[a-gA-G]'));
     GenericChord chord;
