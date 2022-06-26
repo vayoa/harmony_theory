@@ -27,6 +27,9 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     'Dominant 7th',
   ];
 
+  /* TODO: If the bass isn't an inversion and there's a problem with calculating an
+          interval, take the in-harmonic equivalent of the bass.
+          For instance a C/F## turns to C/G... */
   ScaleDegreeChord(PitchScale scale, PitchChord chord)
       : this.raw(
           chord.pattern,
@@ -235,11 +238,11 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     }
     return root.toString();
   }
-
+  
+  // TODO: If the bass is not an inversion return null...
   List<int> get inversionNumbers {
     Interval bassToRoot = bass.from(root);
     int first = degrees[0].from(bass).number;
-    int third = degrees[1].from(bass).number;
     switch (bassToRoot.number) {
       case 3:
         if (patternLength > 3) {
@@ -251,9 +254,11 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
         if (patternLength > 3) {
           return [first, degrees.last.from(bass).number];
         } else {
+          int third = degrees[1].from(bass).number;
           return [third, first];
         }
       case 7:
+        int third = degrees[1].from(bass).number;
         return [third, first];
       default:
         return [

@@ -16,7 +16,6 @@ class PitchChord extends GenericChord<Pitch> {
     required ChordPattern pattern,
     required Pitch root,
     Pitch? bass,
-    Interval? bassToRoot,
   }) : super(pattern, root, bass: bass);
 
   factory PitchChord.parse(String name) {
@@ -40,8 +39,6 @@ class PitchChord extends GenericChord<Pitch> {
       pattern: ChordPattern.parse(pattern),
       root: rootPitch,
       bass: bassPitch,
-      // TDC: Doesn't always work (Interval.fromSemitones errors)...
-      bassToRoot: bassPitch == null ? null : rootPitch - bassPitch,
     );
   }
 
