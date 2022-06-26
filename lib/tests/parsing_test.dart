@@ -39,7 +39,7 @@ class ParsingTestResult {
               ? 'Chord'
               : (chord is TonicizedScaleDegreeChord
                   ? 'Tonicization - ScaleDegreeChord'
-                  : 'ScaleDegreeChord'),
+                  : 'ScaleDegreeChorda'),
           root: chord is PitchChord
               ? chord.root.commonName
               : chord.root.toString(),
