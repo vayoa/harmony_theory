@@ -1,6 +1,7 @@
 import 'package:harmony_theory/extensions/pitch_extension.dart';
 import 'package:harmony_theory/modals/theory_base/generic_chord.dart';
 import 'package:harmony_theory/modals/theory_base/scale_degree/scale_degree_chord.dart';
+import 'package:harmony_theory/modals/theory_base/scale_degree/tonicized_scale_degree_chord.dart';
 
 import '../modals/pitch_chord.dart';
 
@@ -33,9 +34,18 @@ class ParsingTestResult {
   factory ParsingTestResult.ofGenericChord(GenericChord chord) =>
       ParsingTestResult(
         spec: ParsingTestResultSpec(
-          type: chord.runtimeType.toString(),
-          root: chord is PitchChord ? chord.root.commonName : chord.root.toString(),
-          bass: chord is PitchChord ? chord.bass.commonName : chord.bass.toString(),
+          // Why like this? in web it doesn't show the runtime.toString correctly...
+          type: chord is PitchChord
+              ? 'Chord'
+              : (chord is TonicizedScaleDegreeChord
+                  ? 'Tonicization - ScaleDegreeChord'
+                  : 'ScaleDegreeChord'),
+          root: chord is PitchChord
+              ? chord.root.commonName
+              : chord.root.toString(),
+          bass: chord is PitchChord
+              ? chord.bass.commonName
+              : chord.bass.toString(),
           pattern:
               '${chord.pattern.fullName}, (intervals: ${chord.pattern.intervals})',
           object: chord,
