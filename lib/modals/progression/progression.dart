@@ -61,8 +61,7 @@ class Progression<T> implements Identifiable {
         }
         // Fails if we made it to the last index or if adjacent values aren't
         // equal...
-        if (i < values.length - 1 &&
-            adjacentValuesEqual(values[i], values[i + 1])) {
+        if (i < values.length - 1 && values[i] == values[i + 1]) {
           durSum += durations[i];
         } else {
           durSum = (durSum + durations[i]) * ratio;
@@ -113,8 +112,7 @@ class Progression<T> implements Identifiable {
         }
         // Skips the current value if its index is smaller than the last index
         // and it's equal to the chord that comes after it.
-        if (!(i < values.length - 1 &&
-            adjacentValuesEqual(values[i], values[i + 1]))) {
+        if (!(i < values.length - 1 && values[i] == values[i + 1])) {
           double nonAbsoluteDuration =
               (durations[i] * ratio) - previousDuration - durationDiff;
           T? val = values[i];
@@ -282,7 +280,7 @@ class Progression<T> implements Identifiable {
       throw NonPositiveDuration(value, newDuration);
     }
     T? last = _values.isEmpty ? null : _values.last;
-    if (_values.isNotEmpty && adjacentValuesEqual(value, last)) {
+    if (_values.isNotEmpty && value == last) {
       double dur = (newDuration + _durations.last) % _timeSignature.decimal;
       if (dur > 0) {
         checkValidDuration(
@@ -434,8 +432,7 @@ class Progression<T> implements Identifiable {
     if (!newMeasure.isEmpty &&
         measures.length - 1 > index &&
         !measures[index + 1].isEmpty &&
-        adjacentValuesEqual(
-            newMeasure.values.last, measures[index + 1].values.first)) {
+        newMeasure.values.last == measures[index + 1].values.first) {
       newMeasure.addAll(measures[index + 1]);
       measures.removeAt(index + 1);
     }
@@ -496,7 +493,4 @@ class Progression<T> implements Identifiable {
           value: value, duration: duration, timeSignature: _timeSignature);
     }
   }
-
-  // TODO: Remove this. We needed it before we wrote PitchChord...
-  static bool adjacentValuesEqual<T>(T val, T next) => val == next;
 }
