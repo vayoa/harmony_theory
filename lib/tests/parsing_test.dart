@@ -1,9 +1,9 @@
-import 'package:harmony_theory/extensions/pitch_extension.dart';
-import 'package:harmony_theory/modals/theory_base/generic_chord.dart';
-import 'package:harmony_theory/modals/theory_base/scale_degree/scale_degree_chord.dart';
-import 'package:harmony_theory/modals/theory_base/scale_degree/tonicized_scale_degree_chord.dart';
-
+import '../extensions/pitch_extension.dart';
 import '../modals/pitch_chord.dart';
+import '../modals/theory_base/generic_chord.dart';
+import '../modals/theory_base/pitch_scale.dart';
+import '../modals/theory_base/scale_degree/scale_degree_chord.dart';
+import '../modals/theory_base/scale_degree/tonicized_scale_degree_chord.dart';
 
 abstract class ParsingTest {
   static ParsingTestResult test(String name) {
@@ -18,44 +18,41 @@ abstract class ParsingTest {
         return ParsingTestResult(error: pitch ? pitchError : degreeError);
       }
     }
-    return ParsingTestResult.ofGenericChord(chord);
+    return ParsingTestResult.of(chord);
   }
 }
 
 class ParsingTestResult {
-  final ParsingTestResultSpec? spec;
+  final ParsingTestResultSpec? originalSpec;
+  final ParsingTestResultSpec? convertedSpec;
+  final String? convertedScale;
   final Exception? error;
 
   const ParsingTestResult({
-    this.spec,
+    this.originalSpec,
+    this.convertedSpec,
+    this.convertedScale,
     this.error,
-  }) : assert((spec == null) != (error == null));
+  }) : assert(((originalSpec == null) == (convertedSpec == null)) &&
+            (originalSpec == null) != (error == null));
 
-  factory ParsingTestResult.ofGenericChord(GenericChord chord) =>
-      ParsingTestResult(
-        spec: ParsingTestResultSpec(
-          // Why like this? in web it doesn't show the runtime.toString correctly...
-          type: chord is PitchChord
-              ? 'Chord'
-              : (chord is TonicizedScaleDegreeChord
-                  ? 'Tonicization - ScaleDegreeChord'
-                  : 'ScaleDegreeChord'),
-          root: chord is PitchChord
-              ? chord.root.commonName
-              : chord.root.toString(),
-          bass: chord is PitchChord
-              ? chord.bass.commonName
-              : chord.bass.toString(),
-          pattern:
-              '${chord.pattern.fullName}, (intervals: ${chord.pattern.intervals})',
-          object: chord,
+  static final PitchScale convertedScaleObj = PitchScale.cMajor;
+
+  factory ParsingTestResult.of(GenericChord chord) => ParsingTestResult(
+        originalSpec: ParsingTestResultSpec.of(chord),
+        convertedSpec: ParsingTestResultSpec.of(
+          (chord is PitchChord
+                  ? ScaleDegreeChord(convertedScaleObj, chord)
+                  : (chord as ScaleDegreeChord).inScale(convertedScaleObj))
+              as GenericChord,
         ),
+        convertedScale: convertedScaleObj.toString(),
       );
 
   @override
   String toString() {
     if (error != null) return 'Error!\n$error';
-    return spec.toString();
+    return originalSpec.toString();
   }
 }
 
@@ -73,6 +70,25 @@ class ParsingTestResultSpec {
     required this.pattern,
     required this.object,
   });
+
+  ParsingTestResultSpec.of(GenericChord chord)
+      : this(
+          // Why like this? in web it doesn't show the runtime.toString correctly...
+          type: chord is PitchChord
+              ? 'Chord'
+              : (chord is TonicizedScaleDegreeChord
+                  ? 'Tonicization - ScaleDegreeChord'
+                  : 'ScaleDegreeChord'),
+          root: chord is PitchChord
+              ? chord.root.commonName
+              : chord.root.toString(),
+          bass: chord is PitchChord
+              ? chord.bass.commonName
+              : chord.bass.toString(),
+          pattern:
+              '${chord.pattern.fullName}, (intervals: ${chord.pattern.intervals})',
+          object: chord,
+        );
 
   @override
   String toString() => """Found type: $type.
