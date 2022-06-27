@@ -6,7 +6,7 @@ import '../modals/theory_base/scale_degree/scale_degree_chord.dart';
 import '../modals/theory_base/scale_degree/tonicized_scale_degree_chord.dart';
 
 abstract class ParsingTest {
-  static ParsingTestResult test(String name) {
+  static ParsingTestResult test(String name, {PitchScale? scale}) {
     bool pitch = name.startsWith(RegExp(r'[a-gA-G]'));
     GenericChord chord;
     try {
@@ -18,7 +18,7 @@ abstract class ParsingTest {
         return ParsingTestResult(error: pitch ? pitchError : degreeError);
       }
     }
-    return ParsingTestResult.of(chord);
+    return ParsingTestResult.of(chord, scale: scale);
   }
 }
 
@@ -36,18 +36,20 @@ class ParsingTestResult {
   }) : assert(((originalSpec == null) == (convertedSpec == null)) &&
             (originalSpec == null) != (error == null));
 
-  static PitchScale convertedScaleObj = PitchScale.cMajor;
+  static PitchScale defaultConvertedScale = PitchScale.cMajor;
 
-  factory ParsingTestResult.of(GenericChord chord) => ParsingTestResult(
-        originalSpec: ParsingTestResultSpec.of(chord),
-        convertedSpec: ParsingTestResultSpec.of(
-          (chord is PitchChord
-                  ? ScaleDegreeChord(convertedScaleObj, chord)
-                  : (chord as ScaleDegreeChord).inScale(convertedScaleObj))
-              as GenericChord,
-        ),
-        convertedScale: convertedScaleObj.toString(),
-      );
+  factory ParsingTestResult.of(GenericChord chord, {PitchScale? scale}) {
+    scale ??= defaultConvertedScale;
+    return ParsingTestResult(
+      originalSpec: ParsingTestResultSpec.of(chord),
+      convertedSpec: ParsingTestResultSpec.of(
+        (chord is PitchChord
+            ? ScaleDegreeChord(scale, chord)
+            : (chord as ScaleDegreeChord).inScale(scale)) as GenericChord,
+      ),
+      convertedScale: scale.toString(),
+    );
+  }
 
   @override
   String toString() {
