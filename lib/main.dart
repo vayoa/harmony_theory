@@ -4,9 +4,9 @@ import 'package:tonic/tonic.dart';
 
 import 'modals/pitch_chord.dart';
 import 'modals/progression/chord_progression.dart';
-import 'modals/theory_base/pitch_scale.dart';
 import 'modals/progression/scale_degree_progression.dart';
 import 'modals/substitution.dart';
+import 'modals/theory_base/pitch_scale.dart';
 import 'modals/weights/keep_harmonic_function_weight.dart';
 import 'state/progression_bank.dart';
 import 'state/substitution_handler.dart';

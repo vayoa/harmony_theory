@@ -10,6 +10,8 @@ class PitchScale {
   final ScalePattern pattern;
   final Pitch tonic;
 
+  static final PitchScale cMajor = PitchScale.common(tonic: Pitch.parse('C'));
+
   const PitchScale({required this.pattern, required this.tonic});
 
   PitchScale.common({required Pitch tonic, bool minor = false})

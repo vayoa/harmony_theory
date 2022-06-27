@@ -167,6 +167,14 @@ class ScaleDegree implements Identifiable {
     );
   }
 
+  Interval? tryFrom(ScaleDegree other) {
+    try {
+      return from(other);
+    } on ArgumentError {
+      return null;
+    }
+  }
+
   int get _semitonesFromTonicInMajor {
     int semitones =
         ScalePatternExtension.majorKey.intervals[_degree].semitones +

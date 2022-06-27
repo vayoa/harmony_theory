@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:harmony_theory/extensions/scale_pattern_extension.dart';
 import 'package:tonic/tonic.dart';
 
 import '../../../extensions/chord_extension.dart';
@@ -13,6 +14,8 @@ import 'tonicized_scale_degree_chord.dart';
 
 class ScaleDegreeChord extends GenericChord<ScaleDegree>
     implements Identifiable {
+  final bool _bassInChord;
+
   static const int maxInversionNumbers = 2;
 
   static final RegExp chordNamePattern = RegExp(
@@ -27,24 +30,54 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     'Dominant 7th',
   ];
 
-  /* TODO: If the bass isn't an inversion and there's a problem with calculating an
-          interval, take the in-harmonic equivalent of the bass.
-          For instance a C/F## turns to C/G... */
-  ScaleDegreeChord(PitchScale scale, PitchChord chord)
-      : this.raw(
-          chord.pattern,
-          ScaleDegree.fromPitch(scale, chord.root),
-          bass: !chord.hasDifferentBass
-              ? null
-              : ScaleDegree.fromPitch(scale, chord.bass),
-        );
+  // TODO: Optimize.
+  // TODO: When we get a chord like A/B we need it to become B11 for instance...
+  /// If the bass isn't an inversion and there's a problem with calculating an
+  /// interval, this constructor takes the in-harmonic equivalent of the bass.
+  ///
+  /// Example: In C major, a ScaleDegreeChord that was parsed from C/F##
+  /// will turn to I⁶₄ (C/G)...
+  factory ScaleDegreeChord._inharmonicityHandler(
+    ChordPattern pattern,
+    ScaleDegree rootDegree, {
+    ScaleDegree? bass,
+  }) {
+    if (bass == null) {
+      return ScaleDegreeChord.raw(pattern, rootDegree);
+    }
+    Interval? tryFrom = rootDegree.tryFrom(bass);
+    if (tryFrom == null) {
+      int semitones = ScalePatternExtension.majorKeySemitones[bass.degree] +
+          bass.accidentals;
+      bass = ScaleDegree.fromPitch(
+          PitchScale.cMajor, Pitch.fromMidiNumber(semitones));
+    }
+    return ScaleDegreeChord.raw(pattern, rootDegree, bass: bass);
+  }
 
-  ScaleDegreeChord.raw(ChordPattern pattern, ScaleDegree rootDegree,
-      {ScaleDegree? bass})
-      : super(pattern, rootDegree, bass: bass);
+  factory ScaleDegreeChord(PitchScale scale, PitchChord chord) =>
+      ScaleDegreeChord._inharmonicityHandler(
+        chord.pattern,
+        ScaleDegree.fromPitch(scale, chord.root),
+        bass: !chord.hasDifferentBass
+            ? null
+            : ScaleDegree.fromPitch(scale, chord.bass),
+      );
+
+  ScaleDegreeChord.raw(
+    ChordPattern pattern,
+    ScaleDegree rootDegree, {
+    ScaleDegree? bass,
+    bool? bassInChord,
+  })  : _bassInChord = bassInChord ??
+            (bass == null
+                ? true
+                : pattern.intervals.contains(bass.tryFrom(rootDegree))),
+        super(pattern, rootDegree, bass: bass);
 
   ScaleDegreeChord.copy(ScaleDegreeChord chord)
-      : super(
+      : _bassInChord = chord._bassInChord,
+        super(
           ChordPattern(
               name: chord.pattern.name,
               fullName: chord.pattern.fullName,
@@ -83,7 +116,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     }
     ScaleDegree rootDegree = ScaleDegree.parse(match[1]!);
     String? bass = match[3];
-    return ScaleDegreeChord.raw(
+    return ScaleDegreeChord._inharmonicityHandler(
       _cPattern,
       rootDegree,
       bass: _parseBass(bass, rootDegree, _cPattern),
@@ -132,7 +165,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
   }
 
   ScaleDegreeChord.fromJson(Map<String, dynamic> json)
-      : super(
+      : this.raw(
           ChordPatternExtension.fromFullName(json['p']),
           ScaleDegree.fromJson(json['rd']),
           bass: json['b'] == null ? null : ScaleDegree.fromJson(json['b']),
@@ -238,9 +271,9 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     }
     return root.toString();
   }
-  
-  // TODO: If the bass is not an inversion return null...
-  List<int> get inversionNumbers {
+
+  List<int>? get inversionNumbers {
+    if (!_bassInChord) return null;
     Interval bassToRoot = bass.from(root);
     int first = degrees[0].from(bass).number;
     switch (bassToRoot.number) {
@@ -274,7 +307,8 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
   @override
   String get bassString {
     if (!hasDifferentBass) return '';
-    List<int> nums = inversionNumbers;
+    List<int>? nums = inversionNumbers;
+    if (nums == null) return _generateInputBass;
     switch (nums.length) {
       case 1:
       case 2:
@@ -289,8 +323,6 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     }
   }
 
-  /* TDC: For basses that don't create an inversion we need a clearer
-          and less confusing toString()... */
   @override
   String toString() =>
       rootString + (hasDifferentBass ? bassString : patternString);
