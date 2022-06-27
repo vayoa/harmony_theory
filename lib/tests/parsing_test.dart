@@ -36,7 +36,7 @@ class ParsingTestResult {
   }) : assert(((originalSpec == null) == (convertedSpec == null)) &&
             (originalSpec == null) != (error == null));
 
-  static final PitchScale convertedScaleObj = PitchScale.cMajor;
+  static PitchScale convertedScaleObj = PitchScale.cMajor;
 
   factory ParsingTestResult.of(GenericChord chord) => ParsingTestResult(
         originalSpec: ParsingTestResultSpec.of(chord),
