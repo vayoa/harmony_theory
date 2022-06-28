@@ -69,9 +69,7 @@ class PitchChord extends GenericChord<Pitch> {
       return false;
     }
     PitchChord chord = other;
-    Pitch oRoot = chord.root;
-    if (root.accidentalSemitones == oRoot.accidentalSemitones &&
-        (root.diatonicSemitones % 12) == (oRoot.diatonicSemitones % 12)) {
+    if (root.octavelessEqual(chord.root) && bass.octavelessEqual(chord.bass)) {
       return pattern.equals(chord.pattern);
     }
     return false;

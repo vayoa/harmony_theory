@@ -84,8 +84,10 @@ abstract class GenericChord<T> {
   @override
   bool operator ==(Object other) =>
       other is GenericChord<T> &&
-      (other._pattern.equals(_pattern) && other._root == _root);
+      (other._pattern.equals(_pattern) &&
+          other._root == _root &&
+          other._bass == _bass);
 
   @override
-  int get hashCode => Object.hash(_pattern.fullName, _root);
+  int get hashCode => Object.hash(_pattern.fullName, _root, _bass);
 }

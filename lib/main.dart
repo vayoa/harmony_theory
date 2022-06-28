@@ -82,7 +82,7 @@ _test() {
   subs = SubstitutionHandler.getRatedSubstitutions(progression,
       keepAmount: KeepHarmonicFunctionAmount.high);
   print('subs (high): ${subs.length}');
-  assert(subs.length >= 32);
+  assert(subs.length >= 26);
 }
 
 _testCut() {
