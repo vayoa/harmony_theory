@@ -2,8 +2,9 @@ import 'package:tonic/tonic.dart';
 
 import '../../extensions/interval_extension.dart';
 import '../../state/progression_bank.dart';
-import '../theory_base/scale_degree/scale_degree_chord.dart';
 import '../progression/scale_degree_progression.dart';
+import '../theory_base/scale_degree/scale_degree.dart';
+import '../theory_base/scale_degree/scale_degree_chord.dart';
 import '../theory_base/scale_degree/tonicized_scale_degree_chord.dart';
 import 'weight.dart';
 
@@ -21,8 +22,24 @@ class HarmonicFunctionWeight extends Weight {
       HarmonicFunctionBank();
 
   // Int values range from 1 - maxFunctionImportance.
-  static Map<int, Map<int, int>> get sortedFunctions =>
+  static Map<int, Map<int?, Map<int, int>>> get sortedFunctions =>
       _harmonicFunctionBank.sortedFunctions;
+
+  _SortedResult? _getSorted(
+      ScaleDegreeChord currentChord, ScaleDegreeChord nextChord) {
+    ScaleDegreeChord newCurrent = prepareForCheck(currentChord, nextChord);
+    int weakHash = newCurrent.weakHash;
+    if (sortedFunctions.containsKey(weakHash)) {
+      int? bassHash = newCurrent.bass.hashCode;
+      bassHash =
+          sortedFunctions[weakHash]!.containsKey(bassHash) ? bassHash : null;
+      int nextHash = prepareForCheck(nextChord, currentChord).weakHash;
+      if (sortedFunctions[weakHash]![bassHash]![nextHash] != null) {
+        return _SortedResult(sortedFunctions[weakHash]![bassHash]!, nextHash);
+      }
+    }
+    return null;
+  }
 
   ScaleDegreeChord prepareForCheck(
       ScaleDegreeChord chord, ScaleDegreeChord other) {
@@ -58,14 +75,12 @@ class HarmonicFunctionWeight extends Weight {
       if (nextPos == progression.length) nextPos = 0;
       if (progression[currPos] != null && progression[nextPos] != null) {
         count++;
-        int weakHash =
-            prepareForCheck(progression[currPos]!, progression[nextPos]!)
-                .weakHash;
-        int next = prepareForCheck(progression[nextPos]!, progression[currPos]!)
-            .weakHash;
-        if (sortedFunctions.containsKey(weakHash) &&
-            sortedFunctions[weakHash]![next] != null) {
-          Map<int, int> sorted = sortedFunctions[weakHash]!;
+        _SortedResult? _sortedResult =
+            _getSorted(progression[currPos]!, progression[nextPos]!);
+        // If the pair exists in the map sortedFunctions map...
+        if (_sortedResult != null) {
+          int next = _sortedResult.nextHash;
+          Map<int, int> sorted = _sortedResult.sorted;
           score += sorted[next]!;
           String verb = sorted[next]! > 0 ? 'Adding' : 'Deducting';
           details += verb +
@@ -115,77 +130,122 @@ class HarmonicFunctionBank {
 
   HarmonicFunctionBank() {
     sortedFunctions = {};
-    for (MapEntry<String, Map<int, List<String>>> chord
+    for (MapEntry<String, Map<String?, Map<int, List<String>>>> chord
         in _sortedFunctions.entries) {
       int chordWeakHash = ScaleDegreeChord.parse(chord.key).weakHash;
       if (!sortedFunctions.containsKey(chordWeakHash)) {
         sortedFunctions[chordWeakHash] = {};
       }
-      for (MapEntry<int, List<String>> scored in chord.value.entries) {
-        assert(scored.key <= maxFunctionImportance &&
-            scored.key >= -1 * maxFunctionImportance);
-        for (String next in scored.value) {
-          sortedFunctions[chordWeakHash]![
-              ScaleDegreeChord.parse(next).weakHash] = scored.key;
+      for (MapEntry<String?, Map<int, List<String>>> bass
+          in chord.value.entries) {
+        int? bassHash =
+            bass.key == null ? null : ScaleDegree.parse(bass.key!).hashCode;
+        if (!sortedFunctions[chordWeakHash]!.containsKey(bassHash)) {
+          sortedFunctions[chordWeakHash]![bassHash] = {};
+        }
+        for (MapEntry<int, List<String>> scored in bass.value.entries) {
+          assert(scored.key <= maxFunctionImportance &&
+              scored.key >= -1 * maxFunctionImportance);
+          for (String next in scored.value) {
+            sortedFunctions[chordWeakHash]![bassHash]![
+                ScaleDegreeChord.parse(next).weakHash] = scored.key;
+          }
         }
       }
     }
   }
 
-  late Map<int, Map<int, int>> sortedFunctions;
+  late Map<int, Map<int?, Map<int, int>>> sortedFunctions;
 
-  static final Map<String, Map<int, List<String>>> _sortedFunctions = {
+  // Chord - it's bass (null for root) - functions...
+  static final Map<String, Map<String?, Map<int, List<String>>>>
+      _sortedFunctions = {
     'I': {
-      1: ['iii', 'III', 'vi'],
+      null: {
+        1: ['iii', 'III', 'vi'],
+      },
+      // when the V is the bass...
+      'V': {
+        3: ['V'],
+      }
     },
     'ii': {
-      -1: ['IV'],
-      1: ['iii', 'vi', 'viidim'],
-      3: ['V'],
+      null: {
+        -1: ['IV'],
+        1: ['iii', 'vi', 'viidim'],
+        3: ['V'],
+      }
     },
     'iidim': {
-      3: ['V'],
+      null: {
+        3: ['V'],
+      }
     },
     'iii': {
-      -3: ['I', 'viidim'],
-      -1: ['V'],
-      1: ['ii'],
-      2: ['IV'],
+      null: {
+        -3: ['I', 'viidim'],
+        -1: ['V'],
+        1: ['ii'],
+        2: ['IV'],
+      }
     },
     'III': {
-      2: ['IV'],
-      3: ['vi'],
+      null: {
+        2: ['IV'],
+        3: ['vi'],
+      }
     },
     'iv': {
-      0: ['I'],
-      2: ['V'],
+      null: {
+        0: ['I'],
+        2: ['V'],
+      }
     },
     'IV': {
-      -2: ['vi'],
-      1: ['I'],
-      2: ['ii', 'V', 'viidim'],
+      null: {
+        -2: ['vi'],
+        1: ['I'],
+        2: ['ii', 'V', 'viidim'],
+      }
     },
     'V': {
-      -2: ['viidim'],
-      -1: ['ii', 'iii'],
-      1: ['bVI'],
-      2: ['vi'],
-      3: ['I'],
+      null: {
+        -2: ['viidim'],
+        -1: ['ii', 'iii'],
+        1: ['bVI'],
+        2: ['vi'],
+        3: ['I'],
+      }
     },
     'vi': {
-      1: ['IV', 'iii', 'V', 'I'],
-      2: ['ii'],
+      null: {
+        1: ['IV', 'iii', 'V', 'I'],
+        2: ['ii'],
+      }
     },
     'viidim': {
-      -3: ['ii', 'IV', 'iv', 'V'],
-      1: ['iii'],
-      3: ['I', 'III'],
+      null: {
+        -3: ['ii', 'IV', 'iv', 'V'],
+        1: ['iii'],
+        3: ['I', 'III'],
+      }
     },
     'bVI': {
-      1: ['bVII', 'V'],
+      null: {
+        1: ['bVII', 'V'],
+      }
     },
     'bVII': {
-      2: ['I'],
+      null: {
+        2: ['I'],
+      }
     },
   };
+}
+
+class _SortedResult {
+  final Map<int, int> sorted;
+  final int nextHash;
+
+  const _SortedResult(this.sorted, this.nextHash);
 }
