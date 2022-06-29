@@ -7,6 +7,7 @@ import '../modals/theory_base/pitch_scale.dart';
 
 // ignore_for_file: avoid_print
 
+// TODO: Make this an actual test...
 abstract class KrumhanslSchmucklerTest {
   static bool test([int precision = 2]) {
     assert(precision < 24);

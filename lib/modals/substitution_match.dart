@@ -1,5 +1,5 @@
-import 'theory_base/scale_degree/scale_degree_chord.dart';
 import 'progression/scale_degree_progression.dart';
+import 'theory_base/scale_degree/scale_degree_chord.dart';
 
 class SubstitutionMatch {
   final int baseIndex;
@@ -23,6 +23,27 @@ class SubstitutionMatch {
     return "base: $baseIndex(start $baseOffset), sub: $subIndex, "
         "type: ${type.name}, withSeventh: $withSeventh, ratio: $ratio.";
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SubstitutionMatch &&
+          runtimeType == other.runtimeType &&
+          baseIndex == other.baseIndex &&
+          baseOffset == other.baseOffset &&
+          subIndex == other.subIndex &&
+          ratio == other.ratio &&
+          type == other.type &&
+          withSeventh == other.withSeventh;
+
+  @override
+  int get hashCode =>
+      baseIndex.hashCode ^
+      baseOffset.hashCode ^
+      subIndex.hashCode ^
+      ratio.hashCode ^
+      type.hashCode ^
+      withSeventh.hashCode;
 
   static SubstitutionMatchType? getMatchType(
       {required ScaleDegreeChord? base,
