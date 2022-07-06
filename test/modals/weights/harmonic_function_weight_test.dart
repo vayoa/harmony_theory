@@ -3,21 +3,19 @@ import 'package:test/test.dart';
 
 main() {
   test('Harmonic Bank Assertions', () {
-    Map<int, Map<int?, Map<int, int>>> sorted =
-        HarmonicFunctionWeight.sortedFunctions;
+    Map<int, Map<int?, int>> sorted =
+        HarmonicFunctionWeight.sortedFunctions.hashMap;
     for (int k in sorted.keys) {
-      for (int? k2 in sorted[k]!.keys) {
-        expect(
-          sorted[k]![k2]!.values,
-          everyElement(
-            allOf(
-              greaterThanOrEqualTo(
-                  -1 * HarmonicFunctionBank.maxFunctionImportance),
-              lessThanOrEqualTo(HarmonicFunctionBank.maxFunctionImportance),
-            ),
+      expect(
+        sorted[k]!.values,
+        everyElement(
+          allOf(
+            greaterThanOrEqualTo(
+                -1 * HarmonicFunctionWeight.maxFunctionImportance),
+            lessThanOrEqualTo(HarmonicFunctionWeight.maxFunctionImportance),
           ),
-        );
-      }
+        ),
+      );
     }
   });
 }

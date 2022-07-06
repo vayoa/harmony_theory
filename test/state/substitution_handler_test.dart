@@ -55,6 +55,8 @@ _testKeepHarmonicFunctionAmount({
     keepAmount: amount,
   );
   List<String> result = _getStrings(subs);
+  result.forEach((e) => print(e));
+  print('DONE');
   expect(subs.length, greaterThanOrEqualTo(greaterThan));
   expect(result, containsAll(expectingToContain));
 }

@@ -16,6 +16,8 @@ class PairMap<T> {
   /// (like a I^5 for instance).
   late final Map<int, Map<int?, T>> _hashMap;
 
+  Map<int, Map<int?, T>> get hashMap => _hashMap;
+
   /// Creates a new [PairMap] where [map] will be converted to [_hashMap].
   ///
   /// The Strings given in [map] will be converted using [ScaleDegreeChord.parse].
