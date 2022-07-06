@@ -1,7 +1,7 @@
 import '../../state/progression_bank.dart';
+import '../progression/scale_degree_progression.dart';
 import '../theory_base/scale_degree/scale_degree.dart';
 import '../theory_base/scale_degree/scale_degree_chord.dart';
-import '../progression/scale_degree_progression.dart';
 import 'weight.dart';
 
 class InScaleWeight extends Weight {
@@ -67,9 +67,8 @@ class InScaleWeight extends Weight {
     }
     return Score(
       score: 1.0 - (outCount / count),
-      details: details +
-          'Out of $count max points, '
-              'this progression got ${count - outCount} points.',
+      details:
+          '${details}Out of $count max points, this progression got ${count - outCount} points.',
     );
   }
 }

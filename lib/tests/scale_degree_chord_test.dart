@@ -10,16 +10,16 @@ import '../modals/theory_base/scale_degree/scale_degree_chord.dart';
 abstract class ScaleDegreeChordTest {
   static bool test() {
     print('-- Regular --');
-    List<Pitch> _possiblePitches = possiblePitches;
+    List<Pitch> pitches = possiblePitches;
     Map<PitchScale, List<ScaleDegreeChord>> reverse = {};
-    for (Pitch pitch in _possiblePitches) {
+    for (Pitch pitch in pitches) {
       PitchScale scale =
           PitchScale(tonic: pitch, pattern: ScalePatternExtension.majorKey);
       for (int i = 0; i < 2; i++) {
         List<String> inScale = [];
         List<ScaleDegreeChord> chords = [];
-        for (int j = 0; j < _possiblePitches.length; j++) {
-          Pitch converted = _possiblePitches[j];
+        for (int j = 0; j < pitches.length; j++) {
+          Pitch converted = pitches[j];
           String name = '${converted.letterName}${converted.accidentalsString}';
           try {
             chords.add(ScaleDegreeChord(scale, PitchChord.parse(name)));

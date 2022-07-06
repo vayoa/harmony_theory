@@ -75,17 +75,17 @@ class HarmonicFunctionWeight extends Weight {
       if (nextPos == progression.length) nextPos = 0;
       if (progression[currPos] != null && progression[nextPos] != null) {
         count++;
-        _SortedResult? _sortedResult =
+        _SortedResult? sortedResult =
             _getSorted(progression[currPos]!, progression[nextPos]!);
         // If the pair exists in the map sortedFunctions map...
-        if (_sortedResult != null) {
-          int next = _sortedResult.nextHash;
-          Map<int, int> sorted = _sortedResult.sorted;
+        if (sortedResult != null) {
+          int next = sortedResult.nextHash;
+          Map<int, int> sorted = sortedResult.sorted;
           score += sorted[next]!;
           String verb = sorted[next]! > 0 ? 'Adding' : 'Deducting';
-          details += verb +
-              ' ${sorted[next]} points for'
-                  ' ${progression[currPos]!} -> ${progression[nextPos]!} (now $score)\n';
+          details +=
+              '$verb ${sorted[next]} points for ${progression[currPos]!} ->'
+              ' ${progression[nextPos]!} (now $score)\n';
         } else {
           Interval upFromCurrent =
               progression[nextPos]!.root.from(progression[currPos]!.root);
@@ -93,23 +93,22 @@ class HarmonicFunctionWeight extends Weight {
               progression[currPos]!.root.from(progression[nextPos]!.root);
           if (upFromCurrent.equals(Interval.P4)) {
             score += 2;
-            details += 'Adding 2 points for'
-                ' ${progression[currPos]!} -> ${progression[nextPos]!} (a 4th up, now $score)\n';
+            details += 'Adding 2 points for  ${progression[currPos]!} ->'
+                ' ${progression[nextPos]!} (a 4th up, now $score)\n';
           } else if (downFromCurrent.equals(Interval.P4)) {
             score += 1;
-            details += 'Adding 1 point for'
-                ' ${progression[currPos]!} -> ${progression[nextPos]!} (a 4th down, now $score)\n';
+            details += 'Adding 1 point for ${progression[currPos]!} ->'
+                ' ${progression[nextPos]!} (a 4th down, now $score)\n';
           } else if (upFromCurrent.equals(Interval.m2) ||
               upFromCurrent.equals(Interval.M2)) {
             score += 1;
-            details += 'Adding 1 point for'
-                ' ${progression[currPos]!} -> ${progression[nextPos]!} (a 2nd up, now $score)\n';
+            details += 'Adding 1 point for ${progression[currPos]!} ->'
+                ' ${progression[nextPos]!} (a 2nd up, now $score)\n';
           } else if (upFromCurrent.equals(Interval.M3) ||
               upFromCurrent.equals(Interval.m3)) {
             score -= 2;
-            details += 'Deducting 2 points for '
-                '${progression[currPos]!} -> ${progression[nextPos]!} '
-                '(a 3 up, now $score)\n';
+            details += 'Deducting 2 points for ${progression[currPos]!} ->'
+                ' ${progression[nextPos]!} (a 3 up, now $score)\n';
           }
         }
       }
@@ -118,9 +117,8 @@ class HarmonicFunctionWeight extends Weight {
         maxPoints = count * maxImportance;
     return Score(
       score: (score + maxPoints) / (2 * maxPoints),
-      details: details +
-          'Between a minimum of $minPoints points and a maximum of $maxPoints '
-              'points this progression got $score.\n',
+      details: '${details}Between a minimum of $minPoints points and a '
+          'maximum of $maxPoints points this progression got $score.\n',
     );
   }
 }

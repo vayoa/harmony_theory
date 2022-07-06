@@ -65,7 +65,7 @@ class Score {
   Score scale(int importance) {
     return Score(
       score: score * importance,
-      details: details + ', scaled: ${score * importance}',
+      details: '$details, scaled: ${score * importance}',
     );
   }
 

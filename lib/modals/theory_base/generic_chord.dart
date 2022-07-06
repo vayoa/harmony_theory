@@ -57,22 +57,22 @@ abstract class GenericChord<T> {
   String get rootString => _root.toString();
 
   String get patternString {
-    String _patternStr = _pattern.abbr;
+    String patternStr = _pattern.abbr;
     if (_pattern.hasMinor3rd) {
       switch (_pattern.fullName) {
         case 'Minor':
-          _patternStr = '';
+          patternStr = '';
           break;
         case 'Minor 7th':
-          _patternStr = '7';
+          patternStr = '7';
           break;
         case 'Minor-Major 7th':
         case 'Major 7th':
-          _patternStr = 'Δ7';
+          patternStr = 'Δ7';
           break;
       }
     }
-    return _patternStr;
+    return patternStr;
   }
 
   String get bassString => hasDifferentBass ? '/$bass' : '';

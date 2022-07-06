@@ -118,23 +118,23 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     }
     // If the degree is a lowercase letter (meaning the chord contains a minor
     // triad).
-    ChordPattern _cPattern = ChordPattern.parse(match[2]!.replaceAll('b', '♭'));
+    ChordPattern cPattern = ChordPattern.parse(match[2]!.replaceAll('b', '♭'));
     if (match[1]!.toLowerCase() == match[1]) {
       // We don't want to change any of the generated chord patterns (for some
       // reason they aren't const so I can change them and screw up that entire
       // ChordPattern.
       // The ... operator de-folds the list.
-      final List<Interval> _intervals = [..._cPattern.intervals];
+      final List<Interval> intervals = [...cPattern.intervals];
       // Make the 2nd interval (the one between the root and the 3rd) minor.
-      _intervals[1] = Interval.m3;
-      _cPattern = ChordPattern.fromIntervals(_intervals);
+      intervals[1] = Interval.m3;
+      cPattern = ChordPattern.fromIntervals(intervals);
     }
     ScaleDegree rootDegree = ScaleDegree.parse(match[1]!);
     String? bass = match[3];
     return ScaleDegreeChord._inharmonicityHandler(
-      _cPattern,
+      cPattern,
       rootDegree,
-      bass: _parseBass(bass, rootDegree, _cPattern),
+      bass: _parseBass(bass, rootDegree, cPattern),
     );
   }
 
@@ -208,12 +208,12 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
 
   bool get canBeTonic {
     if (_canBeTonicizedPatterns.contains(pattern.name)) return true;
-    final List<Interval> _intervals = pattern.intervals;
-    if ((_intervals[2] - _intervals[0]).equals(Interval.P5)) {
-      final Interval third = _intervals[1] - _intervals[0];
+    final List<Interval> intervals = pattern.intervals;
+    if ((intervals[2] - intervals[0]).equals(Interval.P5)) {
+      final Interval third = intervals[1] - intervals[0];
       if (third.equals(Interval.M3) || third.equals(Interval.m3)) {
-        if (_intervals.length < 4) return true;
-        final Interval seventh = (_intervals[3] - _intervals[0]);
+        if (intervals.length < 4) return true;
+        final Interval seventh = (intervals[3] - intervals[0]);
         if (seventh.equals(Interval.m7)) {
           return true;
         }

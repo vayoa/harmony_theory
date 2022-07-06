@@ -65,16 +65,17 @@ class ScaleDegree implements Identifiable {
     required int intervalNumber,
     required int intervalSemitones,
   }) {
-    final List<int> _semitones = ScalePatternExtension.majorKeySemitones;
+    final List<int> semitones = ScalePatternExtension.majorKeySemitones;
     _degree = (intervalNumber - 1) % 7;
-    int accidentals = (intervalSemitones - _semitones[_degree]) % 12;
-    int down = (_semitones[_degree] - intervalSemitones) % 12;
+    int accidentals = (intervalSemitones - semitones[_degree]) % 12;
+    int down = (semitones[_degree] - intervalSemitones) % 12;
     if (down < accidentals) accidentals = -1 * down;
     _accidentals = accidentals;
   }
 
   ScaleDegree.parse(String degree) {
-    final int startIndex = degree.indexOf(RegExp(r'i|v', caseSensitive: false));
+    final int startIndex =
+        degree.indexOf(RegExp(r'[iv]', caseSensitive: false));
     String degreeStr = degree.substring(startIndex);
     String offsetStr = degree.substring(0, startIndex);
     int index = degrees.indexOf(degreeStr.toUpperCase()) + 1;
@@ -145,13 +146,13 @@ class ScaleDegree implements Identifiable {
   /// Notice: The degree will always be [interval.number] away from [_degree].
   /// Example: ###I.add(Interval.P5) => ###V.
   ScaleDegree add(Interval interval) {
-    final List<int> _semitones = ScalePatternExtension.majorKeySemitones;
+    final List<int> semitones = ScalePatternExtension.majorKeySemitones;
     Interval scaleDegree =
-        Interval.fromSemitones(_semitones[_degree] + _accidentals);
+        Interval.fromSemitones(semitones[_degree] + _accidentals);
     Interval fromTonic =
         Interval.fromSemitones(interval.semitones + scaleDegree.semitones);
     int number = (_degree + interval.number - 1) % 7;
-    return ScaleDegree.raw(number, fromTonic.semitones - _semitones[number]);
+    return ScaleDegree.raw(number, fromTonic.semitones - semitones[number]);
   }
 
   /* TDC: Some intervals can't be parsed (like a doubly-augmented 4th), we might

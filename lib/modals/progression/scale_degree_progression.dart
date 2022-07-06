@@ -81,10 +81,10 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         );
 
   Map<String, dynamic> toJson() {
-    List<Map<String, dynamic>?> _chords =
+    List<Map<String, dynamic>?> chords =
         values.map((e) => e?.toJson()).toList(growable: false);
     return {
-      'val': _chords,
+      'val': chords,
       'dur': durations.realDurations,
       'ts': timeSignature.toString(),
       'null': hasNull,
@@ -355,11 +355,11 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
         }
         // Calculate the new first + last changed indexes (could be changed
         // after overlaps etc...).
-        final double _durToBaseChord =
+        final double durToBaseChord =
             durations.real(baseChord) - durations[baseChord];
-        final double changedStart = _durToBaseChord + d1 + match.baseOffset;
+        final double changedStart = durToBaseChord + d1 + match.baseOffset;
         int firstChanged = substitution.getPlayingIndex(changedStart);
-        final double changedEnd = _durToBaseChord + d2 + match.baseOffset;
+        final double changedEnd = durToBaseChord + d2 + match.baseOffset;
         int lastChanged = substitution.getPlayingIndex(changedEnd - halfStep);
         bool different = false;
         for (int i = firstChanged; !different && i <= lastChanged; i++) {
@@ -407,16 +407,16 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
   }
 
   ChordProgression inScale(PitchScale scale) {
-    ChordProgression _chords =
+    ChordProgression chords =
         ChordProgression.empty(timeSignature: timeSignature);
     for (var i = 0; i < length; i++) {
       if (values[i] == null) {
-        _chords.add(null, durations[i]);
+        chords.add(null, durations[i]);
       } else {
-        _chords.add(values[i]!.inScale(scale), durations[i]);
+        chords.add(values[i]!.inScale(scale), durations[i]);
       }
     }
-    return _chords;
+    return chords;
   }
 
   HarmonicFunction deriveHarmonicFunctionOf(int index) {

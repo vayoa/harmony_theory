@@ -49,6 +49,6 @@ class PitchScale {
   String toString() {
     final String scalePattern =
         pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
-    return tonic.commonName + ' ' + scalePattern;
+    return '${tonic.commonName} $scalePattern';
   }
 }

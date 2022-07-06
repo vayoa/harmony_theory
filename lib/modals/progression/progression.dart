@@ -50,7 +50,7 @@ class Progression<T> implements Identifiable {
         _hasNull = false,
         _values = [] {
     ratio ??= 1.0;
-    List<double> _durationList = [];
+    List<double> durationList = [];
     if (values.isNotEmpty) {
       double overallDuration = 0.0;
       double durSum = 0.0;
@@ -70,17 +70,17 @@ class Progression<T> implements Identifiable {
               value: val, duration: durSum, overallDuration: overallDuration);
           if (!_hasNull) _hasNull = values[i] == null;
           overallDuration += durSum;
-          _durationList.add(overallDuration);
+          durationList.add(overallDuration);
           _values.add(val);
           durSum = 0;
         }
       }
     }
-    _durations = AbsoluteDurations(_durationList);
+    _durations = AbsoluteDurations(durationList);
   }
 
   // Since sublist is used a lot, I made this one function for a light
-  // optimization instead of sublisting the values and the durations and then
+  // optimization instead of sub-listing the values and the durations and then
   // going through them again in the constructor...
   /// Constructs a progression where [durations] is a list of absolute durations.
   /// [timeSignature] is [TimeSignature.evenTime()] by default.
@@ -102,7 +102,7 @@ class Progression<T> implements Identifiable {
         _values = [] {
     ratio ??= 1.0;
     end ??= values.length;
-    List<double> _durationList = [];
+    List<double> durationList = [];
     if (values.isNotEmpty) {
       double previousDuration = 0.0;
       for (int i = start; i < end; i++) {
@@ -122,12 +122,12 @@ class Progression<T> implements Identifiable {
               overallDuration: previousDuration);
           if (!_hasNull) _hasNull = values[i] == null;
           previousDuration += nonAbsoluteDuration;
-          _durationList.add(previousDuration);
+          durationList.add(previousDuration);
           _values.add(val);
         }
       }
     }
-    _durations = AbsoluteDurations(_durationList);
+    _durations = AbsoluteDurations(durationList);
   }
 
   /// Constructs a progression where [durations] is a list of absolute durations.
@@ -395,7 +395,7 @@ class Progression<T> implements Identifiable {
           }
         }
       }
-      return output.substring(0, output.length - 2) + ' |';
+      return '${output.substring(0, output.length - 2)} |';
     } else {
       final List<Progression<T>> measures = splitToMeasures();
       for (var i = 0; i < measures.length; i++) {

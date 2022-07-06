@@ -55,15 +55,8 @@ _testKeepHarmonicFunctionAmount({
     keepAmount: amount,
   );
   List<String> result = _getStrings(subs);
-  if (subs.length < greaterThan) {
-    var rest = expectingToContain.where((e) => !result.contains(e)).toList();
-    rest.forEach((e) {
-      print(progression);
-      print('$e\n\n');
-    });
-  }
-  expect(result, containsAll(expectingToContain));
   expect(subs.length, greaterThanOrEqualTo(greaterThan));
+  expect(result, containsAll(expectingToContain));
 }
 
 List<String> _getStrings(List<Substitution> subs) =>

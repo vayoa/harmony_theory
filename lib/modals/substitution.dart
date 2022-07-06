@@ -1,8 +1,8 @@
 import '../state/progression_bank.dart';
 import '../state/substitution_handler.dart';
-import 'theory_base/pitch_scale.dart';
 import 'progression/scale_degree_progression.dart';
 import 'substitution_match.dart';
+import 'theory_base/pitch_scale.dart';
 import 'weights/keep_harmonic_function_weight.dart';
 import 'weights/weight.dart';
 
@@ -111,14 +111,12 @@ class Substitution {
   @override
   String toString({PitchScale? scale, bool detailed = false}) {
     return '-- "$location" $originalSubstitution --\n'
-            '$substitutedBase' +
-        (scale == null ? ': ' : ' ->\n${substitutedBase.inScale(scale)}:') +
-        ' ${rating.toStringAsFixed(3)}\n' +
-        'base: $base' +
-        (scale == null ? '' : ' ->\n${base.inScale(scale)}') +
-        '.\n'
-            '${score.toString(detailed)}\n'
-            'Details: $match Changed Range: $changedStart - $changedEnd.';
+        '$substitutedBase${scale == null ? ': ' : ' ->\n'
+            '${substitutedBase.inScale(scale)}:'} '
+        '${rating.toStringAsFixed(3)}\nbase: $base${scale == null ? '' : ' ->\n'
+            '${base.inScale(scale)}'}.\n'
+        '${score.toString(detailed)}\n'
+        'Details: $match Changed Range: $changedStart - $changedEnd.';
   }
 
   int compareTo(Substitution other) => score.compareTo(other.score);
@@ -141,13 +139,13 @@ class SubstitutionScore {
       for (MapEntry<String, Score> entry in details.entries) {
         output += '${entry.key}:\n${entry.value},\n\n';
       }
-      return output + '}';
+      return '$output}';
     } else {
       String output = '{';
       for (MapEntry<String, Score> entry in details.entries) {
         output += '${entry.key}: ${entry.value.score}, ';
       }
-      return output + '}';
+      return '$output}';
     }
   }
 }
