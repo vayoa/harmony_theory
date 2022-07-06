@@ -79,6 +79,7 @@ main() {
       other.toString(): {
         0: null,
         1: ['ii'],
+        2: ['viidim'],
       },
     });
     _getMatchTester<int>(
@@ -88,6 +89,7 @@ main() {
       expected: {
         0: ['II', 'ii^2'],
         1: ['ii', 'ii^3', 'ii^5', 'ii7'],
+        2: ['viidim', 'vii7b5'],
       },
     );
   });
