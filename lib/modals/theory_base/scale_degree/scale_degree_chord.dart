@@ -202,7 +202,8 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
   int get degreesLength => patternLength;
 
   /// Returns true if the chord is diatonic in the major scale.
-  bool get isDiatonic => degrees.every((degree) => degree.isDiatonic);
+  bool get isDiatonic =>
+      bass.isDiatonic && degrees.every((degree) => degree.isDiatonic);
 
   bool get canBeTonic {
     if (_canBeTonicizedPatterns.contains(pattern.name)) return true;
@@ -435,14 +436,14 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
   /// they're not diatonic (based on the major scale).
   int get weakHash {
     List<Interval> intervals = pattern.intervals.sublist(1, 3);
-    if (intervals.length >= 4) {
+    if (pattern.intervals.length >= 4) {
       if (!root.add(pattern.intervals[3]).isDiatonic) {
         intervals.add(pattern.intervals[3]);
       }
     }
     return Object.hashAll([
       root,
-      if (!_isInversion) bass,
+      !_isInversion ? bass : null,
       ...[for (Interval interval in intervals) interval.getHash]
     ]);
   }
