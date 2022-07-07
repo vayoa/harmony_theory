@@ -279,7 +279,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
       case "Augmented":
         return ScaleDegreeChord.raw(ChordPattern.parse('Augmented 7th'), root);
       case "Diminished":
-      // not sure if to add 'Diminished 7th' here somehow...
+        // not sure if to add 'Diminished 7th' here somehow...
         return ScaleDegreeChord.raw(ChordPattern.parse('Minor 7th ♭5'), root);
       default:
         return ScaleDegreeChord.copy(this);
@@ -477,6 +477,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
       HarmonicFunction.tonic: null,
     },
     'I^5': {
+      HarmonicFunction.tonic: null,
       HarmonicFunction.dominant: ['V'],
     },
     'ii': {
