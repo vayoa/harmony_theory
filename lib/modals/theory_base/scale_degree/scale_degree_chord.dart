@@ -508,6 +508,11 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
       HarmonicFunction.tonic: null,
       HarmonicFunction.subDominant: ['V', 'viidim'],
     },
+    'vi^5': {
+      HarmonicFunction.tonic: null,
+      HarmonicFunction.dominant: ['III'],
+      // TODO: Ask yuval if this ^ is ok...
+    },
     'viidim': {
       HarmonicFunction.dominant: null,
       HarmonicFunction.subDominant: ['vi'],
