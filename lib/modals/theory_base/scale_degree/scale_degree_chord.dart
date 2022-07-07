@@ -5,8 +5,8 @@ import 'package:tonic/tonic.dart';
 
 import '../../../extensions/chord_extension.dart';
 import '../../../extensions/interval_extension.dart';
+import '../../analysis_tools/pair_map.dart';
 import '../../identifiable.dart';
-import '../../pair_map.dart';
 import '../../pitch_chord.dart';
 import '../generic_chord.dart';
 import '../pitch_scale.dart';
@@ -25,6 +25,8 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
   ///
   /// If [bass] is the same as [root] will still return true.
   bool get isInversion => _isInversion;
+
+  ScaleDegreeChord get tonic => majorTonicTriad;
 
   static const int maxInversionNumbers = 2;
 
@@ -79,11 +81,11 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     ScaleDegree rootDegree, {
     ScaleDegree? bass,
     Interval? bassToRoot,
-    bool? bassInChord,
+    bool? isInversion,
   })  : _bassToRoot = bassToRoot ??
             (bass == null ? Interval.P1 : bass.tryFrom(rootDegree)),
         // TODO: bassToRoot gets calculated twice...
-        _isInversion = bassInChord ??
+        _isInversion = isInversion ??
             (bass == null
                 ? true
                 : pattern.intervals.contains(bass.tryFrom(rootDegree))),
@@ -236,7 +238,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
         tonic.pattern,
         tonic.root,
         bass: tonic.bass,
-        bassInChord: tonic._isInversion,
+        isInversion: tonic._isInversion,
         bassToRoot: tonic._bassToRoot,
       );
     }
@@ -247,6 +249,32 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
         pattern,
         root.tonicizedFor(tonic.root),
         bass: bass.tonicizedFor(tonic.root),
+      ),
+    );
+  }
+
+  ScaleDegreeChord reverseTonicization(ScaleDegreeChord tonic) {
+    if (tonic.root == ScaleDegree.tonic) {
+      return ScaleDegreeChord.copy(this);
+    } else if (weakEqual(majorTonicTriad)) {
+      return ScaleDegreeChord.copy(tonic);
+    } else if (weakEqual(tonic)) {
+      return ScaleDegreeChord.raw(
+        pattern,
+        ScaleDegree.tonic,
+        bass: ScaleDegree(ScalePatternExtension.majorKey, bass.from(root)),
+        isInversion: isInversion,
+        bassToRoot: bassToRoot,
+      );
+    }
+    return TonicizedScaleDegreeChord(
+      tonic: tonic,
+      tonicizedToMajorScale: ScaleDegreeChord.copy(this),
+      tonicizedToTonic: ScaleDegreeChord.raw(
+        pattern,
+        ScaleDegree(ScalePatternExtension.majorKey, root.from(tonic.root)),
+        bass:
+            ScaleDegree(ScalePatternExtension.majorKey, bass.from(tonic.root)),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:harmony_theory/modals/theory_base/scale_degree/scale_degree_chord.dart';
+import 'package:harmony_theory/modals/theory_base/scale_degree/tonicized_scale_degree_chord.dart';
 
 class PairMap<T> {
   /// The computed hash map.
@@ -64,9 +65,42 @@ class PairMap<T> {
     return null;
   }
 
+  ScaleDegreeChord prepareForCheck(
+      ScaleDegreeChord chord, ScaleDegreeChord other) {
+    if (chord is TonicizedScaleDegreeChord &&
+        other is TonicizedScaleDegreeChord) {
+      if (chord.tonic.root == other.tonic.root) {
+        return chord.tonicizedToTonic;
+      } else {
+        return chord;
+      }
+    } else if (other is TonicizedScaleDegreeChord &&
+        other.tonic.weakEqual(chord)) {
+      return ScaleDegreeChord.majorTonicTriad;
+    } else if (chord is TonicizedScaleDegreeChord &&
+        chord.tonic.weakEqual(other)) {
+      return chord.tonicizedToTonic;
+    } else {
+      return chord;
+    }
+  }
+
   /// Returns the value for the given pair.
-  T? getMatch(ScaleDegreeChord first, ScaleDegreeChord? second) {
+  ///
+  /// [useTonicizations] determines whether in case both chords are
+  /// tonicized to the same tonic, we'll take their tonicizedToTonic
+  /// counterparts.
+  T? getMatch(
+    ScaleDegreeChord first,
+    ScaleDegreeChord? second, {
+    bool useTonicizations = true,
+  }) {
     if (second == null) return defaultFor(first);
+    if (useTonicizations) {
+      var tempFirst = prepareForCheck(first, second);
+      second = prepareForCheck(second, first);
+      first = tempFirst;
+    }
     int? firstHash = _containedHash(first, _hashMap);
     if (firstHash != null) {
       int? secondHash = _containedHash(second, _hashMap[firstHash]!);

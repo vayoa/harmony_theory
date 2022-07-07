@@ -2,10 +2,9 @@ import 'package:tonic/tonic.dart';
 
 import '../../extensions/interval_extension.dart';
 import '../../state/progression_bank.dart';
-import '../pair_map.dart';
+import '../analysis_tools/pair_map.dart';
 import '../progression/scale_degree_progression.dart';
 import '../theory_base/scale_degree/scale_degree_chord.dart';
-import '../theory_base/scale_degree/tonicized_scale_degree_chord.dart';
 import 'weight.dart';
 
 class HarmonicFunctionWeight extends Weight {
@@ -22,29 +21,9 @@ class HarmonicFunctionWeight extends Weight {
 
   static PairMap<int> get sortedFunctions => _sortedFunctions;
 
-  int? _getSorted(ScaleDegreeChord currentChord, ScaleDegreeChord nextChord) =>
-      sortedFunctions.getMatch(prepareForCheck(currentChord, nextChord),
-          prepareForCheck(nextChord, currentChord));
-
-  ScaleDegreeChord prepareForCheck(
-      ScaleDegreeChord chord, ScaleDegreeChord other) {
-    if (chord is TonicizedScaleDegreeChord &&
-        other is TonicizedScaleDegreeChord) {
-      if (chord.tonic.root == other.tonic.root) {
-        return chord.tonicizedToTonic;
-      } else {
-        return chord;
-      }
-    } else if (other is TonicizedScaleDegreeChord &&
-        other.tonic.weakEqual(chord)) {
-      return ScaleDegreeChord.majorTonicTriad;
-    } else if (chord is TonicizedScaleDegreeChord &&
-        chord.tonic.weakEqual(other)) {
-      return chord.tonicizedToTonic;
-    } else {
-      return chord;
-    }
-  }
+  static int? getSorted(
+          ScaleDegreeChord currentChord, ScaleDegreeChord nextChord) =>
+      sortedFunctions.getMatch(currentChord, nextChord);
 
   @override
   Score score({
@@ -60,7 +39,7 @@ class HarmonicFunctionWeight extends Weight {
       if (progression[currPos] != null && progression[nextPos] != null) {
         count++;
         int? pairFunctionValue =
-            _getSorted(progression[currPos]!, progression[nextPos]!);
+            getSorted(progression[currPos]!, progression[nextPos]!);
         // If the pair exists in the map sortedFunctions map...
         if (pairFunctionValue != null) {
           score += pairFunctionValue;

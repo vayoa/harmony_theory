@@ -51,7 +51,8 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
                     base.length, (index) => 1 / timeSignature.denominator),
             timeSignature: timeSignature);
 
-  ScaleDegreeProgression.fromChords(PitchScale scale, Progression<PitchChord> chords)
+  ScaleDegreeProgression.fromChords(
+      PitchScale scale, Progression<PitchChord> chords)
       : this.fromProgression(
           Progression<ScaleDegreeChord>.raw(
             values: chords.values
