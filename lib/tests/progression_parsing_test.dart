@@ -2,14 +2,14 @@ import 'package:harmony_theory/modals/analysis_tools/progression_analyzer.dart';
 import 'package:harmony_theory/modals/progression/scale_degree_progression.dart';
 
 abstract class ProgressionParsingTest {
-  static ProgressionParsingTestResult test(String input) {
+  static ProgressionParsingTestResult test(String input, {bool hard = false}) {
     ScaleDegreeProgression progression;
     try {
       progression = ScaleDegreeProgression.parse(input);
     } on Exception catch (e) {
       return ProgressionParsingTestResult(error: e);
     }
-    return ProgressionParsingTestResult.of(progression);
+    return ProgressionParsingTestResult.of(progression, hard: hard);
   }
 }
 
@@ -31,10 +31,11 @@ class ProgressionParsingTestResult {
                 (analyzedResult == null) == (analyzedObject == null)) &&
             (result == null) != (error == null));
 
-  ProgressionParsingTestResult.of(ScaleDegreeProgression progression) {
+  ProgressionParsingTestResult.of(ScaleDegreeProgression progression,
+      {required bool hard}) {
     object = progression;
     result = progression.toString();
-    analyzedObject = ProgressionAnalyzer.analyze(progression);
+    analyzedObject = ProgressionAnalyzer.analyze(progression, hard: hard);
     analyzedResult = analyzedObject.toString();
   }
 
