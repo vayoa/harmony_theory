@@ -37,6 +37,7 @@ class ProgressionParsingTestResult {
     result = progression.toString();
     analyzedObject = ProgressionAnalyzer.analyze(progression, hard: hard);
     analyzedResult = analyzedObject.toString();
+    error = null;
   }
 
   @override
