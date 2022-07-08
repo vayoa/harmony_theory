@@ -1,18 +1,16 @@
-import 'package:harmony_theory/modals/progression/scale_degree_progression.dart';
-
 import '../progression/progression.dart';
+import '../progression/scale_degree_progression.dart';
 import '../theory_base/scale_degree/scale_degree_chord.dart';
 import '../theory_base/scale_degree/tonicized_scale_degree_chord.dart';
 import '../weights/harmonic_function_weight.dart';
 
 class ProgressionAnalyzer {
-  /* TODO: Instead of iterating through values, iterate on
-           values that get cut by measures too... */
-
   /// Returns a "re-written" [prog] after undergoing a harmonic
   /// analysis, finding tonicizations.
   ///
   /// [hard] signifies that
+  /* TODO: Instead of iterating through values, iterate on
+           values that get cut by measures too... */
   static ScaleDegreeProgression analyze(
     ScaleDegreeProgression prog, {
     bool hard = false,

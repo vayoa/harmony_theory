@@ -1,5 +1,5 @@
-import 'package:harmony_theory/modals/analysis_tools/progression_analyzer.dart';
-import 'package:harmony_theory/modals/progression/scale_degree_progression.dart';
+import '../modals/analysis_tools/progression_analyzer.dart';
+import '../modals/progression/scale_degree_progression.dart';
 
 abstract class ProgressionParsingTest {
   static ProgressionParsingTestResult test(String input, {bool hard = false}) {

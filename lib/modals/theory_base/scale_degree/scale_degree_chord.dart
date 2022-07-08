@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:harmony_theory/extensions/scale_pattern_extension.dart';
 import 'package:tonic/tonic.dart';
 
 import '../../../extensions/chord_extension.dart';
 import '../../../extensions/interval_extension.dart';
+import '../../../extensions/scale_pattern_extension.dart';
 import '../../analysis_tools/pair_map.dart';
 import '../../identifiable.dart';
 import '../../pitch_chord.dart';
