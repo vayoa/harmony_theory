@@ -3,25 +3,24 @@ import 'package:harmony_theory/modals/substitution_match.dart';
 import 'package:test/test.dart';
 
 main() {
-  late final ScaleDegreeProgression base;
-  late final ScaleDegreeProgression sub;
-  late final int start;
-  late final double startDur;
-  late final int? end;
-  late final double? endDur;
-
-  setUp(() {
-    base = ScaleDegreeProgression.fromList(
-        [null, null, 'V', 'V', null, null, 'I', null]);
-    sub = ScaleDegreeProgression.fromList(['ii', 'V', 'I', 'ii']);
-    // Not really meant for changing, just here for formatting sake...
-    start = 0;
-    startDur = 0.25;
-    end = 3;
-    endDur = 0.25;
-  });
-
   group('Cut Range', () {
+    late final ScaleDegreeProgression base;
+    late final ScaleDegreeProgression sub;
+    late final int start;
+    late final double startDur;
+    late final int? end;
+    late final double? endDur;
+
+    setUp(() {
+      base = ScaleDegreeProgression.fromList(
+          [null, null, 'V', 'V', null, null, 'I', null]);
+      sub = ScaleDegreeProgression.fromList(['ii', 'V', 'I', 'ii']);
+      // Not really meant for changing, just here for formatting sake...
+      start = 0;
+      startDur = 0.25;
+      end = 3;
+      endDur = 0.25;
+    });
     test('Fitting Match Locations and Possible Substitutions', () {
       // Fitting Match Locations
       List<SubstitutionMatch> matches = base.getFittingMatchLocations(

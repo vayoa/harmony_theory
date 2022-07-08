@@ -65,6 +65,9 @@ class ScaleDegreeProgression extends Progression<ScaleDegreeChord> {
           ),
         );
 
+  ScaleDegreeProgression.parse(String input)
+      : super.parse(input: input, parser: ScaleDegreeChord.parse);
+
   ScaleDegreeProgression.fromJson(Map<String, dynamic> json)
       : super.raw(
           values: [

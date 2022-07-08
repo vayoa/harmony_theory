@@ -30,6 +30,9 @@ class ChordProgression extends Progression<PitchChord> {
           hasNull: progression.hasNull,
         );
 
+  ChordProgression.parse(String input)
+      : super.parse(input: input, parser: PitchChord.parse);
+
   List<PitchScale> get krumhanslSchmucklerScales {
     KrumhanslSchmucklerScaleDetection.initialize();
     return KrumhanslSchmucklerScaleDetection.correlateChordProgression(this);
