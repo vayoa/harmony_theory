@@ -2,8 +2,8 @@ import '../extensions/pitch_extension.dart';
 import '../modals/pitch_chord.dart';
 import '../modals/theory_base/generic_chord.dart';
 import '../modals/theory_base/pitch_scale.dart';
-import '../modals/theory_base/scale_degree/scale_degree_chord.dart';
-import '../modals/theory_base/scale_degree/tonicized_scale_degree_chord.dart';
+import '../modals/theory_base/scale_degree/degree_chord.dart';
+import '../modals/theory_base/scale_degree/tonicized_degree_chord.dart';
 
 abstract class ParsingTest {
   static ParsingTestResult test(String name, {PitchScale? scale}) {
@@ -13,7 +13,7 @@ abstract class ParsingTest {
       chord = PitchChord.parse(name);
     } on Exception catch (pitchError) {
       try {
-        chord = ScaleDegreeChord.parse(name);
+        chord = DegreeChord.parse(name);
       } on Exception catch (degreeError) {
         return ParsingTestResult(error: pitch ? pitchError : degreeError);
       }
@@ -44,8 +44,8 @@ class ParsingTestResult {
       originalSpec: ParsingTestResultSpec.of(chord),
       convertedSpec: ParsingTestResultSpec.of(
         (chord is PitchChord
-            ? ScaleDegreeChord(scale, chord)
-            : (chord as ScaleDegreeChord).inScale(scale)) as GenericChord,
+            ? DegreeChord(scale, chord)
+            : (chord as DegreeChord).inScale(scale)) as GenericChord,
       ),
       convertedScale: scale.toString(),
     );
@@ -78,7 +78,7 @@ class ParsingTestResultSpec {
           // Why like this? in web it doesn't show the runtime.toString correctly...
           type: chord is PitchChord
               ? 'Chord'
-              : (chord is TonicizedScaleDegreeChord
+              : (chord is TonicizedDegreeChord
                   ? 'Tonicization - ScaleDegreeChord'
                   : 'ScaleDegreeChord'),
           root: chord is PitchChord

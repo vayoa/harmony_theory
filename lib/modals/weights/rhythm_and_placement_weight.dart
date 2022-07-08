@@ -1,5 +1,5 @@
 import '../../state/progression_bank.dart';
-import '../progression/scale_degree_progression.dart';
+import '../progression/degree_progression.dart';
 import 'weight.dart';
 
 class RhythmAndPlacementWeight extends Weight {
@@ -35,8 +35,8 @@ class RhythmAndPlacementWeight extends Weight {
   /// All of these are additive.
   @override
   Score score({
-    required ScaleDegreeProgression progression,
-    required ScaleDegreeProgression base,
+    required DegreeProgression progression,
+    required DegreeProgression base,
     EntryLocation? location,
   }) {
     String details = '';

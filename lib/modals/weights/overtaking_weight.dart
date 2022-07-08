@@ -1,6 +1,6 @@
 import '../../state/progression_bank.dart';
-import '../theory_base/scale_degree/scale_degree_chord.dart';
-import '../progression/scale_degree_progression.dart';
+import '../progression/degree_progression.dart';
+import '../theory_base/scale_degree/degree_chord.dart';
 import 'weight.dart';
 
 class OvertakingWeight extends Weight {
@@ -18,11 +18,11 @@ class OvertakingWeight extends Weight {
   /// Acts only on progressions longer than 1 bar (returns 1.0 otherwise).
   /// If [progression] has a chord that takes up [overtaking] or more
   /// of the whole progression's duration, returns 0, otherwise returns 1.
-  /// Chords are deemed equal using [ScaleDegreeChord.weakEqual].
+  /// Chords are deemed equal using [DegreeChord.weakEqual].
   @override
   Score score({
-    required ScaleDegreeProgression progression,
-    required ScaleDegreeProgression base,
+    required DegreeProgression progression,
+    required DegreeProgression base,
     EntryLocation? location,
   }) {
     if (progression.duration < progression.timeSignature.decimal) {

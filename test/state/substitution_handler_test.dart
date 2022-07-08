@@ -1,6 +1,6 @@
 import 'package:harmony_theory/modals/pitch_chord.dart';
 import 'package:harmony_theory/modals/progression/chord_progression.dart';
-import 'package:harmony_theory/modals/progression/scale_degree_progression.dart';
+import 'package:harmony_theory/modals/progression/degree_progression.dart';
 import 'package:harmony_theory/modals/substitution.dart';
 import 'package:harmony_theory/modals/theory_base/pitch_scale.dart';
 import 'package:harmony_theory/modals/weights/keep_harmonic_function_weight.dart';
@@ -45,7 +45,7 @@ main() {
 }
 
 _testKeepHarmonicFunctionAmount({
-  required ScaleDegreeProgression progression,
+  required DegreeProgression progression,
   required KeepHarmonicFunctionAmount amount,
   required int greaterThan,
   required List<String> expectingToContain,
@@ -64,30 +64,29 @@ List<String> _getStrings(List<Substitution> subs) =>
 
 List<String> _getSplit(String str) => str.trim().split('\n');
 
-final ScaleDegreeProgression _yonatanHakatan =
-    ScaleDegreeProgression.fromChords(
-        PitchScale.common(tonic: Pitch.parse('C')),
-        ChordProgression(
-          chords: [
-            PitchChord.parse('C'),
-            PitchChord.parse('G'),
-            PitchChord.parse('C'),
-            PitchChord.parse('G'),
-            PitchChord.parse('C'),
-            PitchChord.parse('G'),
-            PitchChord.parse('C'),
-            PitchChord.parse('G'),
-            PitchChord.parse('C'),
-            PitchChord.parse('Dm'),
-            PitchChord.parse('G'),
-            PitchChord.parse('C'),
-            PitchChord.parse('G'),
-            PitchChord.parse('C'),
-            PitchChord.parse('G'),
-            PitchChord.parse('C'),
-            PitchChord.parse('G'),
-            PitchChord.parse('C'),
-          ],
+final DegreeProgression _yonatanHakatan = DegreeProgression.fromChords(
+    PitchScale.common(tonic: Pitch.parse('C')),
+    ChordProgression(
+      chords: [
+        PitchChord.parse('C'),
+        PitchChord.parse('G'),
+        PitchChord.parse('C'),
+        PitchChord.parse('G'),
+        PitchChord.parse('C'),
+        PitchChord.parse('G'),
+        PitchChord.parse('C'),
+        PitchChord.parse('G'),
+        PitchChord.parse('C'),
+        PitchChord.parse('Dm'),
+        PitchChord.parse('G'),
+        PitchChord.parse('C'),
+        PitchChord.parse('G'),
+        PitchChord.parse('C'),
+        PitchChord.parse('G'),
+        PitchChord.parse('C'),
+        PitchChord.parse('G'),
+        PitchChord.parse('C'),
+      ],
           durations: [
             1 / 4 * 2,
             1 / 4 * 2,

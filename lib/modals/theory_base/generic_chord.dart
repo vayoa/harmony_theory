@@ -1,8 +1,8 @@
 import 'package:tonic/tonic.dart';
 
 import '../../extensions/chord_extension.dart';
-import 'scale_degree/scale_degree.dart';
-import 'scale_degree/scale_degree_chord.dart';
+import 'scale_degree/degree.dart';
+import 'scale_degree/degree_chord.dart';
 
 abstract class GenericChord<T> {
   late final ChordPattern _pattern;
@@ -28,8 +28,8 @@ abstract class GenericChord<T> {
 
   bool get hasDifferentBass => _bass != null;
 
-  /// Returns a list of [ScaleDegree] that represents the degrees that make up
-  /// the [ScaleDegreeChord] in the major scale.
+  /// Returns a list of [Degree] that represents the degrees that make up
+  /// the [DegreeChord] in the major scale.
   List<T> get patternMapped;
 
   int get patternLength => _pattern.intervals.length;

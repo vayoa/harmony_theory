@@ -1,6 +1,6 @@
 import '../../state/progression_bank.dart';
-import '../progression/scale_degree_progression.dart';
-import '../theory_base/scale_degree/scale_degree_chord.dart';
+import '../progression/degree_progression.dart';
+import '../theory_base/scale_degree/degree_chord.dart';
 import 'weight.dart';
 
 class ImportantChordsWeight extends Weight {
@@ -29,8 +29,8 @@ class ImportantChordsWeight extends Weight {
   /// would subtract more points than changing another tonic.
   @override
   Score score({
-    required ScaleDegreeProgression progression,
-    required ScaleDegreeProgression base,
+    required DegreeProgression progression,
+    required DegreeProgression base,
     EntryLocation? location,
   }) {
     int points = 0, max = 0;
@@ -43,8 +43,8 @@ class ImportantChordsWeight extends Weight {
     // tonics.
     if (_isTonic(0, base)) {
       // If the first chord of base is a I or a vi
-      if (base[0]!.weakEqual(ScaleDegreeChord.majorTonicTriad) ||
-          base[0]!.weakEqual(ScaleDegreeChord.vi)) {
+      if (base[0]!.weakEqual(DegreeChord.majorTonicTriad) ||
+          base[0]!.weakEqual(DegreeChord.vi)) {
         max += 3;
         // If the first chord in progression isn't a I or a vi.
         if (progression[0] == null || !progression[0]!.weakEqual(base[0]!)) {
@@ -83,8 +83,8 @@ class ImportantChordsWeight extends Weight {
     if (_isTonic(base.length - 1, base)) {
       max++;
       bool checkDom = false;
-      if (base.values.last!.weakEqual(ScaleDegreeChord.majorTonicTriad) ||
-          base.values.last!.weakEqual(ScaleDegreeChord.vi)) {
+      if (base.values.last!.weakEqual(DegreeChord.majorTonicTriad) ||
+          base.values.last!.weakEqual(DegreeChord.vi)) {
         // Notice it's worst to change the ending tonic if it's a I or a vi
         // (since we added 1 to max earlier).
         max += 3;
@@ -187,11 +187,11 @@ class ImportantChordsWeight extends Weight {
 
   /* TODO: Ask yuval if this is correct, make sure to go through the PairMap
           to determine if what gets defined as a tonic is ok. */
-  bool _isChordTonic(ScaleDegreeChord? chord, {ScaleDegreeChord? next}) =>
+  bool _isChordTonic(DegreeChord? chord, {DegreeChord? next}) =>
       chord != null &&
       chord.deriveHarmonicFunction(next: next) == HarmonicFunction.tonic;
 
-  bool _isTonic(int index, ScaleDegreeProgression progression) =>
+  bool _isTonic(int index, DegreeProgression progression) =>
       _isChordTonic(progression[index],
           next: index + 1 < progression.length ? progression[index + 1] : null);
 }

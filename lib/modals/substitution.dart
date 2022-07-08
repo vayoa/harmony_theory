@@ -1,6 +1,6 @@
 import '../state/progression_bank.dart';
 import '../state/substitution_handler.dart';
-import 'progression/scale_degree_progression.dart';
+import 'progression/degree_progression.dart';
 import 'substitution_match.dart';
 import 'theory_base/pitch_scale.dart';
 import 'weights/keep_harmonic_function_weight.dart';
@@ -8,9 +8,9 @@ import 'weights/weight.dart';
 
 class Substitution {
   final EntryLocation? location;
-  final ScaleDegreeProgression substitutedBase;
-  final ScaleDegreeProgression originalSubstitution;
-  final ScaleDegreeProgression base;
+  final DegreeProgression substitutedBase;
+  final DegreeProgression originalSubstitution;
+  final DegreeProgression base;
   SubstitutionScore score;
   final SubstitutionMatch match;
   final double changedStart;
@@ -31,9 +31,9 @@ class Substitution {
 
   Substitution copyWith({
     EntryLocation? location,
-    ScaleDegreeProgression? substitutedBase,
-    ScaleDegreeProgression? originalSubstitution,
-    ScaleDegreeProgression? base,
+    DegreeProgression? substitutedBase,
+    DegreeProgression? originalSubstitution,
+    DegreeProgression? base,
     double? changedStart,
     double? changedEnd,
     SubstitutionScore? score,
@@ -64,7 +64,7 @@ class Substitution {
     List<Weight> weights, {
     bool keepHarmonicFunction = false,
     Sound? sound,
-    ScaleDegreeProgression? harmonicFunctionBase,
+    DegreeProgression? harmonicFunctionBase,
   }) {
     sound ??= Sound.both;
     double rating = 0.0;

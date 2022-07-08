@@ -1,18 +1,18 @@
-import '../theory_base/scale_degree/scale_degree_chord.dart';
-import '../theory_base/scale_degree/tonicized_scale_degree_chord.dart';
+import '../theory_base/scale_degree/degree_chord.dart';
+import '../theory_base/scale_degree/tonicized_degree_chord.dart';
 
 class PairMap<T> {
   /// The computed hash map.
   ///
-  /// First key is the first [ScaleDegreeChord].
+  /// First key is the first [DegreeChord].
   ///
-  /// The key in the second map is the second [ScaleDegreeChord],
+  /// The key in the second map is the second [DegreeChord],
   /// and the value for that key is the value [T] returned by their pair
   /// (one after the other...).
   ///
   /// The [_hashMap] contains an int of the hash of the chord.
-  /// The [ScaleDegreeChord.weakHash] of it if it contains it, otherwise the regular
-  /// [ScaleDegreeChord.hashCode].
+  /// The [DegreeChord.weakHash] of it if it contains it, otherwise the regular
+  /// [DegreeChord.hashCode].
   /// This allows us to specify chords that would get otherwise lost in the weakHash
   /// (like a I^5 for instance).
   late final Map<int, Map<int?, T>> _hashMap;
@@ -21,11 +21,11 @@ class PairMap<T> {
 
   /// Creates a new [PairMap] where [map] will be converted to [_hashMap].
   ///
-  /// The Strings given in [map] will be converted using [ScaleDegreeChord.parse].
+  /// The Strings given in [map] will be converted using [DegreeChord.parse].
   PairMap(Map<String, Map<T, List<String>?>> map) {
     _hashMap = {};
     for (String first in map.keys) {
-      int firstHash = _hash(ScaleDegreeChord.parse(first));
+      int firstHash = _hash(DegreeChord.parse(first));
       assert(!_hashMap.containsKey(firstHash));
       _hashMap[firstHash] = {};
 
@@ -38,7 +38,7 @@ class PairMap<T> {
         } else {
           for (String? second in map[first]![value]!) {
             int? secondHash =
-                second == null ? null : _hash(ScaleDegreeChord.parse(second));
+                second == null ? null : _hash(DegreeChord.parse(second));
             assert(!_hashMap[firstHash]!.containsKey(secondHash));
             _hashMap[firstHash]![secondHash] = value;
           }
@@ -48,13 +48,13 @@ class PairMap<T> {
   }
 
   // TODO: Optimize, we're always hashing twice...
-  int _hash(ScaleDegreeChord chord) {
+  int _hash(DegreeChord chord) {
     int weak = chord.weakHash, strong = chord.hashCode;
     if (weak == strong) return weak;
     return strong;
   }
 
-  int? _containedHash(ScaleDegreeChord chord, Map map) {
+  int? _containedHash(DegreeChord chord, Map map) {
     // Start with the strong...
     int strong = chord.hashCode;
     if (map.containsKey(strong)) return strong;
@@ -65,20 +65,16 @@ class PairMap<T> {
     return null;
   }
 
-  ScaleDegreeChord prepareForCheck(
-      ScaleDegreeChord chord, ScaleDegreeChord other) {
-    if (chord is TonicizedScaleDegreeChord &&
-        other is TonicizedScaleDegreeChord) {
+  DegreeChord prepareForCheck(DegreeChord chord, DegreeChord other) {
+    if (chord is TonicizedDegreeChord && other is TonicizedDegreeChord) {
       if (chord.tonic.root == other.tonic.root) {
         return chord.tonicizedToTonic;
       } else {
         return chord;
       }
-    } else if (other is TonicizedScaleDegreeChord &&
-        other.tonic.weakEqual(chord)) {
-      return ScaleDegreeChord.majorTonicTriad;
-    } else if (chord is TonicizedScaleDegreeChord &&
-        chord.tonic.weakEqual(other)) {
+    } else if (other is TonicizedDegreeChord && other.tonic.weakEqual(chord)) {
+      return DegreeChord.majorTonicTriad;
+    } else if (chord is TonicizedDegreeChord && chord.tonic.weakEqual(other)) {
       return chord.tonicizedToTonic;
     } else {
       return chord;
@@ -91,8 +87,8 @@ class PairMap<T> {
   /// tonicized to the same tonic, we'll take their tonicizedToTonic
   /// counterparts.
   T? getMatch(
-    ScaleDegreeChord first,
-    ScaleDegreeChord? second, {
+    DegreeChord first,
+    DegreeChord? second, {
     bool useTonicizations = true,
   }) {
     if (second == null) return defaultFor(first);
@@ -113,7 +109,7 @@ class PairMap<T> {
     return null;
   }
 
-  T? defaultFor(ScaleDegreeChord chord) =>
+  T? defaultFor(DegreeChord chord) =>
       _hashMap[_containedHash(chord, _hashMap)]?[null];
 
   @override

@@ -3,7 +3,7 @@ import 'package:tonic/tonic.dart';
 import '../extensions/chord_extension.dart';
 import '../extensions/pitch_extension.dart';
 import 'theory_base/generic_chord.dart';
-import 'theory_base/scale_degree/scale_degree_chord.dart';
+import 'theory_base/scale_degree/degree_chord.dart';
 
 /// Our implementation of a regular chord (built of [Pitch]...), with possible
 /// inversions.

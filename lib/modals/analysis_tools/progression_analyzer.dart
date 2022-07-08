@@ -1,7 +1,7 @@
+import '../progression/degree_progression.dart';
 import '../progression/progression.dart';
-import '../progression/scale_degree_progression.dart';
-import '../theory_base/scale_degree/scale_degree_chord.dart';
-import '../theory_base/scale_degree/tonicized_scale_degree_chord.dart';
+import '../theory_base/scale_degree/degree_chord.dart';
+import '../theory_base/scale_degree/tonicized_degree_chord.dart';
 import '../weights/harmonic_function_weight.dart';
 
 class ProgressionAnalyzer {
@@ -11,22 +11,22 @@ class ProgressionAnalyzer {
   /// [hard] signifies that
   /* TODO: Instead of iterating through values, iterate on
            values that get cut by measures too... */
-  static ScaleDegreeProgression analyze(
-    ScaleDegreeProgression prog, {
+  static DegreeProgression analyze(
+    DegreeProgression prog, {
     bool hard = false,
   }) {
-    List<ScaleDegreeChord?> chords = [];
+    List<DegreeChord?> chords = [];
     int last = 0;
     // find the index of the first chord that isn't null,
     // this is our current tonic.
     for (; last < prog.length; last++) {
       if (prog.values[last] != null) break;
     }
-    ScaleDegreeChord currentTonic = prog.values[last]!;
+    DegreeChord currentTonic = prog.values[last]!;
 
     // Iterate on the progression backwards.
     for (int i = prog.length - 1; i >= last; i--) {
-      ScaleDegreeChord? chord = _analyze(
+      DegreeChord? chord = _analyze(
         prog: prog,
         index: i,
         hard: hard,
@@ -39,7 +39,7 @@ class ProgressionAnalyzer {
       chords.insert(0, chord);
     }
 
-    return ScaleDegreeProgression.fromProgression(
+    return DegreeProgression.fromProgression(
       Progression.raw(
         values: chords,
         durations: prog.durations,
@@ -49,14 +49,14 @@ class ProgressionAnalyzer {
     );
   }
 
-  static ScaleDegreeChord? _analyze({
-    required ScaleDegreeProgression prog,
+  static DegreeChord? _analyze({
+    required DegreeProgression prog,
     required int index,
     required bool hard,
-    required ScaleDegreeChord currentTonic,
-    required ScaleDegreeChord? lastAdded,
+    required DegreeChord currentTonic,
+    required DegreeChord? lastAdded,
   }) {
-    ScaleDegreeChord? chord = prog.values[index];
+    DegreeChord? chord = prog.values[index];
 
     // If the chord isn't diatonic
     if (chord != null && (hard || !chord.isDiatonic)) {
@@ -83,12 +83,12 @@ class ProgressionAnalyzer {
   /// next chord after them is [next].
   ///
   /// [chords] should all be the same chord, just named differently.
-  static ScaleDegreeChord _pickBest({
-    required List<ScaleDegreeChord> chords,
-    required ScaleDegreeChord? next,
+  static DegreeChord _pickBest({
+    required List<DegreeChord> chords,
+    required DegreeChord? next,
   }) {
     if (chords.length == 1) return chords.first;
-    ScaleDegreeChord maxChord = chords.first;
+    DegreeChord maxChord = chords.first;
     int max = HarmonicFunctionWeight.maxFunctionImportance * -2;
     for (var chord in chords) {
       var realNext = next ?? chord.tonic;
@@ -98,7 +98,7 @@ class ProgressionAnalyzer {
       if (!_diatonicTonicization(chord)) score--;
       // Add points when the current chord and the next have the
       // same tonic (when it's not a I)...
-      if (chord.tonic != ScaleDegreeChord.majorTonicTriad &&
+      if (chord.tonic != DegreeChord.majorTonicTriad &&
           chord.tonic == realNext.tonic) score++;
       if (score > max) {
         maxChord = chord;
@@ -112,24 +112,24 @@ class ProgressionAnalyzer {
   /// if no adjacent chord exists, returns null.
   ///
   /// [index] is [chord]'s position in [prog].
-  static ScaleDegreeChord? _tonicizedToNext(
+  static DegreeChord? _tonicizedToNext(
     int index,
-    ScaleDegreeProgression prog,
-    ScaleDegreeChord chord,
+    DegreeProgression prog,
+    DegreeChord chord,
   ) {
     /* TODO: Maybe instead of the next chord look for the next
                 diatonic chord? Could interfere with tonicizations
                 to non-diatonic chords though... */
     if (index + 1 < prog.length && prog.values[index + 1] != null) {
-      ScaleDegreeChord nextTonic = prog.values[index + 1]!;
-      ScaleDegreeChord tonicizedToNext = chord.reverseTonicization(nextTonic);
+      DegreeChord nextTonic = prog.values[index + 1]!;
+      DegreeChord tonicizedToNext = chord.reverseTonicization(nextTonic);
       return tonicizedToNext;
     }
     return null;
   }
 
-  /// Returns true if [chord] is [TonicizedScaleDegreeChord] and its
-  /// [TonicizedScaleDegreeChord.tonicizedToTonic] is diatonic.
-  static bool _diatonicTonicization(ScaleDegreeChord chord) =>
-      chord is TonicizedScaleDegreeChord && chord.tonicizedToTonic.isDiatonic;
+  /// Returns true if [chord] is [TonicizedDegreeChord] and its
+  /// [TonicizedDegreeChord.tonicizedToTonic] is diatonic.
+  static bool _diatonicTonicization(DegreeChord chord) =>
+      chord is TonicizedDegreeChord && chord.tonicizedToTonic.isDiatonic;
 }

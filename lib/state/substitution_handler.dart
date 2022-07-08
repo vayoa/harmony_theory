@@ -1,6 +1,6 @@
-import '../modals/theory_base/scale_degree/scale_degree_chord.dart';
-import '../modals/progression/scale_degree_progression.dart';
+import '../modals/progression/degree_progression.dart';
 import '../modals/substitution.dart';
+import '../modals/theory_base/scale_degree/degree_chord.dart';
 import '../modals/weights/climactic_ending_weight.dart';
 import '../modals/weights/complex_weight.dart';
 import '../modals/weights/harmonic_function_weight.dart';
@@ -38,7 +38,7 @@ abstract class SubstitutionHandler {
   };
 
   static List<Substitution> _getPossibleSubstitutions(
-    ScaleDegreeProgression base, {
+    DegreeProgression base, {
     int start = 0,
     double startDur = 0.0,
     int? end,
@@ -47,7 +47,7 @@ abstract class SubstitutionHandler {
     final List<Substitution> substitutions = [];
     end ??= base.length;
     for (int i = start; i < end; i++) {
-      ScaleDegreeChord? chord = base[i];
+      DegreeChord? chord = base[i];
       if (chord != null) {
         List<PackagedProgression>? progressions =
             ProgressionBank.getByGroup(chord: chord, withTonicization: false);
@@ -82,10 +82,10 @@ abstract class SubstitutionHandler {
   }
 
   static List<Substitution> getRatedSubstitutions(
-    ScaleDegreeProgression base, {
+    DegreeProgression base, {
     Sound? sound,
     KeepHarmonicFunctionAmount? keepAmount,
-    ScaleDegreeProgression? harmonicFunctionBase,
+    DegreeProgression? harmonicFunctionBase,
     int start = 0,
     double startDur = 0.0,
     int? end,
@@ -118,7 +118,7 @@ abstract class SubstitutionHandler {
 
   /// Substitutes the best option for [maxIterations] iterations.
   static Substitution substituteBy({
-    required ScaleDegreeProgression base,
+    required DegreeProgression base,
     required int maxIterations,
     Sound? sound,
     KeepHarmonicFunctionAmount? keepHarmonicFunction,
@@ -127,7 +127,7 @@ abstract class SubstitutionHandler {
     int? end,
     double? endDur,
   }) {
-    ScaleDegreeProgression prev = base;
+    DegreeProgression prev = base;
     List<Substitution> rated;
     do {
       rated = getRatedSubstitutions(

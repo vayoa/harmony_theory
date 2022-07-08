@@ -1,16 +1,16 @@
 import 'package:harmony_theory/modals/analysis_tools/progression_analyzer.dart';
-import 'package:harmony_theory/modals/progression/scale_degree_progression.dart';
+import 'package:harmony_theory/modals/progression/degree_progression.dart';
 import 'package:test/test.dart';
 
 main() {
   group('.analyze()', () {
-    late ScaleDegreeProgression progression;
-    late ScaleDegreeProgression progression2;
-    late ScaleDegreeProgression progressionNull;
-    late ScaleDegreeProgression progressionNull2;
+    late DegreeProgression progression;
+    late DegreeProgression progression2;
+    late DegreeProgression progressionNull;
+    late DegreeProgression progressionNull2;
 
     setUp(() {
-      progression = ScaleDegreeProgression.fromList([
+      progression = DegreeProgression.fromList([
         'I',
         'I',
         'viidim',
@@ -18,7 +18,7 @@ main() {
         'vi',
         'vi',
       ]);
-      progression2 = ScaleDegreeProgression.fromList([
+      progression2 = DegreeProgression.fromList([
         'I',
         'I',
         'vi',
@@ -28,7 +28,7 @@ main() {
         'vi',
         'vi',
       ]);
-      progressionNull = ScaleDegreeProgression.fromList([
+      progressionNull = DegreeProgression.fromList([
         'I',
         'I',
         'viidim',
@@ -36,7 +36,7 @@ main() {
         'vi',
         'vi',
       ]);
-      progressionNull2 = ScaleDegreeProgression.fromList([
+      progressionNull2 = DegreeProgression.fromList([
         'I',
         'I',
         'vi',
@@ -52,7 +52,7 @@ main() {
       test('no nulls', () {
         expect(
           ProgressionAnalyzer.analyze(progression, hard: false).toString(),
-          equals(ScaleDegreeProgression.fromList([
+          equals(DegreeProgression.fromList([
             'I',
             'I',
             'viidim',
@@ -63,7 +63,7 @@ main() {
         );
         expect(
           ProgressionAnalyzer.analyze(progression2, hard: false).toString(),
-          equals(ScaleDegreeProgression.fromList([
+          equals(DegreeProgression.fromList([
             'I',
             'I',
             'vi',
@@ -78,7 +78,7 @@ main() {
       test('with nulls', () {
         expect(
           ProgressionAnalyzer.analyze(progressionNull, hard: false).toString(),
-          equals(ScaleDegreeProgression.fromList([
+          equals(DegreeProgression.fromList([
             'I',
             'I',
             'viidim',
@@ -89,7 +89,7 @@ main() {
         );
         expect(
           ProgressionAnalyzer.analyze(progressionNull2, hard: false).toString(),
-          equals(ScaleDegreeProgression.fromList([
+          equals(DegreeProgression.fromList([
             'I',
             'I',
             'vi',
@@ -107,7 +107,7 @@ main() {
       test('no nulls', () {
         expect(
           ProgressionAnalyzer.analyze(progression, hard: true).toString(),
-          equals(ScaleDegreeProgression.fromList([
+          equals(DegreeProgression.fromList([
             'I',
             'I',
             'iidim/vi',
@@ -118,7 +118,7 @@ main() {
         );
         expect(
           ProgressionAnalyzer.analyze(progression2, hard: true).toString(),
-          equals(ScaleDegreeProgression.fromList([
+          equals(DegreeProgression.fromList([
             'I',
             'I',
             'vi',
@@ -133,7 +133,7 @@ main() {
       test('with nulls', () {
         expect(
           ProgressionAnalyzer.analyze(progressionNull, hard: true).toString(),
-          equals(ScaleDegreeProgression.fromList([
+          equals(DegreeProgression.fromList([
             'I',
             'I',
             'viidim',
@@ -144,7 +144,7 @@ main() {
         );
         expect(
           ProgressionAnalyzer.analyze(progressionNull2, hard: true).toString(),
-          equals(ScaleDegreeProgression.fromList([
+          equals(DegreeProgression.fromList([
             'I',
             'I',
             'vi',

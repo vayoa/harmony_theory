@@ -1,5 +1,5 @@
-import 'progression/scale_degree_progression.dart';
-import 'theory_base/scale_degree/scale_degree_chord.dart';
+import 'progression/degree_progression.dart';
+import 'theory_base/scale_degree/degree_chord.dart';
 
 class SubstitutionMatch {
   final int baseIndex;
@@ -46,32 +46,32 @@ class SubstitutionMatch {
       withSeventh.hashCode;
 
   static SubstitutionMatchType? getMatchType(
-      {required ScaleDegreeChord? base,
-      required ScaleDegreeChord? sub,
+      {required DegreeChord? base,
+      required DegreeChord? sub,
       required bool isSubLast}) {
     if ((sub == null || base == null) || sub.weakEqual(base)) {
       return SubstitutionMatchType.dry;
     } else if (isSubLast &&
-        sub.weakEqual(ScaleDegreeChord.majorTonicTriad) &&
+        sub.weakEqual(DegreeChord.majorTonicTriad) &&
         base.canBeTonic) {
       return SubstitutionMatchType.tonicization;
     }
     return null;
   }
 
-  static ScaleDegreeProgression getSubstitution({
-    required ScaleDegreeProgression progression,
+  static DegreeProgression getSubstitution({
+    required DegreeProgression progression,
     required SubstitutionMatchType type,
     required bool addSeventh,
     required double ratio,
-    ScaleDegreeChord? tonic,
+    DegreeChord? tonic,
   }) {
     switch (type) {
       case SubstitutionMatchType.dry:
         if (addSeventh) {
           return progression.addSeventh(ratio: ratio);
         } else {
-          return ScaleDegreeProgression.fromProgression(
+          return DegreeProgression.fromProgression(
               progression.relativeRhythmTo(ratio));
         }
       case SubstitutionMatchType.tonicization:

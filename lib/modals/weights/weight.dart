@@ -1,6 +1,6 @@
 import '../../state/progression_bank.dart';
+import '../progression/degree_progression.dart';
 import '../progression/progression.dart';
-import '../progression/scale_degree_progression.dart';
 import '../substitution.dart';
 
 /// A particular [ScoreGiver] that scores a [Progression] within a range of
@@ -39,14 +39,14 @@ abstract class Weight {
   }
 
   Score score({
-    required ScaleDegreeProgression progression,
-    required ScaleDegreeProgression base,
+    required DegreeProgression progression,
+    required DegreeProgression base,
     EntryLocation? location,
   });
 
   /// Returns the [progression]'s score after scaling it based on [importance].
   Score scaledScore(
-          {required Substitution substitution, ScaleDegreeProgression? base}) =>
+          {required Substitution substitution, DegreeProgression? base}) =>
       score(
         progression: substitution.substitutedBase,
         base: base ?? substitution.base,

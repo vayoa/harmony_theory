@@ -1,11 +1,11 @@
 import '../modals/analysis_tools/progression_analyzer.dart';
-import '../modals/progression/scale_degree_progression.dart';
+import '../modals/progression/degree_progression.dart';
 
 abstract class ProgressionParsingTest {
   static ProgressionParsingTestResult test(String input, {bool hard = false}) {
-    ScaleDegreeProgression progression;
+    DegreeProgression progression;
     try {
-      progression = ScaleDegreeProgression.parse(input);
+      progression = DegreeProgression.parse(input);
     } on Exception catch (e) {
       return ProgressionParsingTestResult(error: e);
     }
@@ -15,9 +15,9 @@ abstract class ProgressionParsingTest {
 
 class ProgressionParsingTestResult {
   late final String? result;
-  late final ScaleDegreeProgression? object;
+  late final DegreeProgression? object;
   late final String? analyzedResult;
-  late final ScaleDegreeProgression? analyzedObject;
+  late final DegreeProgression? analyzedObject;
   late final Exception? error;
 
   ProgressionParsingTestResult({
@@ -31,7 +31,7 @@ class ProgressionParsingTestResult {
                 (analyzedResult == null) == (analyzedObject == null)) &&
             (result == null) != (error == null));
 
-  ProgressionParsingTestResult.of(ScaleDegreeProgression progression,
+  ProgressionParsingTestResult.of(DegreeProgression progression,
       {required bool hard}) {
     object = progression;
     result = progression.toString();

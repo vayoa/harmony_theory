@@ -3,8 +3,8 @@ import 'package:tonic/tonic.dart';
 import '../../extensions/interval_extension.dart';
 import '../../state/progression_bank.dart';
 import '../analysis_tools/pair_map.dart';
-import '../progression/scale_degree_progression.dart';
-import '../theory_base/scale_degree/scale_degree_chord.dart';
+import '../progression/degree_progression.dart';
+import '../theory_base/scale_degree/degree_chord.dart';
 import 'weight.dart';
 
 class HarmonicFunctionWeight extends Weight {
@@ -21,14 +21,13 @@ class HarmonicFunctionWeight extends Weight {
 
   static PairMap<int> get sortedFunctions => _sortedFunctions;
 
-  static int? getSorted(
-          ScaleDegreeChord currentChord, ScaleDegreeChord nextChord) =>
+  static int? getSorted(DegreeChord currentChord, DegreeChord nextChord) =>
       sortedFunctions.getMatch(currentChord, nextChord);
 
   @override
   Score score({
-    required ScaleDegreeProgression progression,
-    required ScaleDegreeProgression base,
+    required DegreeProgression progression,
+    required DegreeProgression base,
     EntryLocation? location,
   }) {
     int score = 0, count = 0;

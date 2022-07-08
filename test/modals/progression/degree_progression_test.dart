@@ -1,20 +1,20 @@
-import 'package:harmony_theory/modals/progression/scale_degree_progression.dart';
+import 'package:harmony_theory/modals/progression/degree_progression.dart';
 import 'package:harmony_theory/modals/substitution_match.dart';
 import 'package:test/test.dart';
 
 main() {
   group('Cut Range', () {
-    late final ScaleDegreeProgression base;
-    late final ScaleDegreeProgression sub;
+    late final DegreeProgression base;
+    late final DegreeProgression sub;
     late final int start;
     late final double startDur;
     late final int? end;
     late final double? endDur;
 
     setUp(() {
-      base = ScaleDegreeProgression.fromList(
+      base = DegreeProgression.fromList(
           [null, null, 'V', 'V', null, null, 'I', null]);
-      sub = ScaleDegreeProgression.fromList(['ii', 'V', 'I', 'ii']);
+      sub = DegreeProgression.fromList(['ii', 'V', 'I', 'ii']);
       // Not really meant for changing, just here for formatting sake...
       start = 0;
       startDur = 0.25;
@@ -41,7 +41,7 @@ main() {
       expect(matches, contains(expectedMatch));
 
       // Possible Substitutions durations
-      List<ScaleDegreeProgression> subs = base
+      List<DegreeProgression> subs = base
           .getPossibleSubstitutions(
             sub,
             start: start,
@@ -51,8 +51,7 @@ main() {
           )
           .map((e) => e.substitutedBase)
           .toList(growable: false);
-      ScaleDegreeProgression expectedProgression =
-          ScaleDegreeProgression.fromList(
+      DegreeProgression expectedProgression = DegreeProgression.fromList(
         [null, 'ii', 'V', 'I', 'ii', null, 'I', null],
       );
       expect(subs, contains(expectedProgression));

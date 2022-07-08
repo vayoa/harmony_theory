@@ -3,7 +3,7 @@ import 'package:tonic/tonic.dart';
 import '../extensions/scale_pattern_extension.dart';
 import '../modals/pitch_chord.dart';
 import '../modals/theory_base/pitch_scale.dart';
-import '../modals/theory_base/scale_degree/scale_degree_chord.dart';
+import '../modals/theory_base/scale_degree/degree_chord.dart';
 
 // ignore_for_file: avoid_print
 
@@ -11,18 +11,18 @@ abstract class ScaleDegreeChordTest {
   static bool test() {
     print('-- Regular --');
     List<Pitch> pitches = possiblePitches;
-    Map<PitchScale, List<ScaleDegreeChord>> reverse = {};
+    Map<PitchScale, List<DegreeChord>> reverse = {};
     for (Pitch pitch in pitches) {
       PitchScale scale =
           PitchScale(tonic: pitch, pattern: ScalePatternExtension.majorKey);
       for (int i = 0; i < 2; i++) {
         List<String> inScale = [];
-        List<ScaleDegreeChord> chords = [];
+        List<DegreeChord> chords = [];
         for (int j = 0; j < pitches.length; j++) {
           Pitch converted = pitches[j];
           String name = '${converted.letterName}${converted.accidentalsString}';
           try {
-            chords.add(ScaleDegreeChord(scale, PitchChord.parse(name)));
+            chords.add(DegreeChord(scale, PitchChord.parse(name)));
             inScale.add('$name: ${chords.last}');
           } catch (e) {
             print('$converted in $scale failed:');
@@ -43,11 +43,10 @@ abstract class ScaleDegreeChordTest {
       }
     }
     print('\n-- Reversed --');
-    for (MapEntry<PitchScale, List<ScaleDegreeChord>> entry
-        in reverse.entries) {
+    for (MapEntry<PitchScale, List<DegreeChord>> entry in reverse.entries) {
       List<String> chords = entry.value
-          .map((ScaleDegreeChord sdc) =>
-              '$sdc: ${sdc.inScale(entry.key).toString()}')
+          .map(
+              (DegreeChord sdc) => '$sdc: ${sdc.inScale(entry.key).toString()}')
           .toList();
       print('${entry.key}: $chords');
     }

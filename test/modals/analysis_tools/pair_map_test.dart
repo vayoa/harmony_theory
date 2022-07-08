@@ -1,10 +1,10 @@
 import 'package:harmony_theory/modals/analysis_tools/pair_map.dart';
-import 'package:harmony_theory/modals/theory_base/scale_degree/scale_degree_chord.dart';
+import 'package:harmony_theory/modals/theory_base/scale_degree/degree_chord.dart';
 import 'package:test/test.dart';
 
 main() {
   group('getMatch()', () {
-    ScaleDegreeChord other = ScaleDegreeChord.majorTonicTriad;
+    DegreeChord other = DegreeChord.majorTonicTriad;
 
     // Create a PairMap. Add a ii, ii7, iimaj7. Add a iii and a V as well.
     Map<String, Map<int, List<String>>> map = {
@@ -74,7 +74,7 @@ main() {
   });
 
   test('getMatch() null', () {
-    ScaleDegreeChord other = ScaleDegreeChord.parse('IV');
+    DegreeChord other = DegreeChord.parse('IV');
     PairMap<int> pairMap = PairMap({
       other.toString(): {
         0: null,
@@ -98,15 +98,15 @@ main() {
 _getMatchTester<T>({
   required bool first,
   required PairMap<T> pairMap,
-  required ScaleDegreeChord other,
+  required DegreeChord other,
   required Map<T?, List<String>> expected,
 }) {
-  final Map<T?, List<ScaleDegreeChord>> realExpected = expected.map(
-    (key, value) => MapEntry(key,
-        value.map((e) => ScaleDegreeChord.parse(e)).toList(growable: false)),
+  final Map<T?, List<DegreeChord>> realExpected = expected.map(
+    (key, value) => MapEntry(
+        key, value.map((e) => DegreeChord.parse(e)).toList(growable: false)),
   );
   for (T? val in expected.keys) {
-    for (ScaleDegreeChord chord in realExpected[val]!) {
+    for (DegreeChord chord in realExpected[val]!) {
       _Pair pair = _Pair(chord, other);
       expect(
         first ? pair : pair.swap,
@@ -117,8 +117,8 @@ _getMatchTester<T>({
 }
 
 class _Pair {
-  final ScaleDegreeChord first;
-  final ScaleDegreeChord second;
+  final DegreeChord first;
+  final DegreeChord second;
 
   const _Pair(this.first, this.second);
 

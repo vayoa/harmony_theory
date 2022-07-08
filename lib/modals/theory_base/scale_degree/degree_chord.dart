@@ -10,23 +10,22 @@ import '../../identifiable.dart';
 import '../../pitch_chord.dart';
 import '../generic_chord.dart';
 import '../pitch_scale.dart';
-import 'scale_degree.dart';
-import 'tonicized_scale_degree_chord.dart';
+import 'degree.dart';
+import 'tonicized_degree_chord.dart';
 
-class ScaleDegreeChord extends GenericChord<ScaleDegree>
-    implements Identifiable {
+class DegreeChord extends GenericChord<Degree> implements Identifiable {
   final Interval? _bassToRoot;
 
   Interval? get bassToRoot => _bassToRoot;
 
   final bool _isInversion;
 
-  /// Returns true if [bass] is a degree in the current [ScaleDegreeChord], meaning an inversion.
+  /// Returns true if [bass] is a degree in the current [DegreeChord], meaning an inversion.
   ///
   /// If [bass] is the same as [root] will still return true.
   bool get isInversion => _isInversion;
 
-  ScaleDegreeChord get tonic => majorTonicTriad;
+  DegreeChord get tonic => majorTonicTriad;
 
   static const int maxInversionNumbers = 2;
 
@@ -49,37 +48,37 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
   ///
   /// Example: In C major, a ScaleDegreeChord that was parsed from C/F##
   /// will turn to I⁶₄ (C/G)...
-  factory ScaleDegreeChord._inharmonicityHandler(
+  factory DegreeChord._inharmonicityHandler(
     ChordPattern pattern,
-    ScaleDegree rootDegree, {
-    ScaleDegree? bass,
+    Degree rootDegree, {
+    Degree? bass,
   }) {
     if (bass == null) {
-      return ScaleDegreeChord.raw(pattern, rootDegree);
+      return DegreeChord.raw(pattern, rootDegree);
     }
     Interval? tryFrom = rootDegree.tryFrom(bass);
     if (tryFrom == null) {
       int semitones = ScalePatternExtension.majorKeySemitones[bass.degree] +
           bass.accidentals;
-      bass = ScaleDegree.fromPitch(
-          PitchScale.cMajor, Pitch.fromMidiNumber(semitones));
+      bass =
+          Degree.fromPitch(PitchScale.cMajor, Pitch.fromMidiNumber(semitones));
     }
-    return ScaleDegreeChord.raw(pattern, rootDegree, bass: bass);
+    return DegreeChord.raw(pattern, rootDegree, bass: bass);
   }
 
-  factory ScaleDegreeChord(PitchScale scale, PitchChord chord) =>
-      ScaleDegreeChord._inharmonicityHandler(
+  factory DegreeChord(PitchScale scale, PitchChord chord) =>
+      DegreeChord._inharmonicityHandler(
         chord.pattern,
-        ScaleDegree.fromPitch(scale, chord.root),
+        Degree.fromPitch(scale, chord.root),
         bass: !chord.hasDifferentBass
             ? null
-            : ScaleDegree.fromPitch(scale, chord.bass),
+            : Degree.fromPitch(scale, chord.bass),
       );
 
-  ScaleDegreeChord.raw(
+  DegreeChord.raw(
     ChordPattern pattern,
-    ScaleDegree rootDegree, {
-    ScaleDegree? bass,
+    Degree rootDegree, {
+    Degree? bass,
     Interval? bassToRoot,
     bool? isInversion,
   })  : _bassToRoot = bassToRoot ??
@@ -91,7 +90,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
                 : pattern.intervals.contains(bass.tryFrom(rootDegree))),
         super(pattern, rootDegree, bass: bass);
 
-  ScaleDegreeChord.copy(ScaleDegreeChord chord)
+  DegreeChord.copy(DegreeChord chord)
       : _bassToRoot = chord._bassToRoot,
         _isInversion = chord._isInversion,
         super(
@@ -100,11 +99,11 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
               fullName: chord.pattern.fullName,
               abbrs: chord.pattern.abbrs,
               intervals: chord.pattern.intervals),
-          ScaleDegree.copy(chord.root),
-          bass: ScaleDegree.copy(chord.bass),
+          Degree.copy(chord.root),
+          bass: Degree.copy(chord.bass),
         );
 
-  factory ScaleDegreeChord.parse(String name) {
+  factory DegreeChord.parse(String name) {
     List<String> split = name.split(r'/');
     if (split.length == 1) {
       return _parseInternal(name);
@@ -113,7 +112,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     }
   }
 
-  static ScaleDegreeChord _parseInternal(String chord) {
+  static DegreeChord _parseInternal(String chord) {
     final match = chordNamePattern.matchAsPrefix(chord);
     if (match == null) {
       throw FormatException("invalid ScaleDegreeChord name: $chord");
@@ -131,9 +130,9 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
       intervals[1] = Interval.m3;
       cPattern = ChordPattern.fromIntervals(intervals);
     }
-    ScaleDegree rootDegree = ScaleDegree.parse(match[1]!);
+    Degree rootDegree = Degree.parse(match[1]!);
     String? bass = match[3];
-    return ScaleDegreeChord._inharmonicityHandler(
+    return DegreeChord._inharmonicityHandler(
       cPattern,
       rootDegree,
       bass: _parseBass(bass, rootDegree, cPattern),
@@ -141,8 +140,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
   }
 
   /// Returns [degree, accidentals].
-  static ScaleDegree? _parseBass(
-      String? name, ScaleDegree root, ChordPattern pattern) {
+  static Degree? _parseBass(String? name, Degree root, ChordPattern pattern) {
     if (name == null || name.isEmpty) return null;
     int degree, accidentals;
     final int startIndex = name.indexOf(RegExp(r'\d', caseSensitive: false));
@@ -177,15 +175,15 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
       // else default it to major / perfect...
       regular = Interval(number: degree + 1);
     }
-    ScaleDegree bass = root.add(regular);
-    return ScaleDegree.raw(bass.degree, bass.accidentals + accidentals);
+    Degree bass = root.add(regular);
+    return Degree.raw(bass.degree, bass.accidentals + accidentals);
   }
 
-  ScaleDegreeChord.fromJson(Map<String, dynamic> json)
+  DegreeChord.fromJson(Map<String, dynamic> json)
       : this.raw(
           ChordPatternExtension.fromFullName(json['p']),
-          ScaleDegree.fromJson(json['rd']),
-          bass: json['b'] == null ? null : ScaleDegree.fromJson(json['b']),
+          Degree.fromJson(json['rd']),
+          bass: json['b'] == null ? null : Degree.fromJson(json['b']),
         );
 
   Map<String, dynamic> toJson() => {
@@ -195,12 +193,12 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
       };
 
   @override
-  List<ScaleDegree> get patternMapped =>
+  List<Degree> get patternMapped =>
       pattern.intervals.map((i) => root.add(i)).toList();
 
-  /// Returns a list of [ScaleDegree] that represents the degrees that make up
-  /// the [ScaleDegreeChord] in the major scale.
-  List<ScaleDegree> get degrees => patternMapped;
+  /// Returns a list of [Degree] that represents the degrees that make up
+  /// the [DegreeChord] in the major scale.
+  List<Degree> get degrees => patternMapped;
 
   int get degreesLength => patternLength;
 
@@ -225,16 +223,16 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     return false;
   }
 
-  /// Returns a new [ScaleDegreeChord] converted such that [tonic] is the new
+  /// Returns a new [DegreeChord] converted such that [tonic] is the new
   /// tonic. Everything is still represented in the major scale, besides to degree the function is called on...
   ///
   /// Example: V.tonicizedFor(VI) => III, I.tonicizedFor(VI) => VI,
   /// ii.tonicizedFor(VI) => vii.
-  ScaleDegreeChord tonicizedFor(ScaleDegreeChord tonic) {
-    if (tonic.root == ScaleDegree.tonic) {
-      return ScaleDegreeChord.copy(this);
+  DegreeChord tonicizedFor(DegreeChord tonic) {
+    if (tonic.root == Degree.tonic) {
+      return DegreeChord.copy(this);
     } else if (weakEqual(majorTonicTriad)) {
-      return ScaleDegreeChord.raw(
+      return DegreeChord.raw(
         tonic.pattern,
         tonic.root,
         bass: tonic.bass,
@@ -242,10 +240,10 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
         bassToRoot: tonic._bassToRoot,
       );
     }
-    return TonicizedScaleDegreeChord(
+    return TonicizedDegreeChord(
       tonic: tonic,
-      tonicizedToTonic: ScaleDegreeChord.copy(this),
-      tonicizedToMajorScale: ScaleDegreeChord.raw(
+      tonicizedToTonic: DegreeChord.copy(this),
+      tonicizedToMajorScale: DegreeChord.raw(
         pattern,
         root.tonicizedFor(tonic.root),
         bass: bass.tonicizedFor(tonic.root),
@@ -253,64 +251,63 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     );
   }
 
-  ScaleDegreeChord reverseTonicization(ScaleDegreeChord tonic) {
-    if (tonic.root == ScaleDegree.tonic) {
-      return ScaleDegreeChord.copy(this);
+  DegreeChord reverseTonicization(DegreeChord tonic) {
+    if (tonic.root == Degree.tonic) {
+      return DegreeChord.copy(this);
     } else if (weakEqual(majorTonicTriad)) {
-      return ScaleDegreeChord.copy(tonic);
+      return DegreeChord.copy(tonic);
     } else if (weakEqual(tonic)) {
-      return ScaleDegreeChord.raw(
+      return DegreeChord.raw(
         pattern,
-        ScaleDegree.tonic,
-        bass: ScaleDegree(ScalePatternExtension.majorKey, bass.from(root)),
+        Degree.tonic,
+        bass: Degree(ScalePatternExtension.majorKey, bass.from(root)),
         isInversion: isInversion,
         bassToRoot: bassToRoot,
       );
     }
-    return TonicizedScaleDegreeChord(
+    return TonicizedDegreeChord(
       tonic: tonic,
-      tonicizedToMajorScale: ScaleDegreeChord.copy(this),
-      tonicizedToTonic: ScaleDegreeChord.raw(
+      tonicizedToMajorScale: DegreeChord.copy(this),
+      tonicizedToTonic: DegreeChord.raw(
         pattern,
-        ScaleDegree(ScalePatternExtension.majorKey, root.from(tonic.root)),
-        bass:
-            ScaleDegree(ScalePatternExtension.majorKey, bass.from(tonic.root)),
+        Degree(ScalePatternExtension.majorKey, root.from(tonic.root)),
+        bass: Degree(ScalePatternExtension.majorKey, bass.from(tonic.root)),
       ),
     );
   }
 
   /// We get a tonic and a chord and decide what chord it is for the new tonic
-  ScaleDegreeChord shiftFor(ScaleDegreeChord tonic) {
+  DegreeChord shiftFor(DegreeChord tonic) {
     if (weakEqual(tonic)) {
-      return ScaleDegreeChord.copy(ScaleDegreeChord.majorTonicTriad);
+      return DegreeChord.copy(DegreeChord.majorTonicTriad);
     } else {
-      return ScaleDegreeChord.raw(pattern, root.shiftFor(tonic.root));
+      return DegreeChord.raw(pattern, root.shiftFor(tonic.root));
     }
   }
 
-  /// Will return a new [ScaleDegreeChord] with an added 7th if possible.
+  /// Will return a new [DegreeChord] with an added 7th if possible.
   /// [harmonicFunction] can be given for slightly more relevant results.
   @override
-  ScaleDegreeChord addSeventh({HarmonicFunction? harmonicFunction}) {
-    if (pattern.intervals.length >= 4) return ScaleDegreeChord.copy(this);
+  DegreeChord addSeventh({HarmonicFunction? harmonicFunction}) {
+    if (pattern.intervals.length >= 4) return DegreeChord.copy(this);
     switch (pattern.fullName) {
       case "Minor":
-        return ScaleDegreeChord.raw(ChordPattern.parse('Minor 7th'), root);
+        return DegreeChord.raw(ChordPattern.parse('Minor 7th'), root);
       case "Major":
-        if (root == ScaleDegree.V ||
+        if (root == Degree.V ||
             (harmonicFunction != null &&
                 harmonicFunction == HarmonicFunction.dominant)) {
-          return ScaleDegreeChord.raw(ChordPattern.parse('Dominant 7th'), root);
+          return DegreeChord.raw(ChordPattern.parse('Dominant 7th'), root);
         } else {
-          return ScaleDegreeChord.raw(ChordPattern.parse('Major 7th'), root);
+          return DegreeChord.raw(ChordPattern.parse('Major 7th'), root);
         }
       case "Augmented":
-        return ScaleDegreeChord.raw(ChordPattern.parse('Augmented 7th'), root);
+        return DegreeChord.raw(ChordPattern.parse('Augmented 7th'), root);
       case "Diminished":
         // not sure if to add 'Diminished 7th' here somehow...
-        return ScaleDegreeChord.raw(ChordPattern.parse('Minor 7th ♭5'), root);
+        return DegreeChord.raw(ChordPattern.parse('Minor 7th ♭5'), root);
       default:
-        return ScaleDegreeChord.copy(this);
+        return DegreeChord.copy(this);
     }
   }
 
@@ -405,7 +402,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
 
   @override
   bool operator ==(Object other) =>
-      other is ScaleDegreeChord &&
+      other is DegreeChord &&
       (other.pattern.equals(pattern) &&
           other.root == root &&
           bass == other.bass);
@@ -419,7 +416,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
   /// Same chords with different inversions are considered weakly equal.
   /// If the same chords have different bases that aren't inversions, they're not
   /// considered weakly equal.
-  bool weakEqual(ScaleDegreeChord other) {
+  bool weakEqual(DegreeChord other) {
     if (root != other.root ||
         (!_isInversion && !other._isInversion && bass != other.bass)) {
       return false;
@@ -497,7 +494,7 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     ]);
   }
 
-  HarmonicFunction deriveHarmonicFunction({ScaleDegreeChord? next}) =>
+  HarmonicFunction deriveHarmonicFunction({DegreeChord? next}) =>
       defaultFunctions.getMatch(this, next) ?? HarmonicFunction.undefined;
 
   static final PairMap<HarmonicFunction> defaultFunctions = PairMap({
@@ -552,15 +549,15 @@ class ScaleDegreeChord extends GenericChord<ScaleDegree>
     }
   });
 
-  static final ScaleDegreeChord majorTonicTriad = ScaleDegreeChord.parse('I');
-  static final ScaleDegreeChord ii = ScaleDegreeChord.parse('ii');
-  static final ScaleDegreeChord iii = ScaleDegreeChord.parse('iii');
+  static final DegreeChord majorTonicTriad = DegreeChord.parse('I');
+  static final DegreeChord ii = DegreeChord.parse('ii');
+  static final DegreeChord iii = DegreeChord.parse('iii');
 
 // ignore: non_constant_identifier_names
-  static final ScaleDegreeChord IV = ScaleDegreeChord.parse('IV');
-  static final ScaleDegreeChord V = ScaleDegreeChord.parse('V');
-  static final ScaleDegreeChord vi = ScaleDegreeChord.parse('vi');
-  static final ScaleDegreeChord viidim = ScaleDegreeChord.parse('viidim');
+  static final DegreeChord IV = DegreeChord.parse('IV');
+  static final DegreeChord V = DegreeChord.parse('V');
+  static final DegreeChord vi = DegreeChord.parse('vi');
+  static final DegreeChord viidim = DegreeChord.parse('viidim');
 }
 
 enum HarmonicFunction {
