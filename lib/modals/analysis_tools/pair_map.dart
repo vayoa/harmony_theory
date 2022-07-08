@@ -1,5 +1,5 @@
-import '../theory_base/scale_degree/degree_chord.dart';
-import '../theory_base/scale_degree/tonicized_degree_chord.dart';
+import '../theory_base/degree/degree_chord.dart';
+import '../theory_base/degree/tonicized_degree_chord.dart';
 
 class PairMap<T> {
   /// The computed hash map.

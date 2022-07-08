@@ -1,5 +1,5 @@
 import 'package:harmony_theory/modals/analysis_tools/pair_map.dart';
-import 'package:harmony_theory/modals/theory_base/scale_degree/degree_chord.dart';
+import 'package:harmony_theory/modals/theory_base/degree/degree_chord.dart';
 import 'package:test/test.dart';
 
 main() {

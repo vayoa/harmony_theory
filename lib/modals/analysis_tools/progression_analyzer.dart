@@ -1,7 +1,7 @@
 import '../progression/degree_progression.dart';
 import '../progression/progression.dart';
-import '../theory_base/scale_degree/degree_chord.dart';
-import '../theory_base/scale_degree/tonicized_degree_chord.dart';
+import '../theory_base/degree/degree_chord.dart';
+import '../theory_base/degree/tonicized_degree_chord.dart';
 import '../weights/harmonic_function_weight.dart';
 
 class ProgressionAnalyzer {

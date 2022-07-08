@@ -1,8 +1,8 @@
 import 'package:tonic/tonic.dart';
 
 import '../../extensions/chord_extension.dart';
-import 'scale_degree/degree.dart';
-import 'scale_degree/degree_chord.dart';
+import 'degree/degree.dart';
+import 'degree/degree_chord.dart';
 
 abstract class GenericChord<T> {
   late final ChordPattern _pattern;

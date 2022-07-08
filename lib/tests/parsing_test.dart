@@ -1,9 +1,9 @@
 import '../extensions/pitch_extension.dart';
 import '../modals/pitch_chord.dart';
+import '../modals/theory_base/degree/degree_chord.dart';
+import '../modals/theory_base/degree/tonicized_degree_chord.dart';
 import '../modals/theory_base/generic_chord.dart';
 import '../modals/theory_base/pitch_scale.dart';
-import '../modals/theory_base/scale_degree/degree_chord.dart';
-import '../modals/theory_base/scale_degree/tonicized_degree_chord.dart';
 
 abstract class ParsingTest {
   static ParsingTestResult test(String name, {PitchScale? scale}) {

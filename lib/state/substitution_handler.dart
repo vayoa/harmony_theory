@@ -1,6 +1,6 @@
 import '../modals/progression/degree_progression.dart';
 import '../modals/substitution.dart';
-import '../modals/theory_base/scale_degree/degree_chord.dart';
+import '../modals/theory_base/degree/degree_chord.dart';
 import '../modals/weights/climactic_ending_weight.dart';
 import '../modals/weights/complex_weight.dart';
 import '../modals/weights/harmonic_function_weight.dart';

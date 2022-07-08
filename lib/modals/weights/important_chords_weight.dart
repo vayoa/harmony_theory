@@ -1,6 +1,6 @@
 import '../../state/progression_bank.dart';
 import '../progression/degree_progression.dart';
-import '../theory_base/scale_degree/degree_chord.dart';
+import '../theory_base/degree/degree_chord.dart';
 import 'weight.dart';
 
 class ImportantChordsWeight extends Weight {

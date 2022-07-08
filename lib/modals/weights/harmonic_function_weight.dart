@@ -4,7 +4,7 @@ import '../../extensions/interval_extension.dart';
 import '../../state/progression_bank.dart';
 import '../analysis_tools/pair_map.dart';
 import '../progression/degree_progression.dart';
-import '../theory_base/scale_degree/degree_chord.dart';
+import '../theory_base/degree/degree_chord.dart';
 import 'weight.dart';
 
 class HarmonicFunctionWeight extends Weight {
