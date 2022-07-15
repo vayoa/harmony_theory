@@ -157,14 +157,14 @@ class Degree implements Identifiable {
 
   /* TDC: Some intervals can't be parsed (like a doubly-augmented 4th), we might
           need to rewrite the Interval class to support them. */
-  Interval from(Degree other) {
+  Interval from(Degree other, {bool enforceNumber = true}) {
     var number = ((degree - other.degree) % 7) + 1;
     var semitones =
         (_semitonesFromTonicInMajor - other._semitonesFromTonicInMajor) % 12;
     if (number == 1 && semitones == 11) number = 8;
     return Interval.fromSemitones(
       semitones,
-      number: number,
+      number: enforceNumber ? number : null,
     );
   }
 

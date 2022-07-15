@@ -46,10 +46,15 @@ class HarmonicFunctionWeight extends Weight {
               '$pairFunctionValue points for ${progression[currPos]!} ->'
               ' ${progression[nextPos]!} (now $score)\n';
         } else {
-          Interval upFromCurrent =
-              progression[nextPos]!.root.from(progression[currPos]!.root);
-          Interval downFromCurrent =
-              progression[currPos]!.root.from(progression[nextPos]!.root);
+          // TDC AY: Make sure with yuval that not enforcing the number is ok...
+          Interval upFromCurrent = progression[nextPos]!.root.from(
+                progression[currPos]!.root,
+                enforceNumber: false,
+              );
+          Interval downFromCurrent = progression[currPos]!.root.from(
+                progression[nextPos]!.root,
+                enforceNumber: false,
+              );
           if (upFromCurrent.equals(Interval.P4)) {
             score += 2;
             details += 'Adding 2 points for  ${progression[currPos]!} ->'

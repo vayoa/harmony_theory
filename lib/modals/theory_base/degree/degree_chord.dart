@@ -48,7 +48,7 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
   ///
   /// Example: In C major, a ScaleDegreeChord that was parsed from C/F##
   /// will turn to I⁶₄ (C/G)...
-  factory DegreeChord._inharmonicityHandler(
+  factory DegreeChord._enharmonicHandler(
     ChordPattern pattern,
     Degree rootDegree, {
     Degree? bass,
@@ -67,7 +67,7 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
   }
 
   factory DegreeChord(PitchScale scale, PitchChord chord) =>
-      DegreeChord._inharmonicityHandler(
+      DegreeChord._enharmonicHandler(
         chord.pattern,
         Degree.fromPitch(scale, chord.root),
         bass: !chord.hasDifferentBass
@@ -132,7 +132,7 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
     }
     Degree rootDegree = Degree.parse(match[1]!);
     String? bass = match[3];
-    return DegreeChord._inharmonicityHandler(
+    return DegreeChord._enharmonicHandler(
       cPattern,
       rootDegree,
       bass: _parseBass(bass, rootDegree, cPattern),
