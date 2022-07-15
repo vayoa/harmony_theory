@@ -507,6 +507,7 @@ abstract class ProgressionBank {
   }
 
   static final Map<String, DegreeProgression> _builtInBank = {
+    'Cadential 6-4': DegreeProgression.fromList(['V^5', 'I']),
     'Deceptive Cadence': DegreeProgression.fromList(['V', 'vi']),
     // V I
     'Authentic Cadence': DegreeProgression.fromList(['V', 'I']),
