@@ -9,7 +9,7 @@ class ProgressionAnalyzer {
   /// analysis, finding tonicizations.
   ///
   /// [hard] signifies that
-  /* TODO: Instead of iterating through values, iterate on
+  /* TDC: Instead of iterating through values, iterate on
            values that get cut by measures too... */
   static DegreeProgression analyze(
     DegreeProgression prog, {
@@ -22,11 +22,12 @@ class ProgressionAnalyzer {
     for (; last < prog.length; last++) {
       if (prog.values[last] != null) break;
     }
-    DegreeChord currentTonic = prog.values[last]!;
+    DegreeChord currentTonic = DegreeChord.majorTonicTriad;
+    // DegreeChord currentTonic = prog.values[last]!;
 
     // Iterate on the progression backwards.
     for (int i = prog.length - 1; i >= last; i--) {
-      DegreeChord? chord = _analyze(
+      DegreeChord? chord = _analyzeChord(
         prog: prog,
         index: i,
         hard: hard,
@@ -49,7 +50,7 @@ class ProgressionAnalyzer {
     );
   }
 
-  static DegreeChord? _analyze({
+  static DegreeChord? _analyzeChord({
     required DegreeProgression prog,
     required int index,
     required bool hard,
@@ -93,19 +94,30 @@ class ProgressionAnalyzer {
     for (var chord in chords) {
       var realNext = next ?? chord.tonic;
       // Compare their scores.
-      int score = HarmonicFunctionWeight.getSorted(chord, realNext) ?? 0;
+      int score = _harmonicScore(chord, realNext);
       // Remove points for non-diatonic tonicizations...
-      if (!_diatonicTonicization(chord)) score--;
+      if (chord is TonicizedDegreeChord && !_diatonicTonicization(chord)) {
+        score--;
+      }
       // Add points when the current chord and the next have the
       // same tonic (when it's not a I)...
-      if (chord.tonic != DegreeChord.majorTonicTriad &&
-          chord.tonic == realNext.tonic) score++;
+      // Or when the current chord's tonic is the next chord...
+      if ((chord.tonic != DegreeChord.majorTonicTriad &&
+              chord.tonic == realNext.tonic) ||
+          chord.tonic.weakEqual(realNext)) score++;
       if (score > max) {
         maxChord = chord;
         max = score;
       }
     }
     return maxChord;
+  }
+
+  static int _harmonicScore(DegreeChord chord, DegreeChord next) {
+    return HarmonicFunctionWeight.sortedFunctions.getMatch(chord, next,
+            useTonicizations: true, forceRelations: true) ??
+        // AY: priorities I?
+        (chord.weakEqual(DegreeChord.majorTonicTriad) ? 1 : 0);
   }
 
   /// Returns [chord] when tonicized to its adjacent chord in [prog],

@@ -3,7 +3,7 @@ import 'package:harmony_theory/modals/progression/degree_progression.dart';
 import 'package:test/test.dart';
 
 main() {
-  group('.analyze()', () {
+  group('.analyze() 1', () {
     late DegreeProgression progression;
     late DegreeProgression progression2;
     late DegreeProgression progressionNull;
@@ -156,6 +156,41 @@ main() {
           ]).toString()),
         );
       });
+    });
+  });
+  group('.analyze() 2', () {
+    test('normal', () {
+      expect(
+        ProgressionAnalyzer.analyze(
+                DegreeProgression.parse('I, III, vi, II, V,'),
+                hard: false)
+            .toString(),
+        DegreeProgression.parse('I, V/vi, vi, V/V, V').toString(),
+      );
+    });
+
+    test('hard', () {
+      expect(
+        ProgressionAnalyzer.analyze(DegreeProgression.parse('v, I, IV'),
+                hard: true)
+            .toString(),
+        DegreeProgression.parse('ii/IV, V/IV, IV').toString(),
+      );
+
+      expect(
+        ProgressionAnalyzer.analyze(DegreeProgression.parse('I, II, V'),
+                hard: true)
+            .toString(),
+        DegreeProgression.parse('IV/V, V/V, V').toString(),
+      );
+
+      expect(
+        ProgressionAnalyzer.analyze(
+                DegreeProgression.parse('I, III, vi, II, V,'),
+                hard: true)
+            .toString(),
+        DegreeProgression.parse('I, V/vi, ii/V, V/V, V').toString(),
+      );
     });
   });
 }

@@ -65,19 +65,28 @@ class PairMap<T> {
     return null;
   }
 
-  DegreeChord prepareForCheck(DegreeChord chord, DegreeChord other) {
-    if (chord is TonicizedDegreeChord && other is TonicizedDegreeChord) {
+  /// Prepares [chord] to be checked in a pair map based on [other].
+  ///
+  /// If [forceRelation] is true and any or both chords are a
+  /// [TonicizedDegreeChord], we'll return null if there's no tonic
+  /// relation between them, instead of normally returning the chord
+  /// unchanged.
+  DegreeChord? prepareForCheck(DegreeChord chord, DegreeChord other,
+      {forceRelation = false}) {
+    bool chordTonicized = chord is TonicizedDegreeChord;
+    bool otherTonicized = other is TonicizedDegreeChord;
+    if (chordTonicized && otherTonicized) {
       if (chord.tonic.root == other.tonic.root) {
         return chord.tonicizedToTonic;
       } else {
         return chord;
       }
-    } else if (other is TonicizedDegreeChord && other.tonic.weakEqual(chord)) {
+    } else if (otherTonicized && other.tonic.weakEqual(chord)) {
       return DegreeChord.majorTonicTriad;
-    } else if (chord is TonicizedDegreeChord && chord.tonic.weakEqual(other)) {
+    } else if (chordTonicized && chord.tonic.weakEqual(other)) {
       return chord.tonicizedToTonic;
     } else {
-      return chord;
+      return forceRelation && (chordTonicized || otherTonicized) ? null : chord;
     }
   }
 
@@ -86,15 +95,23 @@ class PairMap<T> {
   /// [useTonicizations] determines whether in case both chords are
   /// tonicized to the same tonic, we'll take their tonicizedToTonic
   /// counterparts.
+  ///
+  /// [forceRelations] is only relevant if [useTonicizations] is true,
+  /// and determines whether we only match tonicizations that have tonic
+  /// relations.
   T? getMatch(
     DegreeChord first,
     DegreeChord? second, {
     bool useTonicizations = true,
+    bool forceRelations = false,
   }) {
     if (second == null) return defaultFor(first);
     if (useTonicizations) {
-      var tempFirst = prepareForCheck(first, second);
-      second = prepareForCheck(second, first);
+      var tempFirst =
+          prepareForCheck(first, second, forceRelation: forceRelations);
+      if (tempFirst == null) return null;
+      second = prepareForCheck(second, first, forceRelation: forceRelations);
+      if (second == null) return null;
       first = tempFirst;
     }
     int? firstHash = _containedHash(first, _hashMap);
