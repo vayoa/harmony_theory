@@ -1,3 +1,5 @@
+import 'package:harmony_theory/modals/weights/bass_movement_weight.dart';
+
 import '../modals/progression/degree_progression.dart';
 import '../modals/substitution.dart';
 import '../modals/theory_base/degree/degree_chord.dart';
@@ -25,11 +27,12 @@ abstract class SubstitutionHandler {
     const ClimacticEndingWeight(),
     const UserSavedWeight(),
     const ComplexWeight(),
+    const BassMovementWeight(),
   ]..sort(
-      (Weight w1, Weight w2) => -1 * w1.importance.compareTo(w2.importance));
+          (Weight w1, Weight w2) => -1 * w1.importance.compareTo(w2.importance));
 
   static const KeepHarmonicFunctionWeight keepHarmonicFunction =
-      KeepHarmonicFunctionWeight();
+  KeepHarmonicFunctionWeight();
 
   static KeepHarmonicFunctionAmount keepAmount = KeepHarmonicFunctionAmount.med;
 
@@ -37,8 +40,7 @@ abstract class SubstitutionHandler {
     for (Weight weight in weights) weight.name: weight
   };
 
-  static List<Substitution> _getPossibleSubstitutions(
-    DegreeProgression base, {
+  static List<Substitution> _getPossibleSubstitutions(DegreeProgression base, {
     int start = 0,
     double startDur = 0.0,
     int? end,
@@ -50,7 +52,7 @@ abstract class SubstitutionHandler {
       DegreeChord? chord = base[i];
       if (chord != null) {
         List<PackagedProgression>? progressions =
-            ProgressionBank.getByGroup(chord: chord, withTonicization: false);
+        ProgressionBank.getByGroup(chord: chord, withTonicization: false);
         if (progressions != null && progressions.isNotEmpty) {
           for (PackagedProgression packagedProg in progressions) {
             substitutions.addAll(base.getPossibleSubstitutions(
@@ -81,8 +83,7 @@ abstract class SubstitutionHandler {
     return substitutions.toSet().toList();
   }
 
-  static List<Substitution> getRatedSubstitutions(
-    DegreeProgression base, {
+  static List<Substitution> getRatedSubstitutions(DegreeProgression base, {
     Sound? sound,
     KeepHarmonicFunctionAmount? keepAmount,
     DegreeProgression? harmonicFunctionBase,
