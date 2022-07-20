@@ -157,6 +157,16 @@ class Degree implements Identifiable {
 
   /* TDC: Some intervals can't be parsed (like a doubly-augmented 4th), we might
           need to rewrite the Interval class to support them. */
+
+  /// Returns the interval between this degree and [other],
+  /// where [other] is the degree we start at.
+  ///
+  /// [enforceNumber] determines whether we're enforcing the
+  /// correct interval number between both degrees.
+  /// For instance, if we have a V.from(I) with any accidentals
+  /// the result will have to be a fifth of some sort.
+  ///
+  /// Example: I.from(V) => P4, V.from(I) => P5.
   Interval from(Degree other, {bool enforceNumber = true}) {
     var number = ((degree - other.degree) % 7) + 1;
     var semitones =
