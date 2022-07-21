@@ -101,6 +101,7 @@ class HarmonicFunctionWeight extends Weight {
       3: ['V'],
     },
     'iidim': {
+      1: ['I'],
       3: ['V'],
     },
     'iii': {
