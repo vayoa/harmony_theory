@@ -16,7 +16,12 @@ class PitchChord extends GenericChord<Pitch> {
     required ChordPattern pattern,
     required Pitch root,
     Pitch? bass,
-  }) : super(pattern, root, bass: bass);
+  }) : super(
+          pattern,
+          root,
+          bass: bass,
+          bassToRoot: bass?.numberlessFrom(root),
+        );
 
   factory PitchChord.parse(String name) {
     name = name.replaceAll('b', '♭').replaceAll('#', '♯');
@@ -65,7 +70,9 @@ class PitchChord extends GenericChord<Pitch> {
 
   @override
   bool operator ==(Object other) {
-    if (!identical(this, other) || other is! PitchChord) {
+    if (identical(this, other)) {
+      return true;
+    } else if (other is! PitchChord) {
       return false;
     }
     PitchChord chord = other;

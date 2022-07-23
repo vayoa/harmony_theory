@@ -14,17 +14,6 @@ import 'degree.dart';
 import 'tonicized_degree_chord.dart';
 
 class DegreeChord extends GenericChord<Degree> implements Identifiable {
-  final Interval? _bassToRoot;
-
-  Interval? get bassToRoot => _bassToRoot;
-
-  final bool _isInversion;
-
-  /// Returns true if [bass] is a degree in the current [DegreeChord], meaning an inversion.
-  ///
-  /// If [bass] is the same as [root] will still return true.
-  bool get isInversion => _isInversion;
-
   DegreeChord get tonic => majorTonicTriad;
 
   static const int maxInversionNumbers = 2;
@@ -43,7 +32,7 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
 
   // TODO: Optimize.
   // TODO: When we get a chord like A/B we need it to become B11 for instance...
-  /// If the bass isn't an inversion and there's a problem with calculating an
+  /// If the [bass] isn't an inversion and there's a problem with calculating an
   /// interval, this constructor takes the in-harmonic equivalent of the bass.
   ///
   /// Example: In C major, a ScaleDegreeChord that was parsed from C/F##
@@ -81,19 +70,16 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
     Degree? bass,
     Interval? bassToRoot,
     bool? isInversion,
-  })  : _bassToRoot = bassToRoot ??
-            (bass == null ? Interval.P1 : bass.tryFrom(rootDegree)),
-        // TODO: bassToRoot gets calculated twice...
-        _isInversion = isInversion ??
-            (bass == null
-                ? true
-                : pattern.intervals.contains(bass.tryFrom(rootDegree))),
-        super(pattern, rootDegree, bass: bass);
+  }) : super(
+          pattern,
+          rootDegree,
+          bass: bass,
+          bassToRoot: bassToRoot ?? bass?.tryFrom(rootDegree),
+          isInversion: isInversion,
+        );
 
   DegreeChord.copy(DegreeChord chord)
-      : _bassToRoot = chord._bassToRoot,
-        _isInversion = chord._isInversion,
-        super(
+      : super(
           ChordPattern(
               name: chord.pattern.name,
               fullName: chord.pattern.fullName,
@@ -101,6 +87,8 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
               intervals: chord.pattern.intervals),
           Degree.copy(chord.root),
           bass: Degree.copy(chord.bass),
+          bassToRoot: chord.bassToRoot,
+          isInversion: chord.isInversion,
         );
 
   factory DegreeChord.parse(String name) {
@@ -161,19 +149,25 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
       accidentals = 0;
     }
     if (degree == 0 && accidentals == 0) return null;
-    Interval regular;
+    Interval? regular;
     // If the number is odd and there's such degree in the pattern use it from
     // the pattern...
     // degree is the number parsed - 1...
-    /* TODO: Make a harmonic analysis to choose which interval to use on the
-             7th when the chord doesn't have one - for instance a V should have
-             a min7 like other minor chords instead of a maj7 like other maj
-             chords etc... */
-    if (degree % 2 == 0 && degree ~/ 2 < pattern.intervals.length) {
-      regular = pattern.intervals[degree ~/ 2];
-    } else {
-      // else default it to major / perfect...
-      regular = Interval(number: degree + 1);
+    if (degree == 6 &&
+        (pattern.intervals.length < 4 || pattern.intervals[3].number != 7)) {
+      // Perform harmonic analysis to chooses which interval to use on the
+      // 7th when the chord doesn't have one - for instance a V should have a min7
+      // like other minor chords instead of a maj7 like other maj chords etc...
+      var relevant = relevantSeventh(pattern: pattern, root: root).intervals;
+      if (relevant.length >= 4) regular = relevant[3];
+    }
+    if (regular == null) {
+      if (degree % 2 == 0 && degree ~/ 2 < pattern.intervals.length) {
+        regular = pattern.intervals[degree ~/ 2];
+      } else {
+        // else default it to major / perfect...
+        regular = Interval(number: degree + 1);
+      }
     }
     Degree bass = root.add(regular);
     return Degree.raw(bass.degree, bass.accidentals + accidentals);
@@ -224,7 +218,8 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
   }
 
   /// Returns a new [DegreeChord] converted such that [tonic] is the new
-  /// tonic. Everything is still represented in the major scale, besides to degree the function is called on...
+  /// tonic. Everything is still represented in the major scale, besides
+  /// to degree the function is called on...
   ///
   /// Example: V.tonicizedFor(VI) => III, I.tonicizedFor(VI) => VI,
   /// ii.tonicizedFor(VI) => vii.
@@ -236,8 +231,8 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
         tonic.pattern,
         tonic.root,
         bass: tonic.bass,
-        isInversion: tonic._isInversion,
-        bassToRoot: tonic._bassToRoot,
+        isInversion: tonic.isInversion,
+        bassToRoot: tonic.bassToRoot,
       );
     }
     return TonicizedDegreeChord(
@@ -288,24 +283,42 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
   @override
   DegreeChord addSeventh({HarmonicFunction? harmonicFunction}) {
     if (pattern.intervals.length >= 4) return DegreeChord.copy(this);
+    return DegreeChord.raw(
+      relevantSeventh(
+        pattern: pattern,
+        root: root,
+        harmonicFunction: harmonicFunction,
+      ),
+      root,
+      bass: bass,
+      bassToRoot: bassToRoot,
+      isInversion: isInversion,
+    );
+  }
+
+  static ChordPattern relevantSeventh({
+    required ChordPattern pattern,
+    required Degree root,
+    HarmonicFunction? harmonicFunction,
+  }) {
     switch (pattern.fullName) {
       case "Minor":
-        return DegreeChord.raw(ChordPattern.parse('Minor 7th'), root);
+        return ChordPattern.parse('Minor 7th');
       case "Major":
         if (root == Degree.V ||
             (harmonicFunction != null &&
                 harmonicFunction == HarmonicFunction.dominant)) {
-          return DegreeChord.raw(ChordPattern.parse('Dominant 7th'), root);
+          return ChordPattern.parse('Dominant 7th');
         } else {
-          return DegreeChord.raw(ChordPattern.parse('Major 7th'), root);
+          return ChordPattern.parse('Major 7th');
         }
       case "Augmented":
-        return DegreeChord.raw(ChordPattern.parse('Augmented 7th'), root);
+        return ChordPattern.parse('Augmented 7th');
       case "Diminished":
         // not sure if to add 'Diminished 7th' here somehow...
-        return DegreeChord.raw(ChordPattern.parse('Minor 7th ♭5'), root);
+        return ChordPattern.parse('Minor 7th ♭5');
       default:
-        return DegreeChord.copy(this);
+        return pattern;
     }
   }
 
@@ -318,7 +331,7 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
   }
 
   List<int>? get inversionNumbers {
-    if (!_isInversion) return null;
+    if (!isInversion) return null;
     Interval bassToRoot = bass.from(root);
     int first = degrees[0].from(bass).number;
     switch (bassToRoot.number) {
@@ -416,7 +429,7 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
   /// considered weakly equal.
   bool weakEqual(DegreeChord other) {
     if (root != other.root ||
-        (!_isInversion && !other._isInversion && bass != other.bass)) {
+        (!isInversion && !other.isInversion && bass != other.bass)) {
       return false;
     } else if (pattern == other.pattern) {
       return true;
@@ -464,7 +477,7 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
     }
     return Object.hash(
       root,
-      !_isInversion ? bass : root,
+      !isInversion ? bass : root,
       Object.hashAll(intervals),
     );
   }
@@ -486,7 +499,7 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
     }
     return Identifiable.hashAllInts([
       root.id,
-      if (!_isInversion) bass.id,
+      if (!isInversion) bass.id,
       Identifiable.hashAllInts(
           [for (Interval interval in intervals) interval.id])
     ]);

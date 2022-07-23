@@ -11,14 +11,33 @@ abstract class GenericChord<T> {
 
   late final T? _bass;
 
+  late final Interval? _bassToRoot;
+
+  late final bool _isInversion;
+
   /*
   TODO: Implement inversions. i.e. V4/2. Maybe take a look at this:
         https://music.stackexchange.com/questions/73537/using-roman-numeral-notation-with-notes-in-the-bass-not-figured-bass
   */
 
-  GenericChord(this._pattern, T root, {T? bass})
-      : _root = root,
-        _bass = bass == root ? null : bass;
+  GenericChord(
+    ChordPattern pattern,
+    T root, {
+    T? bass,
+    Interval? bassToRoot,
+    bool? isInversion,
+  }) : assert((bass == null) == (bassToRoot == null)) {
+    _root = root;
+    _bass = bass == root ? null : bass;
+    _bassToRoot = bassToRoot;
+    if (_bass == null) {
+      _pattern = pattern;
+      _isInversion = false;
+    } else {
+      _pattern = _patternBassHandler(pattern, bassToRoot!);
+      _isInversion = isInversion ?? _pattern.intervals.contains(bassToRoot);
+    }
+  }
 
   ChordPattern get pattern => _pattern;
 
@@ -28,11 +47,27 @@ abstract class GenericChord<T> {
 
   bool get hasDifferentBass => _bass != null;
 
+  Interval get bassToRoot => _bassToRoot ?? Interval.P1;
+
+  /// Returns true if [bass] is a degree in the current [DegreeChord], meaning an inversion.
+  ///
+  /// If [bass] is the same as [root] will still return true.
+  bool get isInversion => _isInversion;
+
   /// Returns a list of [Degree] that represents the degrees that make up
   /// the [DegreeChord] in the major scale.
   List<T> get patternMapped;
 
   int get patternLength => _pattern.intervals.length;
+
+  static ChordPattern _patternBassHandler(
+      ChordPattern pattern, Interval rootToBass) {
+    if (rootToBass.number == 7) {
+      List<Interval> intervals = pattern.intervals.sublist(0, 3);
+      return ChordPattern.fromIntervals(intervals..add(rootToBass));
+    }
+    return pattern;
+  }
 
   bool get requiresAddingSeventh {
     if (patternLength >= 4) {

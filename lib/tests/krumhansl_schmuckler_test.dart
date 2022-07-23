@@ -5,9 +5,9 @@ import '../modals/pitch_chord.dart';
 import '../modals/progression/chord_progression.dart';
 import '../modals/theory_base/pitch_scale.dart';
 
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, no_leading_underscores_for_local_identifiers
 
-// TODO: Make this an actual test...
+@Deprecated("TODO: Make this an actual test...")
 abstract class KrumhanslSchmucklerTest {
   static bool test([int precision = 2]) {
     assert(precision < 24);
