@@ -1,10 +1,13 @@
+import 'package:tonic/tonic.dart';
+
 import '../progression/degree_progression.dart';
 import '../progression/progression.dart';
+import '../theory_base/degree/degree.dart';
 import '../theory_base/degree/degree_chord.dart';
 import '../theory_base/degree/tonicized_degree_chord.dart';
 import '../weights/harmonic_function_weight.dart';
 
-class ProgressionAnalyzer {
+abstract class ProgressionAnalyzer {
   /// Returns a "re-written" [prog] after undergoing a harmonic
   /// analysis, finding tonicizations.
   ///
@@ -37,6 +40,7 @@ class ProgressionAnalyzer {
       if (chord != null) {
         currentTonic = chord.tonic;
       }
+      chord = _analyzeSlashChord(chord);
       chords.insert(0, chord);
     }
 
@@ -103,7 +107,7 @@ class ProgressionAnalyzer {
       // same tonic (when it's not a I)...
       // Or when the current chord's tonic is the next chord...
       if ((chord.tonic != DegreeChord.majorTonicTriad &&
-              chord.tonic == realNext.tonic) ||
+          chord.tonic == realNext.tonic) ||
           chord.tonic.weakEqual(realNext)) score++;
       if (score > max) {
         maxChord = chord;
@@ -115,7 +119,7 @@ class ProgressionAnalyzer {
 
   static int _harmonicScore(DegreeChord chord, DegreeChord next) {
     return HarmonicFunctionWeight.sortedFunctions.getMatch(chord, next,
-            useTonicizations: true, forceRelations: true) ??
+        useTonicizations: true, forceRelations: true) ??
         // AY: priorities I?
         (chord.weakEqual(DegreeChord.majorTonicTriad) ? 1 : 0);
   }
@@ -124,11 +128,9 @@ class ProgressionAnalyzer {
   /// if no adjacent chord exists, returns null.
   ///
   /// [index] is [chord]'s position in [prog].
-  static DegreeChord? _tonicizedToNext(
-    int index,
-    DegreeProgression prog,
-    DegreeChord chord,
-  ) {
+  static DegreeChord? _tonicizedToNext(int index,
+      DegreeProgression prog,
+      DegreeChord chord,) {
     /* TODO: Maybe instead of the next chord look for the next
                 diatonic chord? Could interfere with tonicizations
                 to non-diatonic chords though... */
@@ -144,4 +146,26 @@ class ProgressionAnalyzer {
   /// [TonicizedDegreeChord.tonicizedToTonic] is diatonic.
   static bool _diatonicTonicization(DegreeChord chord) =>
       chord is TonicizedDegreeChord && chord.tonicizedToTonic.isDiatonic;
+
+  static DegreeChord? _analyzeSlashChord(DegreeChord? chord) {
+    if (chord != null) {
+      if (chord.hasDifferentBass && chord.bassToRoot.number == 6) {
+        List<Degree> degrees = chord.patternMapped.sublist(0, 3);
+        List<Interval> intervals = [Interval.P1];
+        for (var degree in degrees) {
+          var interval = degree.tryFrom(chord.bass);
+          if (interval == null) {
+            return chord;
+          } else {
+            intervals.add(interval);
+          }
+        }
+        return DegreeChord.raw(
+          ChordPattern.fromIntervals(intervals),
+          chord.bass,
+        );
+      }
+    }
+    return chord;
+  }
 }

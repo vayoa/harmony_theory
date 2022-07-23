@@ -128,6 +128,9 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
   }
 
   /// Returns [degree, accidentals].
+  /* TDC: The parsing isn't consistent and is very confusing.
+          Think of a way to improve its clarity.
+   */
   static Degree? _parseBass(String? name, Degree root, ChordPattern pattern) {
     if (name == null || name.isEmpty) return null;
     int degree, accidentals;

@@ -7,6 +7,9 @@ import 'theory_base/degree/degree_chord_test.dart';
 
 main() {
   test('.parse', () {
+    _expectParse(parse: 'Am/G', pattern: 'Minor 7th', root: 'A', bass: 'G');
+    _expectParse(
+        parse: 'Am/G#', pattern: 'Minor-Major 7th', root: 'A', bass: 'G#');
     _expectParse(parse: 'C/Bb', pattern: 'Dominant 7th', root: 'C', bass: 'Bb');
     // TDC: The bass should probably be B...
     _expectParse(parse: 'C/Cb', pattern: 'Major 7th', root: 'C', bass: 'Cb');

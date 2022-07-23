@@ -193,4 +193,17 @@ main() {
       );
     });
   });
+  group('.analyze() for slash chords', () {
+    test('with a 6th as the interval...', () {
+      expect(
+        ProgressionAnalyzer.analyze(DegreeProgression.parse('vi^b6'))
+            .toString(),
+        DegreeProgression.parse('IVmaj7').toString(),
+      );
+      expect(
+        ProgressionAnalyzer.analyze(DegreeProgression.parse('vi^6')).toString(),
+        DegreeProgression.parse('#iv7b5').toString(),
+      );
+    });
+  });
 }
