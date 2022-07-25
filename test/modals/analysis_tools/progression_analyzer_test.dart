@@ -202,6 +202,11 @@ main() {
         input: 'vi, III, V, II, IV, III, vi',
         expected: 'vi, V/vi, V, V/V, IV, V/vi, vi',
       );
+      _expectAnalyze(
+        hard: true,
+        input: 'iii7b5, ii, vi',
+        expected: 'ii7b5/ii, ii, vi',
+      );
     });
   });
 

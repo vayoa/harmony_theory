@@ -175,6 +175,11 @@ abstract class ProgressionAnalyzer {
       if (chord is TonicizedDegreeChord && !_diatonicTonicization(chord)) {
         score -= chord.isDiatonic ? 2 : 1;
       }
+      // If the chord isn't a tonicization and it's not diatonic,
+      // remove points...
+      else if (!chord.isDiatonic) {
+        score--;
+      }
       // Add points when the current chord and the next have the
       // same tonic (when it's not a I)...
       // Or when the current chord's tonic is the next chord...
