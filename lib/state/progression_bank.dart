@@ -4,6 +4,8 @@ import '../modals/progression/progression.dart';
 import '../modals/theory_base/degree/degree_chord.dart';
 import 'progression_bank_entry.dart';
 
+part 'progression_bank_inversions.dart';
+
 abstract class ProgressionBank {
   static const List<String> allBankVersions = ['beta', '1.0'];
   static const String defaultPackageName = 'General';
@@ -585,6 +587,9 @@ abstract class ProgressionBank {
     'Short Simple Mixture Ascent': DegreeProgression.fromList(['bVII', 'I']),
 
     'Augmented Authentic Cadence': DegreeProgression.fromList(['Vaug', 'I']),
+
+    // Extensions
+    ..._inversionProgressions,
   };
 }
 

@@ -107,7 +107,9 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
     }
     // If the degree is a lowercase letter (meaning the chord contains a minor
     // triad).
-    ChordPattern cPattern = ChordPattern.parse(match[2]!.replaceAll('b', '♭'));
+    ChordPattern cPattern = ChordPattern.parse(
+      match[2]!.replaceAll('b', '♭').replaceFirst('Δ7', 'maj7'),
+    );
     if (match[1]!.toLowerCase() == match[1]) {
       // We don't want to change any of the generated chord patterns (for some
       // reason they aren't const so I can change them and screw up that entire
