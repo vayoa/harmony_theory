@@ -183,9 +183,8 @@ abstract class ProgressionAnalyzer {
       // Add points when the current chord and the next have the
       // same tonic (when it's not a I)...
       // Or when the current chord's tonic is the next chord...
-      if (nextBigger
-          ? _pairOfTonic(chord, realNext)
-          : _pairOfTonic(realPrev, chord)) {
+      if ((nextBigger && _pairOfTonic(chord, realNext)) ||
+          _pairOfTonic(realPrev, chord)) {
         score++;
       }
       if (score > maxScore) {
@@ -195,9 +194,6 @@ abstract class ProgressionAnalyzer {
     }
     return maxChord;
   }
-
-  static int harmonicScore(DegreeChord chord, DegreeChord next) =>
-      _harmonicScore(chord, next);
 
   static int _harmonicScore(DegreeChord chord, DegreeChord next) =>
       cleanFunctions.getMatch(chord, next,
@@ -237,9 +233,6 @@ abstract class ProgressionAnalyzer {
     DegreeProgression prog,
     DegreeChord chord,
   ) {
-    /* TODO: Maybe instead of the next chord look for the next
-                diatonic chord? Could interfere with tonicizations
-                to non-diatonic chords though... */
     if (index - 1 >= 0 && prog.values[index - 1] != null) {
       DegreeChord nextTonic = prog.values[index - 1]!;
       DegreeChord tonicizedToPrev = chord.reverseTonicization(nextTonic);
