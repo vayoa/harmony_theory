@@ -47,6 +47,10 @@ class PairMap<T> {
     }
   }
 
+  PairMap._raw(this._hashMap);
+
+  PairMap<T> clone() => PairMap._raw(Map.from(_hashMap));
+
   // TODO: Optimize, we're always hashing twice...
   int _hash(DegreeChord chord) {
     int weak = chord.weakHash, strong = chord.hashCode;
@@ -71,16 +75,17 @@ class PairMap<T> {
   /// [TonicizedDegreeChord], we'll return null if there's no tonic
   /// relation between them, instead of normally returning the chord
   /// unchanged.
-  DegreeChord? prepareForCheck(DegreeChord chord, DegreeChord other,
-      {forceRelation = false}) {
+  static DegreeChord? prepareForCheck(
+    DegreeChord chord,
+    DegreeChord other, {
+    forceRelation = false,
+  }) {
     bool chordTonicized = chord is TonicizedDegreeChord;
     bool otherTonicized = other is TonicizedDegreeChord;
-    if (chordTonicized && otherTonicized) {
-      if (chord.tonic.root == other.tonic.root) {
-        return chord.tonicizedToTonic;
-      } else {
-        return chord;
-      }
+    if (chordTonicized &&
+        otherTonicized &&
+        chord.tonic.root == other.tonic.root) {
+      return chord.tonicizedToTonic;
     } else if (otherTonicized && other.tonic.weakEqual(chord)) {
       return DegreeChord.majorTonicTriad;
     } else if (chordTonicized && chord.tonic.weakEqual(other)) {

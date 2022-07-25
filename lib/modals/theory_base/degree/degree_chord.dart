@@ -250,16 +250,8 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
   }
 
   DegreeChord reverseTonicization(DegreeChord tonic) {
-    if (tonic.root == Degree.tonic) {
+    if (tonic.root == Degree.tonic || weakEqual(tonic)) {
       return DegreeChord.copy(this);
-    } else if (weakEqual(tonic)) {
-      return DegreeChord.raw(
-        pattern,
-        Degree.tonic,
-        bass: Degree(ScalePatternExtension.majorKey, bass.from(root)),
-        isInversion: isInversion,
-        bassToRoot: bassToRoot,
-      );
     }
     return TonicizedDegreeChord(
       tonic: tonic,

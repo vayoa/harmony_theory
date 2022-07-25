@@ -86,9 +86,10 @@ class HarmonicFunctionWeight extends Weight {
     );
   }
 
-  // Chord - it's bass (null for root) - functions...
+  static final PairMap<int> _sortedFunctions = PairMap(mapFunctions);
+
   // Int values range from 1 - maxFunctionImportance.
-  static final PairMap<int> _sortedFunctions = PairMap({
+  static final Map<String, Map<int, List<String>>> mapFunctions = {
     'I': {
       1: ['iii', 'III', 'vi'],
     },
@@ -157,5 +158,5 @@ class HarmonicFunctionWeight extends Weight {
     'bVII': {
       2: ['I'],
     },
-  });
+  };
 }

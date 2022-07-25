@@ -1,8 +1,22 @@
 import 'package:harmony_theory/modals/analysis_tools/progression_analyzer.dart';
 import 'package:harmony_theory/modals/progression/degree_progression.dart';
+import 'package:harmony_theory/modals/theory_base/degree/degree_chord.dart';
 import 'package:test/test.dart';
 
 main() {
+  group('clean functions', () {
+    test('none of these functions are present', () {
+      _expectCleaned('III', 'vi');
+      _expectCleaned('III', 'IV');
+      _expectCleaned('viidim', 'III');
+      _expectCleaned('vii7', 'III');
+    });
+
+    test('remained present', () {
+      _expectRemained('IV', 'V');
+    });
+  });
+
   group('.analyze() 1', () {
     late DegreeProgression progression;
     late DegreeProgression progression2;
@@ -158,52 +172,68 @@ main() {
       });
     });
   });
+
   group('.analyze() 2', () {
     test('normal', () {
-      expect(
-        ProgressionAnalyzer.analyze(
-                DegreeProgression.parse('I, III, vi, II, V,'),
-                hard: false)
-            .toString(),
-        DegreeProgression.parse('I, V/vi, vi, V/V, V').toString(),
+      _expectAnalyze(
+        hard: false,
+        input: 'I, III, vi, II, V,',
+        expected: 'I, V/vi, vi, V/V, V',
       );
     });
 
     test('hard', () {
-      expect(
-        ProgressionAnalyzer.analyze(DegreeProgression.parse('v, I, IV'),
-                hard: true)
-            .toString(),
-        DegreeProgression.parse('ii/IV, V/IV, IV').toString(),
-      );
-
-      expect(
-        ProgressionAnalyzer.analyze(DegreeProgression.parse('I, II, V'),
-                hard: true)
-            .toString(),
-        DegreeProgression.parse('IV/V, V/V, V').toString(),
-      );
-
-      expect(
-        ProgressionAnalyzer.analyze(
-                DegreeProgression.parse('I, III, vi, II, V,'),
-                hard: true)
-            .toString(),
-        DegreeProgression.parse('I, V/vi, ii/V, V/V, V').toString(),
+      _expectAnalyze(
+          hard: true, input: 'v, I, IV', expected: 'ii/IV, V/IV, IV');
+      _expectAnalyze(hard: true, input: 'I, II, V', expected: 'IV/V, V/V, V');
+      _expectAnalyze(
+        hard: true,
+        input: 'I, III, vi, II, V,',
+        expected: 'I, V/vi, ii/V, V/V, V',
       );
     });
   });
+
+  group('.analyze() 3', () {
+    test('hard', () {
+      _expectAnalyze(hard: true, input: 'I, ii, VI7', expected: 'I, ii, V7/ii');
+      _expectAnalyze(
+        hard: true,
+        input: 'vi, III, V, II, IV, III, vi',
+        expected: 'vi, V/vi, V, V/V, IV, V/vi, vi',
+      );
+    });
+  });
+
   group('.analyze() for slash chords', () {
     test('with a 6th as the interval...', () {
-      expect(
-        ProgressionAnalyzer.analyze(DegreeProgression.parse('vi^b6'))
-            .toString(),
-        DegreeProgression.parse('IVmaj7').toString(),
-      );
-      expect(
-        ProgressionAnalyzer.analyze(DegreeProgression.parse('vi^6')).toString(),
-        DegreeProgression.parse('#iv7b5').toString(),
-      );
+      _expectAnalyze(hard: false, input: 'vi^b6', expected: 'IVmaj7');
+      _expectAnalyze(hard: false, input: 'vi^6', expected: '#iv7b5');
     });
   });
 }
+
+_expectAnalyze({
+  required bool hard,
+  required String input,
+  required String expected,
+}) =>
+    expect(
+      ProgressionAnalyzer.analyze(
+        DegreeProgression.parse(input),
+        hard: hard,
+      ).toString(),
+      DegreeProgression.parse(expected).toString(),
+    );
+
+int? _getMatch(String first, String second) =>
+    ProgressionAnalyzer.cleanFunctions.getMatch(
+      DegreeChord.parse(first),
+      DegreeChord.parse(second),
+    );
+
+void _expectCleaned(String first, String second) =>
+    expect(_getMatch(first, second), isNull);
+
+void _expectRemained(String first, String second) =>
+    expect(_getMatch(first, second), isNotNull);
