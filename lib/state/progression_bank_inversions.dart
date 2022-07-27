@@ -4,6 +4,8 @@ part of 'progression_bank.dart';
     be duplicates here in terms of tonicizations).
  */
 // AY: These need to be titled :/
+// AY: Some of these have more than 8 chords, should we change that restriction?
+// AY: You wrote ^6 on a couple of those, what to do there with tonicization?
 final Map<String, DegreeProgression> _inversionProgressions = {
   'Inversions 1': DegreeProgression.parse('I, VI^3, ii'),
   'Inversions 2': DegreeProgression.parse('I, V^3, I'),

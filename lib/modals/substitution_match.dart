@@ -9,14 +9,16 @@ class SubstitutionMatch {
   final SubstitutionMatchType type;
   final bool withSeventh;
 
+  /// [baseIndexDur] is for assertion purposes.
   const SubstitutionMatch({
+    double? baseIndexDur,
     required this.baseIndex,
     required this.baseOffset,
     required this.subIndex,
     required this.ratio,
     required this.type,
     this.withSeventh = false,
-  });
+  }) : assert(baseIndexDur == null || baseOffset < baseIndexDur);
 
   @override
   String toString() {

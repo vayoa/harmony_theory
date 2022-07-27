@@ -4,6 +4,7 @@ import 'package:harmony_theory/modals/progression/degree_progression.dart';
 import 'package:harmony_theory/modals/substitution.dart';
 import 'package:harmony_theory/modals/theory_base/pitch_scale.dart';
 import 'package:harmony_theory/modals/weights/keep_harmonic_function_weight.dart';
+import 'package:harmony_theory/modals/weights/weight.dart';
 import 'package:harmony_theory/state/progression_bank.dart';
 import 'package:harmony_theory/state/substitution_handler.dart';
 import 'package:test/test.dart';
@@ -13,6 +14,18 @@ main() {
   // First initialize the bank...
   setUp(() {
     ProgressionBank.initializeBuiltIn();
+  });
+
+  group('no errors', () {
+    test('', () {
+      _testReturnsNormally(
+        progression: DegreeProgression.parse('I 4, iii 4, IV 4, V 4, '
+            'vi 2, IV 2, II 4, V 4, I 4'),
+        startDur: 0.5,
+        end: 4,
+        endDur: 0.5,
+      );
+    });
   });
 
   // Test...
@@ -42,6 +55,29 @@ main() {
       );
     });
   });
+}
+
+_testReturnsNormally({
+  required DegreeProgression progression,
+  KeepHarmonicFunctionAmount? amount,
+  Sound? sound,
+  int start = 0,
+  double startDur = 0.0,
+  int? end,
+  double? endDur,
+}) {
+  expect(
+    () => SubstitutionHandler.getRatedSubstitutions(
+      progression,
+      keepAmount: amount,
+      sound: sound,
+      start: start,
+      startDur: startDur,
+      end: end,
+      endDur: endDur,
+    ),
+    returnsNormally,
+  );
 }
 
 _testKeepHarmonicFunctionAmount({

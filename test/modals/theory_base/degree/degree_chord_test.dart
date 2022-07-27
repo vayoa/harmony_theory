@@ -11,9 +11,15 @@ main() {
     _expectParse(
         parse: 'viidim^7', pattern: 'Minor 7th ♭5', root: 'VII', bass: 'VI');
   });
+  test('.tonicizedFor()', () {
+    _expectTonicized(parse: 'I^3/ii', tonicized: 'ii^3');
+    _expectTonicized(parse: 'I^7/ii', tonicized: 'ii^7');
+    _expectTonicized(parse: 'I^7/iidim', tonicized: 'iidim^7');
+    _expectTonicized(parse: 'i^7/ii', tonicized: 'ii^7');
+  });
 }
 
-String describe(GenericChord chord) => "root: ${chord.root}, "
+String describe(GenericChord chord) => "$chord => root: ${chord.root}, "
     "pattern: ${chord.pattern}, bass: ${chord.bass}.";
 
 _expectParse({
@@ -29,3 +35,12 @@ _expectParse({
           Degree.parse(root),
           bass: bass == null ? null : Degree.parse(bass),
         )));
+
+_expectTonicized({
+  required String parse,
+  required String tonicized,
+}) =>
+    expect(
+      describe(DegreeChord.parse(parse)),
+      equals(describe(DegreeChord.parse(tonicized))),
+    );

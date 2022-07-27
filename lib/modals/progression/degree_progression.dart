@@ -247,6 +247,8 @@ class DegreeProgression extends Progression<DegreeChord> {
     required double endDur,
     required SubstitutionMatchType type,
   }) {
+    if (offsetDur + startDur >= durations[baseChordPos]) return null;
+
     double durationToStart =
         durations.real(start) - durations[start] + startDur;
     double maxDur = durations.real(end - 1);
@@ -271,7 +273,7 @@ class DegreeProgression extends Progression<DegreeChord> {
       if (baseDurationLeft >= neededDurationLeft) {
         neededDurationRight = sub.sumDurations(subChordPos + 1) * ratio;
         double durationToBase =
-            (durations.real(baseChordPos) - durations[baseChordPos]);
+        (durations.real(baseChordPos) - durations[baseChordPos]);
         baseDurationRight =
             maxDur - (durationToBase + offsetDur + startDur) - realBaseDuration;
         // Do we have enough duration in right?
@@ -280,6 +282,7 @@ class DegreeProgression extends Progression<DegreeChord> {
           // searching.
           return SubstitutionMatch(
             baseIndex: baseChordPos,
+            baseIndexDur: durations[baseChordPos],
             baseOffset: offsetDur + startDur,
             subIndex: subChordPos,
             ratio: ratio,

@@ -158,16 +158,20 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
     // If the number is odd and there's such degree in the pattern use it from
     // the pattern...
     // degree is the number parsed - 1...
-    if (degree == 6 &&
-        (pattern.intervals.length < 4 || pattern.intervals[3].number != 7)) {
+    if (degree == 6 && !pattern.hasSeventh) {
       // Perform harmonic analysis to chooses which interval to use on the
       // 7th when the chord doesn't have one - for instance a V should have a min7
       // like other minor chords instead of a maj7 like other maj chords etc...
       var relevant = relevantSeventh(pattern: pattern, root: root).intervals;
       if (relevant.length >= 4) regular = relevant[3];
+    } else if (degree == 5 && !pattern.hasSixth) {
+      var relevant = relevantSixth(pattern: pattern, root: root).intervals;
+      if (relevant.length >= 4) regular = relevant[3];
     }
+
     if (regular == null) {
-      if (degree % 2 == 0 && degree ~/ 2 < pattern.intervals.length) {
+      if (degree ~/ 2 < pattern.intervals.length &&
+          pattern.intervals[degree ~/ 2].number == (degree + 1)) {
         regular = pattern.intervals[degree ~/ 2];
       } else {
         // else default it to major / perfect...
@@ -228,17 +232,14 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
   ///
   /// Example: V.tonicizedFor(VI) => III, I.tonicizedFor(VI) => VI,
   /// ii.tonicizedFor(VI) => vii.
+  /* AY: Should Imaj7 tonicized for a minor chord (ii for instance)
+        be iimin-maj7 or IImaj7 or ii7?
+   */
   DegreeChord tonicizedFor(DegreeChord tonic) {
     if (tonic.root == Degree.tonic) {
       return DegreeChord.copy(this);
-    } else if (weakEqual(majorTonicTriad)) {
-      return DegreeChord.raw(
-        tonic.pattern,
-        tonic.root,
-        bass: tonic.bass,
-        isInversion: tonic.isInversion,
-        bassToRoot: tonic.bassToRoot,
-      );
+    } else if (root == Degree.tonic) {
+      return _handleTonicTonicization(tonic);
     }
     return TonicizedDegreeChord(
       tonic: tonic,
@@ -251,6 +252,54 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
     );
   }
 
+  DegreeChord _handleTonicTonicization(DegreeChord tonic) {
+    ChordPattern newPattern;
+    bool diatonicPattern = degrees.every((degree) => degree.isDiatonic);
+    // If our pattern is diatonic (meaning major or major 7th... the bass
+    // doesn't have to be diatonic) then we take the tonic's pattern.
+    if (diatonicPattern) {
+      newPattern = tonic.pattern;
+
+      // If we have a seven but the tonic doesn't we add one to it.
+      if (!newPattern.isTetrad && pattern.isTetrad) {
+        if (pattern.hasSeventh) {
+          newPattern = relevantSeventh(pattern: newPattern, root: tonic.root);
+        } else {
+          // AY: Should we consider the sixth?
+          newPattern = relevantSixth(pattern: newPattern, root: tonic.root);
+        }
+      }
+    } else {
+      // In any other case, we take our pattern.
+      newPattern = pattern;
+    }
+
+    // The bass should follow whatever pattern we took if the our bass
+    // is an inversion, otherwise we copy it exactly.
+    /*
+    AY: Should it be that way or should we take the tonic's previous bass
+        if the it had it's root as the bass (meaning I/ii^6 -> ii^6
+        instead of ii)?
+    */
+    // Notice that if before the tonic had any other bass, it gets ignored.
+    Degree newBass;
+
+    if (isInversion) {
+      var interval = newPattern.intervals[bassToRoot.number ~/ 2];
+      newBass = Degree(interval);
+    } else {
+      newBass = bass;
+    }
+
+    return DegreeChord.raw(
+      newPattern,
+      tonic.root,
+      bass: newBass.tonicizedFor(tonic.root),
+      isInversion: tonic.isInversion,
+      bassToRoot: tonic.bassToRoot,
+    );
+  }
+
   DegreeChord reverseTonicization(DegreeChord tonic) {
     if (tonic.root == Degree.tonic || weakEqual(tonic)) {
       return DegreeChord.copy(this);
@@ -260,8 +309,8 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
       tonicizedToMajorScale: DegreeChord.copy(this),
       tonicizedToTonic: DegreeChord.raw(
         pattern,
-        Degree(ScalePatternExtension.majorKey, root.from(tonic.root)),
-        bass: Degree(ScalePatternExtension.majorKey, bass.from(tonic.root)),
+        Degree(root.from(tonic.root)),
+        bass: Degree(bass.from(tonic.root)),
       ),
     );
   }
@@ -316,6 +365,20 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
         return ChordPattern.parse('Minor 7th ♭5');
       default:
         return pattern;
+    }
+  }
+
+  /* AY: What 6th get added to which chord?
+         currently I'm basing it on the 3rd.
+   */
+  static ChordPattern relevantSixth({
+    required ChordPattern pattern,
+    required Degree root,
+  }) {
+    if (pattern.hasMinor3rd) {
+      return ChordPattern.parse('Minor 6th');
+    } else {
+      return ChordPattern.parse('6th');
     }
   }
 
@@ -379,8 +442,9 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
   }
 
   @override
-  String toString() =>
-      rootString + (hasDifferentBass ? bassString : patternString);
+  String toString() => inputString;
+
+  // rootString + (hasDifferentBass ? bassString : patternString);
 
   String get inputString =>
       rootString + patternString + (hasDifferentBass ? _generateInputBass : '');

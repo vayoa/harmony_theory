@@ -39,9 +39,9 @@ class Degree implements Identifiable {
       : _degree = other._degree,
         _accidentals = other._accidentals;
 
-  Degree(ScalePattern scalePattern, Interval interval)
+  Degree(Interval interval)
       : this.rawInterval(
-            scalePattern: scalePattern,
+            scalePattern: ScalePatternExtension.majorKey,
             intervalNumber: interval.number,
             intervalSemitones: interval.semitones);
 
