@@ -86,7 +86,6 @@ abstract class ProgressionAnalyzer {
       if (prog.values[last] != null) break;
     }
     DegreeChord currentTonic = DegreeChord.majorTonicTriad;
-    // DegreeChord currentTonic = prog.values[last]!;
 
     // Iterate on the progression backwards.
     for (int i = prog.length - 1; i >= last; i--) {
