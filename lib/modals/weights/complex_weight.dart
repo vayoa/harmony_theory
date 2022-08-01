@@ -1,5 +1,5 @@
 import '../../state/progression_bank.dart';
-import '../scale_degree_progression.dart';
+import '../progression/degree_progression.dart';
 import 'weight.dart';
 
 class ComplexWeight extends Weight {
@@ -16,8 +16,8 @@ class ComplexWeight extends Weight {
 
   @override
   Score score({
-    required ScaleDegreeProgression progression,
-    required ScaleDegreeProgression base,
+    required DegreeProgression progression,
+    required DegreeProgression base,
     EntryLocation? location,
   }) {
     int pc = _countChords(progression), bc = _countChords(base);
@@ -30,7 +30,7 @@ class ComplexWeight extends Weight {
     );
   }
 
-  int _countChords(ScaleDegreeProgression progression) {
+  int _countChords(DegreeProgression progression) {
     final double decimal = progression.timeSignature.decimal;
     int count = 0;
     for (int i = 0; i < progression.length; i++) {

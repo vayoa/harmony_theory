@@ -1,4 +1,4 @@
-import 'identifiable.dart';
+import '../identifiable.dart';
 
 class AbsoluteDurations implements Identifiable {
   late final List<double> _real;
@@ -95,8 +95,8 @@ class AbsoluteDurations implements Identifiable {
   @override
   int get hashCode {
     if (_real.isEmpty) return Object.hashAll(_real);
-    double _first = _real.first;
-    List<double> relations = [for (double dur in _real) dur / _first];
+    double first = _real.first;
+    List<double> relations = [for (double dur in _real) dur / first];
     return Object.hashAll(relations);
   }
 
@@ -104,9 +104,9 @@ class AbsoluteDurations implements Identifiable {
   int get id {
     int hash = 0;
     if (_real.isEmpty) return hash;
-    double _first = _real.first;
+    double first = _real.first;
     for (double dur in _real) {
-      hash = Identifiable.combine(hash, (dur / _first).hashCode);
+      hash = Identifiable.combine(hash, (dur / first).hashCode);
     }
     return Identifiable.finish(hash);
   }
@@ -118,6 +118,6 @@ class AbsoluteDurations implements Identifiable {
       output += '${this[i]}, ';
     }
     if (isNotEmpty) output += last.toString();
-    return output + ']';
+    return '$output]';
   }
 }

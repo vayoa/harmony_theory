@@ -1,7 +1,6 @@
 import '../../state/progression_bank.dart';
-import '../scale_degree.dart';
-import '../scale_degree_chord.dart';
-import '../scale_degree_progression.dart';
+import '../progression/degree_progression.dart';
+import '../theory_base/degree/degree_chord.dart';
 import 'weight.dart';
 
 class ImportantChordsWeight extends Weight {
@@ -30,8 +29,8 @@ class ImportantChordsWeight extends Weight {
   /// would subtract more points than changing another tonic.
   @override
   Score score({
-    required ScaleDegreeProgression progression,
-    required ScaleDegreeProgression base,
+    required DegreeProgression progression,
+    required DegreeProgression base,
     EntryLocation? location,
   }) {
     int points = 0, max = 0;
@@ -42,15 +41,15 @@ class ImportantChordsWeight extends Weight {
     // If it is we check for special cases where we would subtract more if it
     // was changed (a I or a vi). If it's not any of those we check for general
     // tonics.
-    if (_isTonic(base[0])) {
+    if (_isTonic(0, base)) {
       // If the first chord of base is a I or a vi
-      if (base[0]!.weakEqual(ScaleDegreeChord.majorTonicTriad) ||
-          base[0]!.weakEqual(ScaleDegreeChord.vi)) {
+      if (base[0]!.weakEqual(DegreeChord.majorTonicTriad) ||
+          base[0]!.weakEqual(DegreeChord.vi)) {
         max += 3;
         // If the first chord in progression isn't a I or a vi.
         if (progression[0] == null || !progression[0]!.weakEqual(base[0]!)) {
           // If it's a different tonic subtract 2 points.
-          if (_isTonic(progression[0])) {
+          if (_isTonic(0, progression)) {
             points += 2;
           } else {
             // If it's not a tonic at all subtract 3.
@@ -63,7 +62,7 @@ class ImportantChordsWeight extends Weight {
         }
       } else {
         max++;
-        if (!_isTonic(progression[0])) {
+        if (!_isTonic(0, progression)) {
           points++;
           details +=
               '-1 for tonic in the beginning of base (${base[0]}) replaced by a '
@@ -81,11 +80,11 @@ class ImportantChordsWeight extends Weight {
     //
     // If we found any tonics we check whether the have dominants going into
     // them and if they do we subtract points if these are changed...
-    if (_isTonic(base.values.last)) {
+    if (_isTonic(base.length - 1, base)) {
       max++;
       bool checkDom = false;
-      if (base.values.last!.weakEqual(ScaleDegreeChord.majorTonicTriad) ||
-          base.values.last!.weakEqual(ScaleDegreeChord.vi)) {
+      if (base.values.last!.weakEqual(DegreeChord.majorTonicTriad) ||
+          base.values.last!.weakEqual(DegreeChord.vi)) {
         // Notice it's worst to change the ending tonic if it's a I or a vi
         // (since we added 1 to max earlier).
         max += 3;
@@ -96,7 +95,7 @@ class ImportantChordsWeight extends Weight {
         // If last in prog isn't null and not a I or a vi...
         if (progression.values.last == null || !checkDom) {
           int sub = 4;
-          if (_isTonic(progression.values.last)) {
+          if (_isTonic(progression.length - 1, progression)) {
             // Check for dom (later) only if this is a tonic too.
             checkDom = true;
             sub = 3;
@@ -108,7 +107,7 @@ class ImportantChordsWeight extends Weight {
               'sub progression. Points: $points.\n';
         }
       } else {
-        if (!_isTonic(progression.values.last)) {
+        if (!_isTonic(progression.length - 1, progression)) {
           points++;
           details +=
               '-1 for tonic in the end of base (${base.values.last}) replaced by a '
@@ -147,7 +146,7 @@ class ImportantChordsWeight extends Weight {
       for (int i = 0; i < 2; i++) {
         bool stopNext = false;
         middleBase += i;
-        if (base.length > middleBase && _isTonic(base[middleBase])) {
+        if (base.length > middleBase && _isTonic(middleBase, base)) {
           max++;
           int middleSub =
               progression.getPlayingIndex(progression.duration / 2) + i;
@@ -156,7 +155,7 @@ class ImportantChordsWeight extends Weight {
           // know there isn't...
           stopNext = true;
           if (middleSub < progression.length &&
-              !_isTonic(progression[middleSub])) {
+              !_isTonic(middleSub, progression)) {
             points++;
             details +=
                 '-1 for tonic in the middle of base (${base[middleBase]}) '
@@ -186,9 +185,13 @@ class ImportantChordsWeight extends Weight {
     return Score(score: finalScore, details: details);
   }
 
-  bool _isTonic(ScaleDegreeChord? chord) =>
+  /* TODO: Ask yuval if this is correct, make sure to go through the PairMap
+          to determine if what gets defined as a tonic is ok. */
+  bool _isChordTonic(DegreeChord? chord, {DegreeChord? next}) =>
       chord != null &&
-      (chord.rootDegree == ScaleDegree.tonic ||
-          chord.rootDegree == ScaleDegree.vi) &&
-      chord.canBeTonic;
+      chord.deriveHarmonicFunction(next: next) == HarmonicFunction.tonic;
+
+  bool _isTonic(int index, DegreeProgression progression) =>
+      _isChordTonic(progression[index],
+          next: index + 1 < progression.length ? progression[index + 1] : null);
 }

@@ -1,7 +1,7 @@
 import 'package:tonic/tonic.dart';
 
-import '../extensions/pitch_extension.dart';
-import '../extensions/scale_pattern_extension.dart';
+import '../../extensions/pitch_extension.dart';
+import '../../extensions/scale_pattern_extension.dart';
 
 /// The same as [Scale], but has a [Pitch] as its tonic instead of a
 /// [PitchClass]. To allow notes that represent the same pitch (but with a
@@ -9,6 +9,8 @@ import '../extensions/scale_pattern_extension.dart';
 class PitchScale {
   final ScalePattern pattern;
   final Pitch tonic;
+
+  static final PitchScale cMajor = PitchScale.common(tonic: Pitch.parse('C'));
 
   const PitchScale({required this.pattern, required this.tonic});
 
@@ -47,6 +49,6 @@ class PitchScale {
   String toString() {
     final String scalePattern =
         pattern.name == 'Diatonic Major' ? 'Major' : 'Minor';
-    return tonic.commonName + ' ' + scalePattern;
+    return '${tonic.commonName} $scalePattern';
   }
 }

@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import '../../state/progression_bank.dart';
-import '../scale_degree_progression.dart';
+import '../progression/degree_progression.dart';
 import 'weight.dart';
 
 class ClimacticEndingWeight extends Weight {
@@ -28,8 +28,8 @@ class ClimacticEndingWeight extends Weight {
   /// (deducts less points than it adds).
   @override
   Score score({
-    required ScaleDegreeProgression progression,
-    required ScaleDegreeProgression base,
+    required DegreeProgression progression,
+    required DegreeProgression base,
     EntryLocation? location,
   }) {
     if (progression.duration < 3.0) {

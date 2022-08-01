@@ -1,5 +1,5 @@
 import '../../state/progression_bank.dart';
-import '../scale_degree_progression.dart';
+import '../progression/degree_progression.dart';
 import 'weight.dart';
 
 class UserSavedWeight extends Weight {
@@ -15,8 +15,8 @@ class UserSavedWeight extends Weight {
 
   @override
   Score score({
-    required ScaleDegreeProgression progression,
-    required ScaleDegreeProgression base,
+    required DegreeProgression progression,
+    required DegreeProgression base,
     EntryLocation? location,
   }) {
     final bool builtIn =

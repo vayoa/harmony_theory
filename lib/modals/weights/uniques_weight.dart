@@ -1,5 +1,5 @@
 import '../../state/progression_bank.dart';
-import '../scale_degree_progression.dart';
+import '../progression/degree_progression.dart';
 import 'weight.dart';
 
 class UniquesWeight extends Weight {
@@ -14,8 +14,8 @@ class UniquesWeight extends Weight {
 
   @override
   Score score({
-    required ScaleDegreeProgression progression,
-    required ScaleDegreeProgression base,
+    required DegreeProgression progression,
+    required DegreeProgression base,
     EntryLocation? location,
   }) {
     int unique = progression.values.toSet().length;

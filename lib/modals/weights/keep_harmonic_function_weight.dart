@@ -1,7 +1,7 @@
 import '../../state/progression_bank.dart';
 import '../../state/substitution_handler.dart';
-import '../scale_degree_chord.dart';
-import '../scale_degree_progression.dart';
+import '../progression/degree_progression.dart';
+import '../theory_base/degree/degree_chord.dart';
 import 'weight.dart';
 
 class KeepHarmonicFunctionWeight extends Weight {
@@ -16,8 +16,8 @@ class KeepHarmonicFunctionWeight extends Weight {
 
   @override
   Score score({
-    required ScaleDegreeProgression progression,
-    required ScaleDegreeProgression base,
+    required DegreeProgression progression,
+    required DegreeProgression base,
     EntryLocation? location,
   }) {
     // For each chord in base, see which chords are replacing it and score
@@ -30,8 +30,8 @@ class KeepHarmonicFunctionWeight extends Weight {
     String details = '';
     // Since a progression has to have the same duration as it's base...
     while (subIndex < progression.length && baseIndex < base.length) {
-      ScaleDegreeChord? baseChord = base[baseIndex];
-      ScaleDegreeChord? subChord = progression[subIndex];
+      DegreeChord? baseChord = base[baseIndex];
+      DegreeChord? subChord = progression[subIndex];
       if (((baseChord == null) != (subChord == null)) ||
           (baseChord != null && !baseChord.weakEqual(subChord!))) {
         replacements++;

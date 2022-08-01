@@ -2,9 +2,9 @@ import 'package:tonic/tonic.dart';
 
 import '../../extensions/interval_extension.dart';
 import '../../state/progression_bank.dart';
-import '../scale_degree_chord.dart';
-import '../scale_degree_progression.dart';
-import '../tonicized_scale_degree_chord.dart';
+import '../analysis_tools/pair_map.dart';
+import '../progression/degree_progression.dart';
+import '../theory_base/degree/degree_chord.dart';
 import 'weight.dart';
 
 class HarmonicFunctionWeight extends Weight {
@@ -17,40 +17,19 @@ class HarmonicFunctionWeight extends Weight {
           weightDescription: WeightDescription.technical,
         );
 
-  static final HarmonicFunctionBank _harmonicFunctionBank =
-      HarmonicFunctionBank();
+  static const int maxFunctionImportance = 3;
 
-  // Int values range from 1 - maxFunctionImportance.
-  static Map<int, Map<int, int>> get sortedFunctions =>
-      _harmonicFunctionBank.sortedFunctions;
+  static PairMap<int> get sortedFunctions => _sortedFunctions;
 
-  ScaleDegreeChord prepareForCheck(
-      ScaleDegreeChord chord, ScaleDegreeChord other) {
-    if (chord is TonicizedScaleDegreeChord &&
-        other is TonicizedScaleDegreeChord) {
-      if (chord.tonic.rootDegree == other.tonic.rootDegree) {
-        return chord.tonicizedToTonic;
-      } else {
-        return chord;
-      }
-    } else if (other is TonicizedScaleDegreeChord &&
-        other.tonic.weakEqual(chord)) {
-      return ScaleDegreeChord.majorTonicTriad;
-    } else if (chord is TonicizedScaleDegreeChord &&
-        chord.tonic.weakEqual(other)) {
-      return chord.tonicizedToTonic;
-    } else {
-      return chord;
-    }
-  }
+  static int? getSorted(DegreeChord currentChord, DegreeChord nextChord) =>
+      sortedFunctions.getMatch(currentChord, nextChord);
 
   @override
   Score score({
-    required ScaleDegreeProgression progression,
-    required ScaleDegreeProgression base,
+    required DegreeProgression progression,
+    required DegreeProgression base,
     EntryLocation? location,
   }) {
-    int maxImportance = HarmonicFunctionBank.maxFunctionImportance;
     int score = 0, count = 0;
     String details = '';
     for (int i = 0; i < progression.length; i++) {
@@ -58,87 +37,64 @@ class HarmonicFunctionWeight extends Weight {
       if (nextPos == progression.length) nextPos = 0;
       if (progression[currPos] != null && progression[nextPos] != null) {
         count++;
-        int weakHash =
-            prepareForCheck(progression[currPos]!, progression[nextPos]!)
-                .weakHash;
-        int next = prepareForCheck(progression[nextPos]!, progression[currPos]!)
-            .weakHash;
-        if (sortedFunctions.containsKey(weakHash) &&
-            sortedFunctions[weakHash]![next] != null) {
-          Map<int, int> sorted = sortedFunctions[weakHash]!;
-          score += sorted[next]!;
-          String verb = sorted[next]! > 0 ? 'Adding' : 'Deducting';
-          details += verb +
-              ' ${sorted[next]} points for'
-                  ' ${progression[currPos]!} -> ${progression[nextPos]!} (now $score)\n';
+        int? pairFunctionValue =
+            getSorted(progression[currPos]!, progression[nextPos]!);
+        // If the pair exists in the map sortedFunctions map...
+        if (pairFunctionValue != null) {
+          score += pairFunctionValue;
+          details += '${pairFunctionValue > 0 ? 'Adding' : 'Deducting'} '
+              '$pairFunctionValue points for ${progression[currPos]!} ->'
+              ' ${progression[nextPos]!} (now $score)\n';
         } else {
-          Interval upFromCurrent = progression[nextPos]!
-              .rootDegree
-              .from(progression[currPos]!.rootDegree);
-          Interval downFromCurrent = progression[currPos]!
-              .rootDegree
-              .from(progression[nextPos]!.rootDegree);
+          // TDC AY: Make sure with yuval that not enforcing the number is ok...
+          Interval upFromCurrent = progression[nextPos]!.root.from(
+                progression[currPos]!.root,
+                enforceNumber: false,
+              );
+          Interval downFromCurrent = progression[currPos]!.root.from(
+                progression[nextPos]!.root,
+                enforceNumber: false,
+              );
           if (upFromCurrent.equals(Interval.P4)) {
             score += 2;
-            details += 'Adding 2 points for'
-                ' ${progression[currPos]!} -> ${progression[nextPos]!} (a 4th up, now $score)\n';
+            details += 'Adding 2 points for  ${progression[currPos]!} ->'
+                ' ${progression[nextPos]!} (a 4th up, now $score)\n';
           } else if (downFromCurrent.equals(Interval.P4)) {
             score += 1;
-            details += 'Adding 1 point for'
-                ' ${progression[currPos]!} -> ${progression[nextPos]!} (a 4th down, now $score)\n';
+            details += 'Adding 1 point for ${progression[currPos]!} ->'
+                ' ${progression[nextPos]!} (a 4th down, now $score)\n';
           } else if (upFromCurrent.equals(Interval.m2) ||
               upFromCurrent.equals(Interval.M2)) {
             score += 1;
-            details += 'Adding 1 point for'
-                ' ${progression[currPos]!} -> ${progression[nextPos]!} (a 2nd up, now $score)\n';
+            details += 'Adding 1 point for ${progression[currPos]!} ->'
+                ' ${progression[nextPos]!} (a 2nd up, now $score)\n';
           } else if (upFromCurrent.equals(Interval.M3) ||
               upFromCurrent.equals(Interval.m3)) {
             score -= 2;
-            details += 'Deducting 2 points for '
-                '${progression[currPos]!} -> ${progression[nextPos]!} '
-                '(a 3 up, now $score)\n';
+            details += 'Deducting 2 points for ${progression[currPos]!} ->'
+                ' ${progression[nextPos]!} (a 3 up, now $score)\n';
           }
         }
       }
     }
-    int minPoints = count * -1 * maxImportance,
-        maxPoints = count * maxImportance;
+    int minPoints = count * -1 * maxFunctionImportance,
+        maxPoints = count * maxFunctionImportance;
     return Score(
       score: (score + maxPoints) / (2 * maxPoints),
-      details: details +
-          'Between a minimum of $minPoints points and a maximum of $maxPoints '
-              'points this progression got $score.\n',
+      details: '${details}Between a minimum of $minPoints points and a '
+          'maximum of $maxPoints points this progression got $score.\n',
     );
   }
-}
 
-class HarmonicFunctionBank {
-  static const int maxFunctionImportance = 3;
+  static final PairMap<int> _sortedFunctions = PairMap(mapFunctions);
 
-  HarmonicFunctionBank() {
-    sortedFunctions = {};
-    for (MapEntry<String, Map<int, List<String>>> chord
-        in _sortedFunctions.entries) {
-      int chordWeakHash = ScaleDegreeChord.parse(chord.key).weakHash;
-      if (!sortedFunctions.containsKey(chordWeakHash)) {
-        sortedFunctions[chordWeakHash] = {};
-      }
-      for (MapEntry<int, List<String>> scored in chord.value.entries) {
-        assert(scored.key <= maxFunctionImportance &&
-            scored.key >= -1 * maxFunctionImportance);
-        for (String next in scored.value) {
-          sortedFunctions[chordWeakHash]![
-              ScaleDegreeChord.parse(next).weakHash] = scored.key;
-        }
-      }
-    }
-  }
-
-  late Map<int, Map<int, int>> sortedFunctions;
-
-  static final Map<String, Map<int, List<String>>> _sortedFunctions = {
+  // Int values range from 1 - maxFunctionImportance.
+  static final Map<String, Map<int, List<String>>> mapFunctions = {
     'I': {
       1: ['iii', 'III', 'vi'],
+    },
+    'I^5': {
+      3: ['V'],
     },
     'ii': {
       -1: ['IV'],
@@ -146,6 +102,7 @@ class HarmonicFunctionBank {
       3: ['V'],
     },
     'iidim': {
+      1: ['I'],
       3: ['V'],
     },
     'iii': {
@@ -178,7 +135,19 @@ class HarmonicFunctionBank {
       1: ['IV', 'iii', 'V', 'I'],
       2: ['ii'],
     },
+    'vi^5': {
+      // TODO: Make sure with yuval that this is ok...
+      3: ['III'],
+    },
     'viidim': {
+      -3: ['ii', 'IV', 'iv', 'V'],
+      1: ['iii'],
+      3: ['I', 'III'],
+    },
+    /* TODO: Make sure vii7 has the right entries. I just copied them
+            from viidim since vii7 doesn't get caught in it
+            (only vii7b5 does...) */
+    'vii7': {
       -3: ['ii', 'IV', 'iv', 'V'],
       1: ['iii'],
       3: ['I', 'III'],

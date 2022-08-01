@@ -1,11 +1,13 @@
 import 'package:tonic/tonic.dart';
 
 import '../extensions/scale_pattern_extension.dart';
-import '../modals/chord_progression.dart';
-import '../modals/pitch_scale.dart';
+import '../modals/pitch_chord.dart';
+import '../modals/progression/chord_progression.dart';
+import '../modals/theory_base/pitch_scale.dart';
 
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, no_leading_underscores_for_local_identifiers
 
+@Deprecated("TODO: Make this an actual test...")
 abstract class KrumhanslSchmucklerTest {
   static bool test([int precision = 2]) {
     assert(precision < 24);
@@ -33,24 +35,24 @@ abstract class KrumhanslSchmucklerTest {
 
   static ChordProgression yonatanHakatan = ChordProgression(
     chords: [
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('Dm'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('C'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
+      PitchChord.parse('Dm'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('C'),
     ],
     durations: [
       1 / 4 * 2,
@@ -79,14 +81,14 @@ abstract class KrumhanslSchmucklerTest {
 
   static ChordProgression californication = ChordProgression(
     chords: [
-      Chord.parse('Am'),
-      Chord.parse('F'),
-      Chord.parse('Am'),
-      Chord.parse('F'),
-      Chord.parse('C'),
-      Chord.parse('G'),
-      Chord.parse('F'),
-      Chord.parse('Dm'),
+      PitchChord.parse('Am'),
+      PitchChord.parse('F'),
+      PitchChord.parse('Am'),
+      PitchChord.parse('F'),
+      PitchChord.parse('C'),
+      PitchChord.parse('G'),
+      PitchChord.parse('F'),
+      PitchChord.parse('Dm'),
     ],
     durations: [
       1 / 2,

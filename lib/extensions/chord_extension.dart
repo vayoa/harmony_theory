@@ -20,6 +20,15 @@ extension ChordPatternExtension on ChordPattern {
   bool get hasMinor3rd =>
       intervals.length >= 2 && intervals[1].equals(Interval.m3);
 
+  bool get isTetrad => intervals.length >= 4;
+
+  bool get hasSeventh => isTetrad && intervals[3].number == 7;
+
+  bool get hasSixth => isTetrad && intervals[3].number == 6;
+
+  ChordPattern copy() => ChordPattern(
+      name: name, fullName: fullName, abbrs: abbrs, intervals: intervals);
+
   static ChordPattern fromFullName(String fullName) =>
       chordPatternSpecs[fullName]!;
 

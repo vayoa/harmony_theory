@@ -1,0 +1,24 @@
+name: Deploy
+on:
+  push:
+    tags: [ deploy* ]
+jobs:
+  build:
+    name: Build Web Dashboard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Web Dashboard
+        run: |
+          echo "Deploy Web Dashboard"
+          sleep 10s
+      - uses: convictional/trigger-workflow-and-wait@v1.3.0
+        with:
+          owner: vayoa
+          repo: harmony_dashboard
+          github_token: ${{ secrets.WEB_DEPLOYMENT_ACCESS_TOKEN }}
+          workflow_file_name: web.yml
+          ref: feat/inversions
+      - name: Deploy Web Dashboard
+        run: |
+          echo "Deploy Web Dashboard"
+          sleep 10s

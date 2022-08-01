@@ -1,16 +1,16 @@
 import '../state/progression_bank.dart';
 import '../state/substitution_handler.dart';
-import 'pitch_scale.dart';
-import 'scale_degree_progression.dart';
+import 'progression/degree_progression.dart';
 import 'substitution_match.dart';
+import 'theory_base/pitch_scale.dart';
 import 'weights/keep_harmonic_function_weight.dart';
 import 'weights/weight.dart';
 
 class Substitution {
   final EntryLocation? location;
-  final ScaleDegreeProgression substitutedBase;
-  final ScaleDegreeProgression originalSubstitution;
-  final ScaleDegreeProgression base;
+  final DegreeProgression substitutedBase;
+  final DegreeProgression originalSubstitution;
+  final DegreeProgression base;
   SubstitutionScore score;
   final SubstitutionMatch match;
   final double changedStart;
@@ -31,9 +31,9 @@ class Substitution {
 
   Substitution copyWith({
     EntryLocation? location,
-    ScaleDegreeProgression? substitutedBase,
-    ScaleDegreeProgression? originalSubstitution,
-    ScaleDegreeProgression? base,
+    DegreeProgression? substitutedBase,
+    DegreeProgression? originalSubstitution,
+    DegreeProgression? base,
     double? changedStart,
     double? changedEnd,
     SubstitutionScore? score,
@@ -64,7 +64,7 @@ class Substitution {
     List<Weight> weights, {
     bool keepHarmonicFunction = false,
     Sound? sound,
-    ScaleDegreeProgression? harmonicFunctionBase,
+    DegreeProgression? harmonicFunctionBase,
   }) {
     sound ??= Sound.both;
     double rating = 0.0;
@@ -111,14 +111,12 @@ class Substitution {
   @override
   String toString({PitchScale? scale, bool detailed = false}) {
     return '-- "$location" $originalSubstitution --\n'
-            '$substitutedBase' +
-        (scale == null ? ': ' : ' ->\n${substitutedBase.inScale(scale)}:') +
-        ' ${rating.toStringAsFixed(3)}\n' +
-        'base: $base' +
-        (scale == null ? '' : ' ->\n${base.inScale(scale)}') +
-        '.\n'
-            '${score.toString(detailed)}\n'
-            'Details: $match Changed Range: $changedStart - $changedEnd.';
+        '$substitutedBase${scale == null ? ': ' : ' ->\n'
+            '${substitutedBase.inScale(scale)}:'} '
+        '${rating.toStringAsFixed(3)}\nbase: $base${scale == null ? '' : ' ->\n'
+            '${base.inScale(scale)}'}.\n'
+        '${score.toString(detailed)}\n'
+        'Details: $match Changed Range: $changedStart - $changedEnd.';
   }
 
   int compareTo(Substitution other) => score.compareTo(other.score);
@@ -141,13 +139,13 @@ class SubstitutionScore {
       for (MapEntry<String, Score> entry in details.entries) {
         output += '${entry.key}:\n${entry.value},\n\n';
       }
-      return output + '}';
+      return '$output}';
     } else {
       String output = '{';
       for (MapEntry<String, Score> entry in details.entries) {
         output += '${entry.key}: ${entry.value.score}, ';
       }
-      return output + '}';
+      return '$output}';
     }
   }
 }

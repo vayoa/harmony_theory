@@ -1,10 +1,11 @@
-import 'package:tonic/tonic.dart';
+import 'dart:math';
 
-import '../extensions/chord_extension.dart';
+import '../identifiable.dart';
 import 'absolute_durations.dart';
 import 'exceptions.dart';
-import 'identifiable.dart';
 import 'time_signature.dart';
+
+typedef Parser<T> = T Function(String input);
 
 /// Describes a progression of any sort - a set of values, each with a duration.
 ///
@@ -53,7 +54,7 @@ class Progression<T> implements Identifiable {
         _hasNull = false,
         _values = [] {
     ratio ??= 1.0;
-    List<double> _durationList = [];
+    List<double> durationList = [];
     if (values.isNotEmpty) {
       double overallDuration = 0.0;
       double durSum = 0.0;
@@ -64,8 +65,7 @@ class Progression<T> implements Identifiable {
         }
         // Fails if we made it to the last index or if adjacent values aren't
         // equal...
-        if (i < values.length - 1 &&
-            adjacentValuesEqual(values[i], values[i + 1])) {
+        if (i < values.length - 1 && values[i] == values[i + 1]) {
           durSum += durations[i];
         } else {
           durSum = (durSum + durations[i]) * ratio;
@@ -74,17 +74,17 @@ class Progression<T> implements Identifiable {
               value: val, duration: durSum, overallDuration: overallDuration);
           if (!_hasNull) _hasNull = values[i] == null;
           overallDuration += durSum;
-          _durationList.add(overallDuration);
+          durationList.add(overallDuration);
           _values.add(val);
           durSum = 0;
         }
       }
     }
-    _durations = AbsoluteDurations(_durationList);
+    _durations = AbsoluteDurations(durationList);
   }
 
   // Since sublist is used a lot, I made this one function for a light
-  // optimization instead of sublisting the values and the durations and then
+  // optimization instead of sub-listing the values and the durations and then
   // going through them again in the constructor...
   /// Constructs a progression where [durations] is a list of absolute durations.
   /// [timeSignature] is [TimeSignature.evenTime()] by default.
@@ -92,21 +92,20 @@ class Progression<T> implements Identifiable {
   /// [start] and [end] determine the range of the list to be converted (end is
   /// excluded...).
   /// [durationDiff] will be deducted from each duration.
-  Progression._absoluteInternal(
-    List<T?> values,
-    List<double> durations, {
-    TimeSignature? timeSignature,
-    double? ratio,
-    int start = 0,
-    int? end,
-    double durationDiff = 0.0,
-  })  : assert(values.length == durations.length),
+  Progression._absoluteInternal(List<T?> values,
+      List<double> durations, {
+        TimeSignature? timeSignature,
+        double? ratio,
+        int start = 0,
+        int? end,
+        double durationDiff = 0.0,
+      })  : assert(values.length == durations.length),
         _timeSignature = timeSignature ?? const TimeSignature.evenTime(),
         _hasNull = false,
         _values = [] {
     ratio ??= 1.0;
     end ??= values.length;
-    List<double> _durationList = [];
+    List<double> durationList = [];
     if (values.isNotEmpty) {
       double previousDuration = 0.0;
       for (int i = start; i < end; i++) {
@@ -116,8 +115,7 @@ class Progression<T> implements Identifiable {
         }
         // Skips the current value if its index is smaller than the last index
         // and it's equal to the chord that comes after it.
-        if (!(i < values.length - 1 &&
-            adjacentValuesEqual(values[i], values[i + 1]))) {
+        if (!(i < values.length - 1 && values[i] == values[i + 1])) {
           double nonAbsoluteDuration =
               (durations[i] * ratio) - previousDuration - durationDiff;
           T? val = values[i];
@@ -127,12 +125,12 @@ class Progression<T> implements Identifiable {
               overallDuration: previousDuration);
           if (!_hasNull) _hasNull = values[i] == null;
           previousDuration += nonAbsoluteDuration;
-          _durationList.add(previousDuration);
+          durationList.add(previousDuration);
           _values.add(val);
         }
       }
     }
-    _durations = AbsoluteDurations(_durationList);
+    _durations = AbsoluteDurations(durationList);
   }
 
   /// Constructs a progression where [durations] is a list of absolute durations.
@@ -141,7 +139,7 @@ class Progression<T> implements Identifiable {
   Progression.absolute(List<T?> values, List<double> durations,
       {TimeSignature? timeSignature, double? ratio})
       : this._absoluteInternal(values, durations,
-            timeSignature: timeSignature, ratio: ratio);
+      timeSignature: timeSignature, ratio: ratio);
 
   /// Doesn't check for duplicates or full and just sets the values for the
   /// fields.
@@ -165,6 +163,70 @@ class Progression<T> implements Identifiable {
             List.generate(base.length,
                 (index) => (index + 1) * (1 / timeSignature.denominator)),
             timeSignature: timeSignature);
+
+  Progression.parse({
+    required String input,
+    required Parser<T> parser,
+    TimeSignature timeSignature = const TimeSignature.evenTime(),
+  })  : _timeSignature = timeSignature,
+        _hasNull = false {
+    var result = progressionParser(input: input, parser: parser);
+    _values = result[0];
+    _durations = result[1];
+    _hasNull = result[2];
+    // TODO: Optimize, we iterated on the progression before this...
+    for (int i = 0; i < length; i++) {
+      checkValidDuration(
+        value: _values[i],
+        duration: _durations[i],
+        overallDuration: _durations.real(i) - _durations[i],
+      );
+    }
+  }
+
+  static List progressionParser<T>({
+    required String input,
+    required Parser<T> parser,
+    TimeSignature timeSignature = const TimeSignature.evenTime(),
+  }) {
+    List<String> inputs = input.split(r',');
+    List<double> durations = [];
+    List<T?> values = [];
+    bool hasNull = false;
+    final double step = timeSignature.step;
+    double duration = 0.0;
+    for (int i = 0; i < inputs.length; i++) {
+      if (inputs[i].isNotEmpty) {
+        List<String> parts = inputs[i].trim().split(r' ');
+        String input = parts[0];
+        int addTimes = 1;
+        if (parts.length == 2) {
+          addTimes = max(addTimes, int.tryParse(parts[1]) ?? addTimes);
+        }
+        duration += step + ((addTimes - 1) * step);
+
+        T? value = valueParser<T>(input, parser);
+        if (values.isEmpty || i == inputs.length - 1 || values.last != value) {
+          double dur = duration;
+          if (durations.isNotEmpty) {
+            dur = duration - durations.last;
+          }
+          if (dur < 0) throw NonPositiveDuration(value, dur);
+          if (!hasNull) hasNull = value == null;
+          values.add(value);
+          durations.add(duration);
+        }
+      }
+    }
+    return [values, AbsoluteDurations(durations), hasNull];
+  }
+
+  static T? valueParser<T>(String input, Parser<T> parser) {
+    if (input.isEmpty || input == '/' || input == '//' || input == 'null') {
+      return null;
+    }
+    return parser(input);
+  }
 
   /// Sums [durations] from [start] to [end], not including [end].
   /// If [start] == [end], returns 0.0.
@@ -251,7 +313,7 @@ class Progression<T> implements Identifiable {
     if (duration < decimal) return [this];
     final List<Progression<T>> measures = [];
     Progression<T> currentMeasure =
-        Progression.empty(timeSignature: timeSignature);
+    Progression.empty(timeSignature: timeSignature);
     double currentRhythmSum = 0.0;
     for (var i = 0; i < length; i++) {
       double newDur = _durations[i];
@@ -285,7 +347,7 @@ class Progression<T> implements Identifiable {
       throw NonPositiveDuration(value, newDuration);
     }
     T? last = _values.isEmpty ? null : _values.last;
-    if (_values.isNotEmpty && adjacentValuesEqual(value, last)) {
+    if (_values.isNotEmpty && value == last) {
       double dur = (newDuration + _durations.last) % _timeSignature.decimal;
       if (dur > 0) {
         checkValidDuration(
@@ -376,10 +438,8 @@ class Progression<T> implements Identifiable {
       double stepSum = 0.0;
       for (var i = 0; i < length; i++) {
         String durationFormatted =
-            detailed ? durationFormat(_durations[i]) : '';
-        final val = _values[i];
-        final String valueFormatted =
-            val is Chord ? val.commonName : valueFormat(_values[i]);
+        detailed ? durationFormat(_durations[i]) : '';
+        final String valueFormatted = valueFormat(_values[i]);
         final String formatted = valueFormatted +
             (durationFormatted.isEmpty ? '' : '($durationFormatted)');
         double curDuration = _durations[i];
@@ -402,7 +462,7 @@ class Progression<T> implements Identifiable {
           }
         }
       }
-      return output.substring(0, output.length - 2) + ' |';
+      return '${output.substring(0, output.length - 2)} |';
     } else {
       final List<Progression<T>> measures = splitToMeasures();
       for (var i = 0; i < measures.length; i++) {
@@ -439,8 +499,7 @@ class Progression<T> implements Identifiable {
     if (!newMeasure.isEmpty &&
         measures.length - 1 > index &&
         !measures[index + 1].isEmpty &&
-        adjacentValuesEqual(
-            newMeasure.values.last, measures[index + 1].values.first)) {
+        newMeasure.values.last == measures[index + 1].values.first) {
       newMeasure.addAll(measures[index + 1]);
       measures.removeAt(index + 1);
     }
@@ -501,7 +560,4 @@ class Progression<T> implements Identifiable {
           value: value, duration: duration, timeSignature: _timeSignature);
     }
   }
-
-  static bool adjacentValuesEqual<T>(T val, T next) =>
-      val is Chord ? val.equals(next) : val == next;
 }

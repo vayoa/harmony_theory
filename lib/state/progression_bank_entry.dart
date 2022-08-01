@@ -1,7 +1,7 @@
-import '../modals/scale_degree_progression.dart';
+import '../modals/progression/degree_progression.dart';
 
 class ProgressionBankEntry {
-  final ScaleDegreeProgression progression;
+  final DegreeProgression progression;
   final bool usedInSubstitutions;
 
   const ProgressionBankEntry({
@@ -10,7 +10,7 @@ class ProgressionBankEntry {
   });
 
   ProgressionBankEntry copyWith({
-    ScaleDegreeProgression? progression,
+    DegreeProgression? progression,
     bool? builtIn,
     bool? usedInSubstitutions,
   }) =>
@@ -22,7 +22,7 @@ class ProgressionBankEntry {
   ProgressionBankEntry.fromJson({
     required Map<String, dynamic> json,
   })  : usedInSubstitutions = json['s'],
-        progression = ScaleDegreeProgression.fromJson(json['p']);
+        progression = DegreeProgression.fromJson(json['p']);
 
   Map<String, dynamic> toJson() => {
         's': usedInSubstitutions,

@@ -1,6 +1,8 @@
-import '../modals/scale_degree_chord.dart';
-import '../modals/scale_degree_progression.dart';
+import 'package:harmony_theory/modals/weights/bass_movement_weight.dart';
+
+import '../modals/progression/degree_progression.dart';
 import '../modals/substitution.dart';
+import '../modals/theory_base/degree/degree_chord.dart';
 import '../modals/weights/climactic_ending_weight.dart';
 import '../modals/weights/complex_weight.dart';
 import '../modals/weights/harmonic_function_weight.dart';
@@ -25,11 +27,12 @@ abstract class SubstitutionHandler {
     const ClimacticEndingWeight(),
     const UserSavedWeight(),
     const ComplexWeight(),
+    const BassMovementWeight(),
   ]..sort(
-      (Weight w1, Weight w2) => -1 * w1.importance.compareTo(w2.importance));
+          (Weight w1, Weight w2) => -1 * w1.importance.compareTo(w2.importance));
 
   static const KeepHarmonicFunctionWeight keepHarmonicFunction =
-      KeepHarmonicFunctionWeight();
+  KeepHarmonicFunctionWeight();
 
   static KeepHarmonicFunctionAmount keepAmount = KeepHarmonicFunctionAmount.med;
 
@@ -37,8 +40,7 @@ abstract class SubstitutionHandler {
     for (Weight weight in weights) weight.name: weight
   };
 
-  static List<Substitution> _getPossibleSubstitutions(
-    ScaleDegreeProgression base, {
+  static List<Substitution> _getPossibleSubstitutions(DegreeProgression base, {
     int start = 0,
     double startDur = 0.0,
     int? end,
@@ -47,10 +49,10 @@ abstract class SubstitutionHandler {
     final List<Substitution> substitutions = [];
     end ??= base.length;
     for (int i = start; i < end; i++) {
-      ScaleDegreeChord? chord = base[i];
+      DegreeChord? chord = base[i];
       if (chord != null) {
         List<PackagedProgression>? progressions =
-            ProgressionBank.getByGroup(chord: chord, withTonicization: false);
+        ProgressionBank.getByGroup(chord: chord, withTonicization: false);
         if (progressions != null && progressions.isNotEmpty) {
           for (PackagedProgression packagedProg in progressions) {
             substitutions.addAll(base.getPossibleSubstitutions(
@@ -81,11 +83,10 @@ abstract class SubstitutionHandler {
     return substitutions.toSet().toList();
   }
 
-  static List<Substitution> getRatedSubstitutions(
-    ScaleDegreeProgression base, {
+  static List<Substitution> getRatedSubstitutions(DegreeProgression base, {
     Sound? sound,
     KeepHarmonicFunctionAmount? keepAmount,
-    ScaleDegreeProgression? harmonicFunctionBase,
+    DegreeProgression? harmonicFunctionBase,
     int start = 0,
     double startDur = 0.0,
     int? end,
@@ -118,7 +119,7 @@ abstract class SubstitutionHandler {
 
   /// Substitutes the best option for [maxIterations] iterations.
   static Substitution substituteBy({
-    required ScaleDegreeProgression base,
+    required DegreeProgression base,
     required int maxIterations,
     Sound? sound,
     KeepHarmonicFunctionAmount? keepHarmonicFunction,
@@ -127,7 +128,7 @@ abstract class SubstitutionHandler {
     int? end,
     double? endDur,
   }) {
-    ScaleDegreeProgression prev = base;
+    DegreeProgression prev = base;
     List<Substitution> rated;
     do {
       rated = getRatedSubstitutions(

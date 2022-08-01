@@ -14,4 +14,8 @@ extension PitchExtension on Pitch {
   bool operator <(Pitch other) => compareTo(other) < 0;
 
   bool operator >(Pitch other) => compareTo(other) > 0;
+
+  Interval numberlessFrom(Pitch other) {
+    return Interval.fromSemitones((semitones - other.semitones) % 12);
+  }
 }

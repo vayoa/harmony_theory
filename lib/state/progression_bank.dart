@@ -1,8 +1,10 @@
 import '../modals/identifiable.dart';
-import '../modals/progression.dart';
-import '../modals/scale_degree_chord.dart';
-import '../modals/scale_degree_progression.dart';
+import '../modals/progression/degree_progression.dart';
+import '../modals/progression/progression.dart';
+import '../modals/theory_base/degree/degree_chord.dart';
 import 'progression_bank_entry.dart';
+
+part 'progression_bank_inversions.dart';
 
 abstract class ProgressionBank {
   static const List<String> allBankVersions = ['beta', '1.0'];
@@ -28,7 +30,7 @@ abstract class ProgressionBank {
   /// different group then if it's in any other place (for tonicization).
   static Map<int, List<int>> _groupedBank = {};
 
-  static final int _tonicID = ScaleDegreeChord.majorTonicTriad.weakID;
+  static final int _tonicID = DegreeChord.majorTonicTriad.weakID;
 
   static final int tonicizationID = Identifiable.hash2(_tonicID, true.hashCode);
 
@@ -39,7 +41,7 @@ abstract class ProgressionBank {
   static Map<int, List<int>> get groupedBank => _groupedBank;
 
   /// Returns all saved progressions that have a
-  /// [ScaleDegreeChord.majorTonicTriad] as their last chord.
+  /// [DegreeChord.majorTonicTriad] as their last chord.
   static List<PackagedProgression> get tonicizations {
     if (_groupedBank.containsKey(tonicizationID)) {
       List<PackagedProgression> results = [];
@@ -63,8 +65,7 @@ abstract class ProgressionBank {
     _bank = {defaultPackageName: {}, builtInPackageName: {}};
     _substitutionsIDBank = {};
     _groupedBank = {};
-    for (MapEntry<String, ScaleDegreeProgression> mapEntry
-        in _builtInBank.entries) {
+    for (MapEntry<String, DegreeProgression> mapEntry in _builtInBank.entries) {
       ProgressionBankEntry entry = ProgressionBankEntry(
         usedInSubstitutions: true,
         progression: mapEntry.value,
@@ -178,7 +179,7 @@ abstract class ProgressionBank {
           String add = ' $num';
           if (title.length + add.length > maxTitleCharacters) {
             title =
-                title.substring(0, title.length - add.length - 3) + '...' + add;
+                '${title.substring(0, title.length - add.length - 3)}...$add';
           }
         }
 
@@ -357,7 +358,7 @@ abstract class ProgressionBank {
   ///
   /// If [addToGroups] is false, we won't add the progression to [_groupedBank].
   static void _addProgToGroups({
-    required ScaleDegreeProgression progression,
+    required DegreeProgression progression,
     required String location,
     int? id,
     bool addToGroups = true,
@@ -368,8 +369,8 @@ abstract class ProgressionBank {
     }
     if (addToGroups) {
       for (int i = 0; i < progression.length; i++) {
-        ScaleDegreeChord? chord = progression[i];
-        final Map<int, ScaleDegreeChord> addedChords = {};
+        DegreeChord? chord = progression[i];
+        final Map<int, DegreeChord> addedChords = {};
         if (chord != null) {
           int weakChordID = weakIDWithPlace(chord, i == progression.length - 1);
           if (!addedChords.containsKey(weakChordID)) {
@@ -385,13 +386,12 @@ abstract class ProgressionBank {
     }
   }
 
-  static void _removeProgFromGroups(ScaleDegreeProgression progression,
-      [int? id]) {
+  static void _removeProgFromGroups(DegreeProgression progression, [int? id]) {
     id ??= progression.id;
     _substitutionsIDBank.remove(id);
     for (int i = 0; i < progression.length; i++) {
-      ScaleDegreeChord? chord = progression[i];
-      final Map<int, ScaleDegreeChord> addedChords = {};
+      DegreeChord? chord = progression[i];
+      final Map<int, DegreeChord> addedChords = {};
       if (chord != null) {
         int weakChordID = weakIDWithPlace(chord, i == progression.length - 1);
         if (!addedChords.containsKey(weakChordID)) {
@@ -474,19 +474,19 @@ abstract class ProgressionBank {
   }
 
   /// [last] will only have effect when [chord.id] is equal to
-  /// [ScaleDegreeChord.majorTonicTriad]'s weak hash.
-  static int weakIDWithPlace(ScaleDegreeChord chord, [bool last = false]) {
+  /// [DegreeChord.majorTonicTriad]'s weak hash.
+  static int weakIDWithPlace(DegreeChord chord, [bool last = false]) {
     int weakID = chord.weakID;
     return Identifiable.hash2(
         weakID, weakID == _tonicID ? last.hashCode : false.hashCode);
   }
 
   /// Returns all saved progressions from [_bank] containing the
-  /// [ScaleDegreeChord.id] of [chord].
+  /// [DegreeChord.id] of [chord].
   /// If [withTonicization] is true, returns also all saved progressions that
-  /// have a [ScaleDegreeChord.majorTonicTriad] as their last chord.
+  /// have a [DegreeChord.majorTonicTriad] as their last chord.
   static List<PackagedProgression>? getByGroup(
-      {required ScaleDegreeChord chord, required bool withTonicization}) {
+      {required DegreeChord chord, required bool withTonicization}) {
     List<int>? ids = _groupedBank[weakIDWithPlace(chord, false)];
     if (ids != null) {
       if (withTonicization && _groupedBank.containsKey(tonicizationID)) {
@@ -508,89 +508,88 @@ abstract class ProgressionBank {
     return null;
   }
 
-  static final Map<String, ScaleDegreeProgression> _builtInBank = {
-    'Deceptive Cadence': ScaleDegreeProgression.fromList(['V', 'vi']),
+  static final Map<String, DegreeProgression> _builtInBank = {
+    'Cadential 6-4': DegreeProgression.fromList(['V^5', 'I']),
+    'Deceptive Cadence': DegreeProgression.fromList(['V', 'vi']),
     // V I
-    'Authentic Cadence': ScaleDegreeProgression.fromList(['V', 'I']),
+    'Authentic Cadence': DegreeProgression.fromList(['V', 'I']),
     'Authentic Cadence 2':
-        ScaleDegreeProgression.fromList(['V', 'I'], durations: [1 / 4, 1 / 2]),
+        DegreeProgression.fromList(['V', 'I'], durations: [1 / 4, 1 / 2]),
     // ii V I
-    'Two-Five-One': ScaleDegreeProgression.fromList(['ii', 'V', 'I']),
-    'Two-Five-One 2': ScaleDegreeProgression.fromList(['ii', 'V', 'I'],
+    'Two-Five-One': DegreeProgression.fromList(['ii', 'V', 'I']),
+    'Two-Five-One 2': DegreeProgression.fromList(['ii', 'V', 'I'],
         durations: [1 / 4, 1 / 4, 1 / 2]),
-    'Altered Two-Five-One in Minor': ScaleDegreeProgression.fromList(
+    'Altered Two-Five-One in Minor': DegreeProgression.fromList(
         ['viidim', 'iii', 'III', 'vi'],
         durations: [1 / 4, 1 / 4, 1 / 4, 1 / 4]),
-    'Two(diminished)-Five-One':
-        ScaleDegreeProgression.fromList(['iidim', 'V', 'I']),
+    'Two(diminished)-Five-One': DegreeProgression.fromList(['iidim', 'V', 'I']),
     'Two(half-diminished)-Five-One':
-        ScaleDegreeProgression.fromList(['iim7b5', 'V', 'I']),
+        DegreeProgression.fromList(['iim7b5', 'V', 'I']),
 
-    'Two-Five-One with 7ths':
-        ScaleDegreeProgression.fromList(['iim7b5', 'V7', 'I']),
+    'Two-Five-One with 7ths': DegreeProgression.fromList(['iim7b5', 'V7', 'I']),
 
     // IV V I
-    'Four-Five-One': ScaleDegreeProgression.fromList(['IV', 'V', 'I']),
+    'Four-Five-One': DegreeProgression.fromList(['IV', 'V', 'I']),
 
-    'Four(minor)-Five-One': ScaleDegreeProgression.fromList(['iv', 'V', 'I']),
+    'Four(minor)-Five-One': DegreeProgression.fromList(['iv', 'V', 'I']),
 
     'Altered Minor Plagal Cadence':
-        ScaleDegreeProgression.fromList(['IV', 'iv', 'I']),
+        DegreeProgression.fromList(['IV', 'iv', 'I']),
 
     // IV I
-    'Plagal Cadence': ScaleDegreeProgression.fromList(['IV', 'I']),
+    'Plagal Cadence': DegreeProgression.fromList(['IV', 'I']),
 
-    'Minor Plagal Cadence': ScaleDegreeProgression.fromList(['iv', 'I']),
+    'Minor Plagal Cadence': DegreeProgression.fromList(['iv', 'I']),
 
     // Added
     'Altered Authentic Cadence in Minor':
-        ScaleDegreeProgression.fromList(['iii', 'III', 'vi']),
+        DegreeProgression.fromList(['iii', 'III', 'vi']),
 
     'Altered Authentic Cadence in Minor 2':
-        ScaleDegreeProgression.fromList(['iii', 'III', 'vi', 'vi']),
+        DegreeProgression.fromList(['iii', 'III', 'vi', 'vi']),
 
     'Diminished Resolution with 7ths':
-        ScaleDegreeProgression.fromList(['iim7b5', 'I']),
+        DegreeProgression.fromList(['iim7b5', 'I']),
 
-    'Diminished Resolution': ScaleDegreeProgression.fromList(['iidim', 'I']),
+    'Diminished Resolution': DegreeProgression.fromList(['iidim', 'I']),
 
     'Diatonic Quartal Harmony':
-        ScaleDegreeProgression.fromList(['IV', 'II', 'V', 'III', 'vi']),
+        DegreeProgression.fromList(['IV', 'II', 'V', 'III', 'vi']),
 
     'Reversed Diatonic Quartal Harmony':
-        ScaleDegreeProgression.fromList(['vi', 'III', 'V', 'II', 'IV']),
+        DegreeProgression.fromList(['vi', 'III', 'V', 'II', 'IV']),
 
-    'Mix Pre-Dominant': ScaleDegreeProgression.fromList(['bVII', 'V', 'I']),
+    'Mix Pre-Dominant': DegreeProgression.fromList(['bVII', 'V', 'I']),
 
     'Long Chromatic Inner Voice':
-        ScaleDegreeProgression.fromList(['bVI', 'IV', 'bVII', 'V', 'I']),
+        DegreeProgression.fromList(['bVI', 'IV', 'bVII', 'V', 'I']),
 
-    'One-Four-One': ScaleDegreeProgression.fromList(['I', 'IV', 'I']),
+    'One-Four-One': DegreeProgression.fromList(['I', 'IV', 'I']),
 
-    'One-Four-One Altered': ScaleDegreeProgression.fromList(['I', 'iv', 'I']),
+    'One-Four-One Altered': DegreeProgression.fromList(['I', 'iv', 'I']),
 
-    'Neapolitan Cadence': ScaleDegreeProgression.fromList(['bII', 'V', 'I']),
+    'Neapolitan Cadence': DegreeProgression.fromList(['bII', 'V', 'I']),
 
     'Short Chromatic Inner Voice (dim)':
-        ScaleDegreeProgression.fromList(['bVII', 'VIIdim7', 'I']),
+        DegreeProgression.fromList(['bVII', 'VIIdim7', 'I']),
 
-    'Diatonic Diminished': ScaleDegreeProgression.fromList(['VIIdim7', 'I']),
+    'Diatonic Diminished': DegreeProgression.fromList(['VIIdim7', 'I']),
 
-    'Minor-Based Diminished': ScaleDegreeProgression.fromList(['bII7', 'I']),
+    'Minor-Based Diminished': DegreeProgression.fromList(['bII7', 'I']),
 
-    'Two-SubFive-One': ScaleDegreeProgression.fromList(['ii', 'bII', 'I']),
+    'Two-SubFive-One': DegreeProgression.fromList(['ii', 'bII', 'I']),
 
     'Two(diminished)-SubFive-One':
-        ScaleDegreeProgression.fromList(['iidim', 'bII', 'I']),
+        DegreeProgression.fromList(['iidim', 'bII', 'I']),
 
-    'Simple Mixture Ascent':
-        ScaleDegreeProgression.fromList(['bVI', 'bVII', 'I']),
+    'Simple Mixture Ascent': DegreeProgression.fromList(['bVI', 'bVII', 'I']),
 
-    'Short Simple Mixture Ascent':
-        ScaleDegreeProgression.fromList(['bVII', 'I']),
+    'Short Simple Mixture Ascent': DegreeProgression.fromList(['bVII', 'I']),
 
-    'Augmented Authentic Cadence':
-        ScaleDegreeProgression.fromList(['Vaug', 'I']),
+    'Augmented Authentic Cadence': DegreeProgression.fromList(['Vaug', 'I']),
+
+    // Extensions
+    ..._inversionProgressions,
   };
 }
 
@@ -638,7 +637,7 @@ class EntryLocation {
 
 class PackagedProgression {
   final EntryLocation location;
-  final ScaleDegreeProgression progression;
+  final DegreeProgression progression;
 
   PackagedProgression({
     required this.location,

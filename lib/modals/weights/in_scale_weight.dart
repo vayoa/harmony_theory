@@ -1,7 +1,7 @@
 import '../../state/progression_bank.dart';
-import '../scale_degree.dart';
-import '../scale_degree_chord.dart';
-import '../scale_degree_progression.dart';
+import '../progression/degree_progression.dart';
+import '../theory_base/degree/degree.dart';
+import '../theory_base/degree/degree_chord.dart';
 import 'weight.dart';
 
 class InScaleWeight extends Weight {
@@ -14,17 +14,17 @@ class InScaleWeight extends Weight {
           weightDescription: WeightDescription.classic,
         );
 
-  static final List<ScaleDegree> sharps = [
-    ScaleDegree.parse('#VI'),
-    ScaleDegree.parse('#III'),
-    ScaleDegree.parse('#VII'),
+  static final List<Degree> sharps = [
+    Degree.parse('#VI'),
+    Degree.parse('#III'),
+    Degree.parse('#VII'),
   ];
 
-  static final List<ScaleDegree> flats = [
-    ScaleDegree.parse('bII'),
-    ScaleDegree.parse('bV'),
-    ScaleDegree.parse('bI'),
-    ScaleDegree.parse('bIV'),
+  static final List<Degree> flats = [
+    Degree.parse('bII'),
+    Degree.parse('bV'),
+    Degree.parse('bI'),
+    Degree.parse('bIV'),
   ];
 
   /// Based on chord degrees. Any degrees in the progression that are in
@@ -32,17 +32,17 @@ class InScaleWeight extends Weight {
   /// The final score is (1.0 - (outPoints / degreeCount)).
   @override
   Score score({
-    required ScaleDegreeProgression progression,
-    required ScaleDegreeProgression base,
+    required DegreeProgression progression,
+    required DegreeProgression base,
     EntryLocation? location,
   }) {
     int count = 0, outCount = 0;
     String details = '';
-    for (ScaleDegreeChord? chord in progression.values) {
+    for (DegreeChord? chord in progression.values) {
       if (chord != null) {
-        List<ScaleDegree> degrees = chord.degrees;
+        List<Degree> degrees = chord.degrees;
         count += degrees.length;
-        for (ScaleDegree degree in degrees) {
+        for (Degree degree in degrees) {
           if (degree.accidentals != 0) {
             // Since flats is bigger than sharps by one...
             if (flats.last == degree) {
@@ -67,9 +67,8 @@ class InScaleWeight extends Weight {
     }
     return Score(
       score: 1.0 - (outCount / count),
-      details: details +
-          'Out of $count max points, '
-              'this progression got ${count - outCount} points.',
+      details:
+          '${details}Out of $count max points, this progression got ${count - outCount} points.',
     );
   }
 }

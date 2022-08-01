@@ -1,28 +1,28 @@
 import 'package:tonic/tonic.dart';
 
-import '../extensions/chord_extension.dart';
 import '../extensions/scale_pattern_extension.dart';
-import '../modals/pitch_scale.dart';
-import '../modals/scale_degree_chord.dart';
+import '../modals/pitch_chord.dart';
+import '../modals/theory_base/degree/degree_chord.dart';
+import '../modals/theory_base/pitch_scale.dart';
 
 // ignore_for_file: avoid_print
 
 abstract class ScaleDegreeChordTest {
   static bool test() {
     print('-- Regular --');
-    List<Pitch> _possiblePitches = possiblePitches;
-    Map<PitchScale, List<ScaleDegreeChord>> reverse = {};
-    for (Pitch pitch in _possiblePitches) {
+    List<Pitch> pitches = possiblePitches;
+    Map<PitchScale, List<DegreeChord>> reverse = {};
+    for (Pitch pitch in pitches) {
       PitchScale scale =
           PitchScale(tonic: pitch, pattern: ScalePatternExtension.majorKey);
       for (int i = 0; i < 2; i++) {
         List<String> inScale = [];
-        List<ScaleDegreeChord> chords = [];
-        for (int j = 0; j < _possiblePitches.length; j++) {
-          Pitch converted = _possiblePitches[j];
+        List<DegreeChord> chords = [];
+        for (int j = 0; j < pitches.length; j++) {
+          Pitch converted = pitches[j];
           String name = '${converted.letterName}${converted.accidentalsString}';
           try {
-            chords.add(ScaleDegreeChord(scale, Chord.parse(name)));
+            chords.add(DegreeChord(scale, PitchChord.parse(name)));
             inScale.add('$name: ${chords.last}');
           } catch (e) {
             print('$converted in $scale failed:');
@@ -43,11 +43,10 @@ abstract class ScaleDegreeChordTest {
       }
     }
     print('\n-- Reversed --');
-    for (MapEntry<PitchScale, List<ScaleDegreeChord>> entry
-        in reverse.entries) {
+    for (MapEntry<PitchScale, List<DegreeChord>> entry in reverse.entries) {
       List<String> chords = entry.value
-          .map((ScaleDegreeChord sdc) =>
-              '$sdc: ${sdc.inScale(entry.key).commonName}')
+          .map(
+              (DegreeChord sdc) => '$sdc: ${sdc.inScale(entry.key).toString()}')
           .toList();
       print('${entry.key}: $chords');
     }
