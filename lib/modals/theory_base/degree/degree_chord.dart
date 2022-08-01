@@ -472,6 +472,10 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
   PitchChord inScale(PitchScale scale) => PitchChord(
       pattern: pattern, root: root.inScale(scale), bass: bass.inScale(scale));
 
+  /// Returns true if the chord, assuming it's the last chord in a progression,
+  /// would make that progression a tonicization progression.
+  bool get ifLastTurnsTonicization => weakEqual(majorTonicTriad);
+
   @override
   bool operator ==(Object other) =>
       other is DegreeChord &&

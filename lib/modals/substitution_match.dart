@@ -53,9 +53,7 @@ class SubstitutionMatch {
       required bool isSubLast}) {
     if ((sub == null || base == null) || sub.weakEqual(base)) {
       return SubstitutionMatchType.dry;
-    } else if (isSubLast &&
-        sub.weakEqual(DegreeChord.majorTonicTriad) &&
-        base.canBeTonic) {
+    } else if (isSubLast && sub.ifLastTurnsTonicization && base.canBeTonic) {
       return SubstitutionMatchType.tonicization;
     }
     return null;
