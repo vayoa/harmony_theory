@@ -22,7 +22,7 @@ class SavedVariationGroup {
         dryVariationId = entry.progression.dryVariationId;
 
   SavedVariationGroup.fromJson(Map<String, dynamic> json)
-      : ids = json['ids'],
+      : ids = json['ids'].cast<int>(),
         dryVariationId = json['dry'];
 
   Map<String, dynamic> toJson() => {

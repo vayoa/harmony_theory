@@ -206,7 +206,7 @@ abstract class ProgressionBank {
         'substitutionsTitles': {
           for (MapEntry<int, EntryLocation> entry
               in _substitutionsIDBank.entries)
-            entry.key.toString(): entry.value
+            entry.key.toString(): entry.value.toString()
         },
         'bank': {
           for (MapEntry<String, Map<String, ProgressionBankEntry>> package
@@ -649,6 +649,15 @@ class ProgressionBankComputePass {
     required this.groupedBank,
     required this.variationBank,
   });
+
+  @override
+  String toString() {
+    return 'ProgressionBankComputePass{'
+        'version: $version, bank: $bank, '
+        'substitutionsIDBank: $substitutionsIDBank, '
+        'groupedBank: $groupedBank, '
+        'variationBank: $variationBank}';
+  }
 }
 
 class EntryLocation {
