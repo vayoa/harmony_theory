@@ -68,6 +68,8 @@ abstract class SubstitutionHandler {
                 endDur: endDur,
                 forIndex: i,
                 location: packagedProg.location,
+                dryVariationId:
+                    ProgressionBank.getDryVariationId(packagedProg.location),
               ),
             );
           }
@@ -86,6 +88,7 @@ abstract class SubstitutionHandler {
           end: end,
           endDur: endDur,
           location: sub.location,
+          dryVariationId: ProgressionBank.getDryVariationId(sub.location),
         ),
       );
     }

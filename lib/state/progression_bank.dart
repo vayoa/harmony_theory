@@ -542,6 +542,14 @@ abstract class ProgressionBank {
     return null;
   }
 
+  static int? getDryVariationId(EntryLocation location) {
+    final varId = getAtLocation(location)?.variationId;
+    if (varId != null) {
+      return _variationsBank[varId]?.dryVariationId;
+    }
+    return null;
+  }
+
   static final Map<String, DegreeProgression> _builtInBank = {
     'Cadential 6-4': DegreeProgression.fromList(['V^5', 'I']),
     'Deceptive Cadence': DegreeProgression.fromList(['V', 'vi']),
