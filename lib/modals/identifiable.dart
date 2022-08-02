@@ -1,4 +1,4 @@
-abstract class Identifiable {
+abstract class Identifiable extends Object {
   int get id;
 
   // TDC: I took all implementations from [SystemHash].
@@ -41,4 +41,7 @@ abstract class Identifiable {
     }
     return finish(hash);
   }
+
+  // TDC: Optimize...
+  static int hashDouble(double n) => hashAllInts(n.toString().codeUnits);
 }

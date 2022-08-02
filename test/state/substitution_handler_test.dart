@@ -1,12 +1,12 @@
 import 'package:harmony_theory/modals/pitch_chord.dart';
 import 'package:harmony_theory/modals/progression/chord_progression.dart';
 import 'package:harmony_theory/modals/progression/degree_progression.dart';
-import 'package:harmony_theory/modals/substitution.dart';
 import 'package:harmony_theory/modals/theory_base/pitch_scale.dart';
 import 'package:harmony_theory/modals/weights/keep_harmonic_function_weight.dart';
 import 'package:harmony_theory/modals/weights/weight.dart';
 import 'package:harmony_theory/state/progression_bank.dart';
 import 'package:harmony_theory/state/substitution_handler.dart';
+import 'package:harmony_theory/state/variation_group.dart';
 import 'package:test/test.dart';
 import 'package:tonic/tonic.dart';
 
@@ -86,7 +86,7 @@ _testKeepHarmonicFunctionAmount({
   required int greaterThan,
   required List<String> expectingToContain,
 }) {
-  List<Substitution> subs = SubstitutionHandler.getRatedSubstitutions(
+  List<VariationGroup> subs = SubstitutionHandler.getRatedSubstitutions(
     progression,
     keepAmount: amount,
   );
@@ -95,8 +95,11 @@ _testKeepHarmonicFunctionAmount({
   expect(result, containsAll(expectingToContain));
 }
 
-List<String> _getStrings(List<Substitution> subs) =>
-    [for (var sub in subs) sub.substitutedBase.toString()];
+List<String> _getStrings(List<VariationGroup> variations) => [
+      for (var variation in variations) ...[
+        for (var sub in variation.members) sub.substitutedBase.toString()
+      ]
+    ];
 
 List<String> _getSplit(String str) => str.trim().split('\n');
 

@@ -2,6 +2,7 @@ import '../modals/identifiable.dart';
 import '../modals/progression/degree_progression.dart';
 import '../modals/progression/progression.dart';
 import '../modals/theory_base/degree/degree_chord.dart';
+import '../state/variation_group.dart';
 import 'progression_bank_entry.dart';
 
 part 'progression_bank_inversions.dart';
@@ -22,7 +23,7 @@ abstract class ProgressionBank {
   /// (which is the entry's location).
   ///
   /// Holds the ids for the progressions that are used in the substitutions.
-  static Map<int, String> _substitutionsIDBank = {};
+  static Map<int, EntryLocation> _substitutionsIDBank = {};
 
   /// Key - scale degree chord id, value - list of entry progression ids.
   ///
@@ -30,15 +31,21 @@ abstract class ProgressionBank {
   /// different group then if it's in any other place (for tonicization).
   static Map<int, List<int>> _groupedBank = {};
 
+  /// Key - [DegreeProgression.variationId], value - list of entry progression ids.
+  static Map<int, SavedVariationGroup> _variationsBank = {};
+
   static final int _tonicID = DegreeChord.majorTonicTriad.weakID;
 
   static final int tonicizationID = Identifiable.hash2(_tonicID, true.hashCode);
 
-  static Map<int, String> get substitutionsIDBank => _substitutionsIDBank;
+  static Map<int, EntryLocation> get substitutionsIDBank =>
+      _substitutionsIDBank;
 
   static Map<String, Map<String, ProgressionBankEntry>> get bank => _bank;
 
   static Map<int, List<int>> get groupedBank => _groupedBank;
+
+  static Map<int, SavedVariationGroup> get variationBank => _variationsBank;
 
   /// Returns all saved progressions that have a
   /// [DegreeChord.majorTonicTriad] as their last chord.
@@ -46,8 +53,7 @@ abstract class ProgressionBank {
     if (_groupedBank.containsKey(tonicizationID)) {
       List<PackagedProgression> results = [];
       for (int id in _groupedBank[tonicizationID]!) {
-        EntryLocation location =
-            EntryLocation.fromLocation(_substitutionsIDBank[id]!)!;
+        EntryLocation location = _substitutionsIDBank[id]!;
         results.add(
           PackagedProgression(
               location: location,
@@ -65,6 +71,7 @@ abstract class ProgressionBank {
     _bank = {defaultPackageName: {}, builtInPackageName: {}};
     _substitutionsIDBank = {};
     _groupedBank = {};
+    _variationsBank = {};
     for (MapEntry<String, DegreeProgression> mapEntry in _builtInBank.entries) {
       ProgressionBankEntry entry = ProgressionBankEntry(
         usedInSubstitutions: true,
@@ -83,7 +90,7 @@ abstract class ProgressionBank {
       _substitutionsIDBank = {
         for (MapEntry<String, dynamic> entry
             in json['substitutionsTitles'].entries)
-          int.parse(entry.key): entry.value
+          int.parse(entry.key): EntryLocation.fromLocation(entry.value)!
       };
       _bank = {
         for (MapEntry<String, dynamic> package in json['bank'].entries)
@@ -95,6 +102,10 @@ abstract class ProgressionBank {
       _groupedBank = {
         for (MapEntry<String, dynamic> entry in json['groupedBank'].entries)
           int.parse(entry.key): entry.value.cast<int>(),
+      };
+      _variationsBank = {
+        for (MapEntry<String, dynamic> entry in json['variationsBank'].entries)
+          int.parse(entry.key): SavedVariationGroup.fromJson(entry.value),
       };
     } else {
       // If not, migrate it...
@@ -121,23 +132,16 @@ abstract class ProgressionBank {
         _bank = {defaultPackageName: {}, builtInPackageName: {}};
         // We also initialize this here.
         _substitutionsIDBank = {};
+        _groupedBank = {};
+        _variationsBank = {};
         for (MapEntry<String, dynamic> entry in json['bank'].entries) {
           // If built in, put in built in package...
           String package =
               entry.value['b'] ? builtInPackageName : defaultPackageName;
           ProgressionBankEntry pEntry =
               ProgressionBankEntry.fromJson(json: entry.value);
-          _bank[package]![entry.key] = pEntry;
-          if (pEntry.usedInSubstitutions) {
-            _substitutionsIDBank[pEntry.progression.id] =
-                nameToLocation(package, entry.key);
-          }
+          add(title: entry.key, entry: pEntry, package: package);
         }
-        _groupedBank = {
-          for (MapEntry<String, dynamic> entry in json['groupedBank'].entries)
-            int.parse(entry.key): entry.value.cast<int>(),
-        };
-        break;
     }
   }
 
@@ -194,12 +198,14 @@ abstract class ProgressionBank {
         bank: _bank,
         substitutionsIDBank: _substitutionsIDBank,
         groupedBank: _groupedBank,
+        variationBank: _variationsBank,
       );
 
   static Map<String, dynamic> toJson() => {
         'ver': _version,
         'substitutionsTitles': {
-          for (MapEntry<int, String> entry in _substitutionsIDBank.entries)
+          for (MapEntry<int, EntryLocation> entry
+              in _substitutionsIDBank.entries)
             entry.key.toString(): entry.value
         },
         'bank': {
@@ -214,6 +220,11 @@ abstract class ProgressionBank {
         'groupedBank': {
           for (MapEntry<int, List<int>> entry in _groupedBank.entries)
             entry.key.toString(): entry.value
+        },
+        'variationsBank': {
+          for (MapEntry<int, SavedVariationGroup> entry
+              in _variationsBank.entries)
+            entry.key.toString(): entry.value.toJson(),
         }
       };
 
@@ -229,9 +240,6 @@ abstract class ProgressionBank {
     }
     return json;
   }
-
-  static String nameToLocation(String package, String name) =>
-      package + packageSeparator + name;
 
   static bool packageNameValid(String package) =>
       package.trim().isNotEmpty && !package.contains(packageSeparator);
@@ -267,8 +275,8 @@ abstract class ProgressionBank {
     return id;
   }
 
-  /// Adds [entry] to the [_bank] at [package] (and to the [_groupedBank] based
-  /// on [entry.usedInSubstitutions]...).
+  /// Adds [entry] to the [_bank] at [package] (and to the [_groupedBank]
+  /// and [_variationsBank] based on [entry.usedInSubstitutions]...).
   ///
   /// If no [package] was given, will use [defaultPackageName]. If no such
   /// [package] exists, will create one.
@@ -278,7 +286,8 @@ abstract class ProgressionBank {
   /// If another entry in the bank has the same [title] in the same [package],
   /// will override that entry with the new one ([entry]).
   ///
-  /// If [addToGroups] is false, we won't add the progression to [_groupedBank].
+  /// If [addToGroups] is false, we won't add the progression to [_groupedBank]
+  /// and [_variationsBank].
   ///
   /// Will return the id of the progression.
   static int add({
@@ -298,8 +307,8 @@ abstract class ProgressionBank {
     _bank[package]![title] = entry;
     if (entry.usedInSubstitutions) {
       _addProgToGroups(
-        progression: entry.progression,
-        location: nameToLocation(package, title),
+        entry: entry,
+        location: EntryLocation(package, title),
         id: id,
         addToGroups: addToGroups,
       );
@@ -308,14 +317,15 @@ abstract class ProgressionBank {
   }
 
   /// Removes an entry with the title of [title] from the [_bank] at
-  /// [package] (and will check to remove from the [_groupedBank] based on the
-  /// entry's [usedInSubstitutions]...).
+  /// [package] (and will check to remove from the [_groupedBank]
+  /// and [_variationsBank] based on the entry's
+  /// [usedInSubstitutions]...).
   ///
   /// If no such entry exists in the [package] (only checks for it's title),
   /// will do nothing.
   ///
   /// If [removeFromGroups] is false, we won't remove the progression from
-  /// [_groupedBank].
+  /// [_groupedBank] and [_variationsBank].
   ///
   /// Will return the id of the progression if removed.
   static int? remove({
@@ -330,10 +340,10 @@ abstract class ProgressionBank {
       id ??= entry.progression.id;
       if (removeFromBank) _bank[package]!.remove(title);
       if (entry.usedInSubstitutions &&
-          nameToLocation(package, title) == _substitutionsIDBank[id]) {
+          EntryLocation(package, title) == _substitutionsIDBank[id]) {
         _substitutionsIDBank.remove(id);
         if (removeFromGroups) {
-          _removeProgFromGroups(entry.progression, id);
+          _removeProgFromGroups(entry, id);
         }
       }
       return id;
@@ -352,22 +362,29 @@ abstract class ProgressionBank {
     _bank.remove(package);
   }
 
-  /// Gets [progression] and [location] (entry's LOCATION).
-  /// Adds the progression to it's relevant groups ([_groupedBank]) and to
-  /// [_substitutionsIDBank] to be later used in substitutions.
+  /// Gets [entry] and [location] (entry's LOCATION).
+  /// Adds the progression to it's relevant groups ([_groupedBank]
+  /// and [_variationsBank]) and to [_substitutionsIDBank] to be
+  /// later used in substitutions.
   ///
-  /// If [addToGroups] is false, we won't add the progression to [_groupedBank].
+  /// If [addToGroups] is false, we won't add the progression to [_groupedBank]
+  /// and [_variationsBank].
   static void _addProgToGroups({
-    required DegreeProgression progression,
-    required String location,
+    required ProgressionBankEntry entry,
+    required EntryLocation location,
     int? id,
     bool addToGroups = true,
   }) {
+    DegreeProgression progression = entry.progression;
     id ??= progression.id;
     if (!_substitutionsIDBank.containsKey(location)) {
       _substitutionsIDBank[id] = location;
     }
     if (addToGroups) {
+      SavedVariationGroup vg = _variationsBank.putIfAbsent(
+          entry.variationId!, () => SavedVariationGroup(entry));
+      vg.ids.add(id);
+
       for (int i = 0; i < progression.length; i++) {
         DegreeChord? chord = progression[i];
         final Map<int, DegreeChord> addedChords = {};
@@ -386,10 +403,17 @@ abstract class ProgressionBank {
     }
   }
 
-  static void _removeProgFromGroups(DegreeProgression progression, [int? id]) {
+  static void _removeProgFromGroups(ProgressionBankEntry entry, [int? id]) {
+    DegreeProgression progression = entry.progression;
     id ??= progression.id;
     _substitutionsIDBank.remove(id);
     for (int i = 0; i < progression.length; i++) {
+      SavedVariationGroup vg = _variationsBank[entry.variationId]!;
+      vg.ids.remove(id);
+      if (vg.ids.isEmpty) {
+        _variationsBank.remove(entry.variationId);
+      }
+
       DegreeChord? chord = progression[i];
       final Map<int, DegreeChord> addedChords = {};
       if (chord != null) {
@@ -428,14 +452,15 @@ abstract class ProgressionBank {
       if (entry.usedInSubstitutions) {
         int id = entry.progression.id;
         _substitutionsIDBank.remove(id);
-        _substitutionsIDBank[id] = nameToLocation(package, newTitle);
+        _substitutionsIDBank[id] = EntryLocation(package, newTitle);
       }
     }
   }
 
   /// Gets an [id] and a [location] (entry's LOCATION!!!) and checks if it's
   /// free in [_substitutionsIDBank].
-  static bool idFreeInSubs({required String location, required int id}) =>
+  static bool idFreeInSubs(
+          {required EntryLocation location, required int id}) =>
       !_substitutionsIDBank.containsKey(id) ||
       _substitutionsIDBank[id] == location;
 
@@ -444,7 +469,7 @@ abstract class ProgressionBank {
       _bank.containsKey(package) &&
       _bank[package]!.containsKey(title) &&
       idFreeInSubs(
-          location: nameToLocation(package, title),
+          location: EntryLocation(package, title),
           id: _bank[package]![title]!.progression.id);
 
   static bool canBeSubstitution(Progression progression) =>
@@ -458,16 +483,15 @@ abstract class ProgressionBank {
       ProgressionBankEntry entry = _bank[package]![title]!;
       if (entry.usedInSubstitutions != useInSubstitutions &&
           idFreeInSubs(
-              location: nameToLocation(package, title),
+              location: EntryLocation(package, title),
               id: _bank[package]![title]!.progression.id)) {
         _bank[package]![title] =
             entry.copyWith(usedInSubstitutions: useInSubstitutions);
         if (useInSubstitutions) {
           _addProgToGroups(
-              progression: entry.progression,
-              location: nameToLocation(package, title));
+              entry: entry, location: EntryLocation(package, title));
         } else {
-          _removeProgFromGroups(entry.progression);
+          _removeProgFromGroups(entry);
         }
       }
     }
@@ -494,8 +518,7 @@ abstract class ProgressionBank {
       }
       List<PackagedProgression> results = [];
       for (int id in ids) {
-        EntryLocation location =
-            EntryLocation.fromLocation(_substitutionsIDBank[id]!)!;
+        EntryLocation location = _substitutionsIDBank[id]!;
         results.add(
           PackagedProgression(
               location: location,
@@ -504,6 +527,17 @@ abstract class ProgressionBank {
         );
       }
       return results;
+    }
+    return null;
+  }
+
+  /// Returns the [ProgressionBankEntry] [id] refers to
+  /// in [_substitutionsIDBank], if exists. Otherwise returns
+  /// null.
+  static ProgressionBankEntry? getByID(int id) {
+    final location = ProgressionBank.substitutionsIDBank[id];
+    if (location != null) {
+      return ProgressionBank.getAtLocation(location);
     }
     return null;
   }
@@ -596,14 +630,16 @@ abstract class ProgressionBank {
 class ProgressionBankComputePass {
   final String version;
   final Map<String, Map<String, ProgressionBankEntry>> bank;
-  final Map<int, String> substitutionsIDBank;
+  final Map<int, EntryLocation> substitutionsIDBank;
   final Map<int, List<int>> groupedBank;
+  final Map<int, SavedVariationGroup> variationBank;
 
   const ProgressionBankComputePass({
     required this.version,
     required this.bank,
     required this.substitutionsIDBank,
     required this.groupedBank,
+    required this.variationBank,
   });
 }
 

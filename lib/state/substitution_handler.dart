@@ -1,8 +1,10 @@
-import 'package:harmony_theory/modals/weights/bass_movement_weight.dart';
+import 'package:harmony_theory/extensions/utilities.dart';
+import 'package:harmony_theory/state/variation_group.dart';
 
 import '../modals/progression/degree_progression.dart';
 import '../modals/substitution.dart';
 import '../modals/theory_base/degree/degree_chord.dart';
+import '../modals/weights/bass_movement_weight.dart';
 import '../modals/weights/climactic_ending_weight.dart';
 import '../modals/weights/complex_weight.dart';
 import '../modals/weights/harmonic_function_weight.dart';
@@ -29,10 +31,10 @@ abstract class SubstitutionHandler {
     const ComplexWeight(),
     const BassMovementWeight(),
   ]..sort(
-          (Weight w1, Weight w2) => -1 * w1.importance.compareTo(w2.importance));
+      (Weight w1, Weight w2) => -1 * w1.importance.compareTo(w2.importance));
 
   static const KeepHarmonicFunctionWeight keepHarmonicFunction =
-  KeepHarmonicFunctionWeight();
+      KeepHarmonicFunctionWeight();
 
   static KeepHarmonicFunctionAmount keepAmount = KeepHarmonicFunctionAmount.med;
 
@@ -40,30 +42,34 @@ abstract class SubstitutionHandler {
     for (Weight weight in weights) weight.name: weight
   };
 
-  static List<Substitution> _getPossibleSubstitutions(DegreeProgression base, {
+  static List<VariationGroup> _getPossibleSubstitutions(
+    DegreeProgression base, {
     int start = 0,
     double startDur = 0.0,
     int? end,
     double? endDur,
   }) {
-    final List<Substitution> substitutions = [];
+    final Map<int, List<Substitution>> substitutions = {};
     end ??= base.length;
     for (int i = start; i < end; i++) {
       DegreeChord? chord = base[i];
       if (chord != null) {
         List<PackagedProgression>? progressions =
-        ProgressionBank.getByGroup(chord: chord, withTonicization: false);
+            ProgressionBank.getByGroup(chord: chord, withTonicization: false);
         if (progressions != null && progressions.isNotEmpty) {
           for (PackagedProgression packagedProg in progressions) {
-            substitutions.addAll(base.getPossibleSubstitutions(
-              packagedProg.progression,
-              start: start,
-              startDur: startDur,
-              end: end,
-              endDur: endDur,
-              forIndex: i,
-              location: packagedProg.location,
-            ));
+            Utilites.mergeMaps(
+              substitutions,
+              base.getPossibleSubstitutions(
+                packagedProg.progression,
+                start: start,
+                startDur: startDur,
+                end: end,
+                endDur: endDur,
+                forIndex: i,
+                location: packagedProg.location,
+              ),
+            );
           }
         }
       }
@@ -71,19 +77,25 @@ abstract class SubstitutionHandler {
     // We do this here since it's more efficient...
     List<PackagedProgression> tonicizations = ProgressionBank.tonicizations;
     for (PackagedProgression sub in tonicizations) {
-      substitutions.addAll(base.getPossibleSubstitutions(
-        sub.progression,
-        start: start,
-        startDur: startDur,
-        end: end,
-        endDur: endDur,
-        location: sub.location,
-      ));
+      Utilites.mergeMaps(
+        substitutions,
+        base.getPossibleSubstitutions(
+          sub.progression,
+          start: start,
+          startDur: startDur,
+          end: end,
+          endDur: endDur,
+          location: sub.location,
+        ),
+      );
     }
-    return substitutions.toSet().toList();
+    return substitutions.entries
+        .map((e) => VariationGroup(e.key, e.value))
+        .toList();
   }
 
-  static List<Substitution> getRatedSubstitutions(DegreeProgression base, {
+  static List<VariationGroup> getRatedSubstitutions(
+    DegreeProgression base, {
     Sound? sound,
     KeepHarmonicFunctionAmount? keepAmount,
     DegreeProgression? harmonicFunctionBase,
@@ -93,27 +105,35 @@ abstract class SubstitutionHandler {
     double? endDur,
   }) {
     if (keepAmount != null) SubstitutionHandler.keepAmount = keepAmount;
-    List<Substitution> substitutions = _getPossibleSubstitutions(
+    List<VariationGroup> variations = _getPossibleSubstitutions(
       base,
       start: start,
       startDur: startDur,
       end: end,
       endDur: endDur,
     );
-    List<Substitution> sorted = [];
+    List<VariationGroup> sorted = [];
     bool shouldCalc = keepAmount != KeepHarmonicFunctionAmount.low;
-    for (Substitution sub in substitutions) {
-      SubstitutionScore? score = sub.scoreWith(
-        weights,
-        keepHarmonicFunction: shouldCalc,
-        sound: sound,
-        harmonicFunctionBase: harmonicFunctionBase,
-      );
-      if (score != null) {
-        sorted.add(sub);
+    for (VariationGroup variation in variations) {
+      List<Substitution> sortedSubs = [];
+      for (Substitution sub in variation.members) {
+        SubstitutionScore? score = sub.scoreWith(
+          weights,
+          keepHarmonicFunction: shouldCalc,
+          sound: sound,
+          harmonicFunctionBase: harmonicFunctionBase,
+        );
+        if (score != null) {
+          sortedSubs.add(sub);
+        }
+      }
+      if (sortedSubs.isNotEmpty) {
+        final vg = VariationGroup(variation.subVariationId, sortedSubs);
+        vg.sort();
+        sorted.add(vg);
       }
     }
-    sorted.sort((Substitution a, Substitution b) => -1 * a.compareTo(b));
+    sorted.sort((var a, var b) => -1 * a.compareTo(b));
     return sorted;
   }
 
@@ -129,7 +149,7 @@ abstract class SubstitutionHandler {
     double? endDur,
   }) {
     DegreeProgression prev = base;
-    List<Substitution> rated;
+    List<VariationGroup> rated;
     do {
       rated = getRatedSubstitutions(
         prev,
@@ -141,11 +161,11 @@ abstract class SubstitutionHandler {
         end: end,
         endDur: endDur,
       );
-      if (prev == rated.first.substitutedBase) break;
-      prev = rated.first.substitutedBase;
+      if (prev == rated.first.best.substitutedBase) break;
+      prev = rated.first.best.substitutedBase;
       maxIterations--;
     } while (maxIterations > 0);
-    Substitution result = rated.first.copyWith(base: base);
+    Substitution result = rated.first.best.copyWith(base: base);
     return result;
   }
 }

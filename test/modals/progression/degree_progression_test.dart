@@ -49,6 +49,8 @@ main() {
             end: end,
             endDur: endDur,
           )
+          .values
+          .expand((element) => element)
           .map((e) => e.substitutedBase)
           .toList(growable: false);
       DegreeProgression expectedProgression = DegreeProgression.fromList(
@@ -57,4 +59,79 @@ main() {
       expect(subs, contains(expectedProgression));
     });
   });
+
+  group('Variation Id', () {
+    test('.dryVariationId', () {
+      _expectVariations(
+        const [
+          'I, V, I',
+          'vi, III, vi',
+          'viidim, #IV, viidim',
+        ],
+        dry: true,
+      );
+      _expectVariations(
+        const [
+          'I, V, I',
+          'vi, III',
+          'I, V, II',
+          'viidim, IV, viidim',
+          'viidim, V, viidim',
+        ],
+        dry: true,
+        fails: true,
+      );
+      _expectVariations(
+        const [
+          'I, V, I',
+          'I, V, I 2',
+        ],
+        dry: true,
+        fails: true,
+      );
+      _expectVariations(
+        const [
+          'V, I',
+          'V, I 2',
+        ],
+        dry: true,
+        fails: true,
+      );
+    });
+    test('.variationId', () {
+      _expectVariations(const [
+        'I, V, I',
+        'idim, Vaug, i',
+      ]);
+      _expectVariations(
+        const [
+          'I, V, I',
+          'I, V, I 2',
+        ],
+        fails: true,
+      );
+      _expectVariations(
+        const [
+          'I, V, I',
+          'vi, III, vi',
+          'vi, III',
+          'viidim, #IV, viidim',
+        ],
+        fails: true,
+      );
+    });
+  });
+}
+
+_expectVariations(List<String> lst, {bool dry = false, fails = false}) {
+  var ids = lst.map((e) {
+    DegreeProgression p = DegreeProgression.parse(e);
+    if (dry) {
+      return p.dryVariationId;
+    }
+    return p.variationId();
+  });
+  var every = everyElement(equals(ids.first));
+  if (fails) every = isNot(every);
+  return expect(ids, every);
 }

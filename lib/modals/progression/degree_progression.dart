@@ -1,7 +1,10 @@
+import '../../extensions/interval_extension.dart';
+import '../../modals/identifiable.dart';
 import '../../state/progression_bank.dart';
 import '../pitch_chord.dart';
 import '../substitution.dart';
 import '../substitution_match.dart';
+import '../theory_base/degree/degree.dart';
 import '../theory_base/degree/degree_chord.dart';
 import '../theory_base/degree/tonicized_degree_chord.dart';
 import '../theory_base/pitch_scale.dart';
@@ -18,17 +21,16 @@ class DegreeProgression extends Progression<DegreeChord> {
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
       : super(base, durations, timeSignature: timeSignature);
 
-  DegreeProgression.empty(
-      {TimeSignature timeSignature = const TimeSignature.evenTime()})
+  DegreeProgression.empty({TimeSignature timeSignature = const TimeSignature.evenTime()})
       : this([], [], timeSignature: timeSignature);
 
   DegreeProgression.fromProgression(Progression<DegreeChord?> progression)
       : super.raw(
-          values: progression.values,
-          durations: progression.durations,
-          timeSignature: progression.timeSignature,
-          hasNull: progression.hasNull,
-        );
+    values: progression.values,
+    durations: progression.durations,
+    timeSignature: progression.timeSignature,
+    hasNull: progression.hasNull,
+  );
 
   DegreeProgression.evenTime(List<DegreeChord?> base,
       {TimeSignature timeSignature = const TimeSignature.evenTime()})
@@ -36,57 +38,56 @@ class DegreeProgression extends Progression<DegreeChord> {
 
   /// Gets a list of [String] each representing a ScaleDegreeChord and returns
   /// a new [DegreeProgression].
-  DegreeProgression.fromList(
-    List<String?> base, {
+  DegreeProgression.fromList(List<String?> base, {
     List<double>? durations,
     TimeSignature timeSignature = const TimeSignature.evenTime(),
   }) : this(
-          base
-              .map((String? chord) =>
-                  chord == null ? null : DegreeChord.parse(chord))
-              .toList(),
-          durations ??
-              List.generate(
-                  base.length, (index) => 1 / timeSignature.denominator),
-          timeSignature: timeSignature,
-        );
+    base
+        .map((String? chord) =>
+    chord == null ? null : DegreeChord.parse(chord))
+        .toList(),
+    durations ??
+        List.generate(
+            base.length, (index) => 1 / timeSignature.denominator),
+    timeSignature: timeSignature,
+  );
 
   DegreeProgression.fromChords(PitchScale scale, Progression<PitchChord> chords)
       : this.fromProgression(
-          Progression<DegreeChord>.raw(
-            values: chords.values
-                .map((PitchChord? chord) =>
-                    chord == null ? null : DegreeChord(scale, chord))
-                .toList(),
-            durations: chords.durations,
-            timeSignature: chords.timeSignature,
-            hasNull: chords.hasNull,
-          ),
-        );
+    Progression<DegreeChord>.raw(
+      values: chords.values
+          .map((PitchChord? chord) =>
+      chord == null ? null : DegreeChord(scale, chord))
+          .toList(),
+      durations: chords.durations,
+      timeSignature: chords.timeSignature,
+      hasNull: chords.hasNull,
+    ),
+  );
 
   DegreeProgression.parse(String input)
       : super.parse(input: input, parser: DegreeChord.parse);
 
   DegreeProgression.fromJson(Map<String, dynamic> json)
       : super.raw(
-          values: [
-            for (Map<String, dynamic>? map in json['val'])
-              map == null
-                  ? null
-                  : (map.containsKey('toTonic')
-                      ? TonicizedDegreeChord.fromJson(map)
-                      : DegreeChord.fromJson(map))
-          ],
-          durations: AbsoluteDurations(
-            (json['dur'] as List<dynamic>).cast<double>(),
-          ),
-          timeSignature: TimeSignature.fromString(json['ts']),
-          hasNull: json['null'],
-        );
+    values: [
+      for (Map<String, dynamic>? map in json['val'])
+        map == null
+            ? null
+            : (map.containsKey('toTonic')
+            ? TonicizedDegreeChord.fromJson(map)
+            : DegreeChord.fromJson(map))
+    ],
+    durations: AbsoluteDurations(
+      (json['dur'] as List<dynamic>).cast<double>(),
+    ),
+    timeSignature: TimeSignature.fromString(json['ts']),
+    hasNull: json['null'],
+  );
 
   Map<String, dynamic> toJson() {
     List<Map<String, dynamic>?> chords =
-        values.map((e) => e?.toJson()).toList(growable: false);
+    values.map((e) => e?.toJson()).toList(growable: false);
     return {
       'val': chords,
       'dur': durations.realDurations,
@@ -97,7 +98,7 @@ class DegreeProgression extends Progression<DegreeChord> {
 
   DegreeProgression addSeventh({double ratio = 1.0}) {
     DegreeProgression converted =
-        DegreeProgression.empty(timeSignature: timeSignature);
+    DegreeProgression.empty(timeSignature: timeSignature);
     for (int i = 0; i < length; i++) {
       if (values[i] != null) {
         converted.add(values[i]!.addSeventh(), durations[i] * ratio);
@@ -114,7 +115,7 @@ class DegreeProgression extends Progression<DegreeChord> {
   DegreeProgression tonicizedFor(DegreeChord tonic,
       {bool addSeventh = false, double ratio = 1.0}) {
     DegreeProgression converted =
-        DegreeProgression.empty(timeSignature: timeSignature);
+    DegreeProgression.empty(timeSignature: timeSignature);
     for (int i = 0; i < length; i++) {
       DegreeChord? convertedChord;
       if (values[i] != null) {
@@ -138,8 +139,7 @@ class DegreeProgression extends Progression<DegreeChord> {
   ///
   /// [endDur] - limit the end duration. The duration you input will be
   /// included.
-  List<SubstitutionMatch> getFittingMatchLocations(
-    DegreeProgression sub, {
+  List<SubstitutionMatch> getFittingMatchLocations(DegreeProgression sub, {
     int start = 0,
     int? end,
     int? forIndex,
@@ -235,8 +235,7 @@ class DegreeProgression extends Progression<DegreeChord> {
     return matches;
   }
 
-  SubstitutionMatch? _getMatch(
-    DegreeProgression sub, {
+  SubstitutionMatch? _getMatch(DegreeProgression sub, {
     required double realBaseDuration,
     required int subChordPos,
     required int baseChordPos,
@@ -273,7 +272,7 @@ class DegreeProgression extends Progression<DegreeChord> {
       if (baseDurationLeft >= neededDurationLeft) {
         neededDurationRight = sub.sumDurations(subChordPos + 1) * ratio;
         double durationToBase =
-        (durations.real(baseChordPos) - durations[baseChordPos]);
+            (durations.real(baseChordPos) - durations[baseChordPos]);
         baseDurationRight =
             maxDur - (durationToBase + offsetDur + startDur) - realBaseDuration;
         // Do we have enough duration in right?
@@ -297,13 +296,15 @@ class DegreeProgression extends Progression<DegreeChord> {
     return null;
   }
 
-  /// Returns a substituted [base] from the current progression within the
+  /// Returns a map of substituted [base] from the current progression within the
   /// range [start] - [end] (end excluded) if possible.
   /// If not, returns [base].
   /// The range can also be fine tuned with [startDur] and [endDur]
   /// (the duration int [startDur] will be excluded and the duration in [endDur]
   /// wll be included).
-  List<Substitution> getPossibleSubstitutions(
+  ///
+  /// The substitutions are separated into variation groups.
+  Map<int, List<Substitution>> getPossibleSubstitutions(
     DegreeProgression sub, {
     int start = 0,
     int? end,
@@ -311,6 +312,7 @@ class DegreeProgression extends Progression<DegreeChord> {
     double startDur = 0.0,
     double? endDur,
     EntryLocation? location,
+    int? dryVariationId,
   }) {
     final List<SubstitutionMatch> matches = getFittingMatchLocations(
       sub,
@@ -320,8 +322,11 @@ class DegreeProgression extends Progression<DegreeChord> {
       endDur: endDur,
       forIndex: forIndex,
     );
-    final List<Substitution> substitutions = [];
+    final Map<int, List<Substitution>> substitutions = {};
     double halfStep = (timeSignature.step / 2);
+
+    dryVariationId ??= sub.dryVariationId;
+
     for (SubstitutionMatch match in matches) {
       int baseChord = match.baseIndex;
       int chord = match.subIndex;
@@ -332,7 +337,7 @@ class DegreeProgression extends Progression<DegreeChord> {
                 type: match.type,
                 addSeventh: match.withSeventh,
                 ratio: match.ratio,
-                tonic: this[match.baseIndex]);
+            tonic: this[match.baseIndex]);
         // The duration from the beginning of sub to matching chord in sub.
         double d1 = -1 * relativeMatch.sumDurations(0, chord);
         // First index that could be changed.
@@ -346,9 +351,9 @@ class DegreeProgression extends Progression<DegreeChord> {
         double d2 = relativeMatch.sumDurations(chord);
         // Last index to change...
         int right =
-            getPlayingIndex(d2 + match.baseOffset - halfStep, from: baseChord);
+        getPlayingIndex(d2 + match.baseOffset - halfStep, from: baseChord);
         DegreeProgression substitution =
-            DegreeProgression.fromProgression(sublist(0, left));
+        DegreeProgression.fromProgression(sublist(0, left));
         double bd1 = -1 * sumDurations(left, baseChord) - match.baseOffset;
         double bd2 = sumDurations(baseChord, right + 1) - match.baseOffset;
         if (bd1 != d1) {
@@ -380,30 +385,41 @@ class DegreeProgression extends Progression<DegreeChord> {
               durations.real(i) != substitution.durations.real(i);
         }
         if (different) {
-          substitutions.add(
-            Substitution(
-              originalSubstitution: sub,
-              substitutedBase: substitution,
-              base: this,
-              match: match,
-              changedStart: changedStart,
-              changedEnd: changedEnd,
-              location: location,
-            ),
+          final int subVariation = sub.substitutionVariationId(
+            start: changedStart,
+            ratio: match.ratio,
+            dry: dryVariationId,
+            tonicizedFor: match.type == SubstitutionMatchType.tonicization
+                ? this[match.baseIndex]!.root
+                : null,
           );
+          final Substitution subToAdd = Substitution(
+            originalSubstitution: sub,
+            substitutedBase: substitution,
+            base: this,
+            match: match,
+            changedStart: changedStart,
+            changedEnd: changedEnd,
+            location: location,
+          );
+          // Ensures the entries are unique.
+          if (!substitutions
+              .putIfAbsent(subVariation, () => [])
+              .contains(subToAdd)) {
+            substitutions[subVariation]!.add(subToAdd);
+          }
         }
       } catch (e) {
         if (e is! NonValidDuration) rethrow;
       }
     }
-    return substitutions.toSet().toList();
+    return substitutions;
   }
 
   /// Returns [relativeSubSection], but if a null values is there returns
   /// replaces the null value should be if [relativeSubSection] substituted the
   /// current one, a [durationBefore] duration away from the start.
-  DegreeProgression fillWith(
-      double durationBefore, DegreeProgression relativeSubSection) {
+  DegreeProgression fillWith(double durationBefore, DegreeProgression relativeSubSection) {
     if (!relativeSubSection.hasNull) return relativeSubSection;
     double sum = 0.0;
     DegreeProgression filled = DegreeProgression.empty(
@@ -420,7 +436,7 @@ class DegreeProgression extends Progression<DegreeChord> {
 
   ChordProgression inScale(PitchScale scale) {
     ChordProgression chords =
-        ChordProgression.empty(timeSignature: timeSignature);
+    ChordProgression.empty(timeSignature: timeSignature);
     for (var i = 0; i < length; i++) {
       if (values[i] == null) {
         chords.add(null, durations[i]);
@@ -446,4 +462,41 @@ class DegreeProgression extends Progression<DegreeChord> {
   @override
   DegreeProgression inTimeSignature(TimeSignature timeSignature) =>
       DegreeProgression.fromProgression(super.inTimeSignature(timeSignature));
+
+  DegreeChord get notNullLast => values.lastWhere((e) => e != null,
+      orElse: () => throw Exception('All roots are null!'))!;
+
+  int get dryVariationId {
+    List<int> hashes = [];
+    Degree last = notNullLast.root;
+    for (int i = 0; i < length - 1; i++) {
+      // TODO: 0 could interfere with a real hashCode?
+      // we don't care about the last interval since it's 0
+      // and about the first duration since it's 0.
+      int interval = values[i]?.root.from(last).id ?? 0;
+      int duration = Identifiable.hashDouble(durations.real(i + 1));
+      hashes.add(interval);
+      hashes.add(duration);
+    }
+    return Identifiable.hashAllInts(hashes);
+  }
+
+  int variationId({Degree? tonicizedFor, int? dry}) => Identifiable.hash2(
+      tonicizedFor == null
+          ? notNullLast.root.id
+          : notNullLast.root.tonicizedFor(tonicizedFor).id,
+      dry ?? dryVariationId);
+
+  // TODO: Make this static, it doesn't relate to a prog...
+  int substitutionVariationId({
+    required double start,
+    required double ratio,
+    Degree? tonicizedFor,
+    int? dry,
+  }) =>
+      Identifiable.hashAllInts([
+        Identifiable.hashDouble(start),
+        Identifiable.hashDouble(ratio),
+        variationId(tonicizedFor: tonicizedFor, dry: dry),
+      ]);
 }

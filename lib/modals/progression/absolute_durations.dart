@@ -85,10 +85,15 @@ class AbsoluteDurations implements Identifiable {
   }
 
   @override
-  bool operator ==(Object other) =>
-      other is AbsoluteDurations &&
-      other.length == length &&
-      other._real == _real;
+  bool operator ==(Object other) {
+    if (other is AbsoluteDurations && other.length == length) {
+      for (int i = 0; i < length; i++) {
+        if (_real[i] != other._real[i]) return false;
+      }
+      return true;
+    }
+    return false;
+  }
 
   /// Hashes based on rhythm relations. We take the first duration and base
   /// the whole other ones on the relation between them and it.
@@ -106,7 +111,7 @@ class AbsoluteDurations implements Identifiable {
     if (_real.isEmpty) return hash;
     double first = _real.first;
     for (double dur in _real) {
-      hash = Identifiable.combine(hash, (dur / first).hashCode);
+      hash = Identifiable.combine(hash, Identifiable.hashDouble(dur / first));
     }
     return Identifiable.finish(hash);
   }
@@ -115,9 +120,9 @@ class AbsoluteDurations implements Identifiable {
   String toString() {
     String output = '[';
     for (int i = 0; i < length - 1; i++) {
-      output += '${this[i]}, ';
+      output += '${this[i]}(${real(i)}), ';
     }
-    if (isNotEmpty) output += last.toString();
+    if (isNotEmpty) output += '$last($realLast)';
     return '$output]';
   }
 }

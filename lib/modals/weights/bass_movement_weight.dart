@@ -1,8 +1,8 @@
-import 'package:harmony_theory/modals/progression/degree_progression.dart';
-import 'package:harmony_theory/modals/weights/weight.dart';
-import 'package:harmony_theory/state/progression_bank.dart';
 import 'package:tonic/tonic.dart';
 
+import '../../modals/progression/degree_progression.dart';
+import '../../modals/weights/weight.dart';
+import '../../state/progression_bank.dart';
 import '../theory_base/degree/degree_chord.dart';
 
 class BassMovementWeight extends Weight {
