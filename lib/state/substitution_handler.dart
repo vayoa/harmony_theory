@@ -1,9 +1,8 @@
-import 'package:harmony_theory/extensions/utilities.dart';
-import 'package:harmony_theory/state/variation_group.dart';
-
+import '../extensions/utilities.dart';
 import '../modals/progression/degree_progression.dart';
 import '../modals/substitution.dart';
 import '../modals/theory_base/degree/degree_chord.dart';
+import '../modals/variation_id.dart';
 import '../modals/weights/bass_movement_weight.dart';
 import '../modals/weights/climactic_ending_weight.dart';
 import '../modals/weights/complex_weight.dart';
@@ -16,6 +15,7 @@ import '../modals/weights/rhythm_and_placement_weight.dart';
 import '../modals/weights/uniques_weight.dart';
 import '../modals/weights/user_saved_weight.dart';
 import '../modals/weights/weight.dart';
+import '../state/variation_group.dart';
 import 'progression_bank.dart';
 
 abstract class SubstitutionHandler {
@@ -49,7 +49,7 @@ abstract class SubstitutionHandler {
     int? end,
     double? endDur,
   }) {
-    final Map<int, List<Substitution>> substitutions = {};
+    final Map<SubVariationId, List<Substitution>> substitutions = {};
     end ??= base.length;
     for (int i = start; i < end; i++) {
       DegreeChord? chord = base[i];
@@ -58,7 +58,7 @@ abstract class SubstitutionHandler {
             ProgressionBank.getByGroup(chord: chord, withTonicization: false);
         if (progressions != null && progressions.isNotEmpty) {
           for (PackagedProgression packagedProg in progressions) {
-            Utilites.mergeMaps(
+            Utilities.mergeMaps(
               substitutions,
               base.getPossibleSubstitutions(
                 packagedProg.progression,
@@ -68,8 +68,6 @@ abstract class SubstitutionHandler {
                 endDur: endDur,
                 forIndex: i,
                 location: packagedProg.location,
-                dryVariationId:
-                    ProgressionBank.getDryVariationId(packagedProg.location),
               ),
             );
           }
@@ -79,7 +77,7 @@ abstract class SubstitutionHandler {
     // We do this here since it's more efficient...
     List<PackagedProgression> tonicizations = ProgressionBank.tonicizations;
     for (PackagedProgression sub in tonicizations) {
-      Utilites.mergeMaps(
+      Utilities.mergeMaps(
         substitutions,
         base.getPossibleSubstitutions(
           sub.progression,
@@ -88,7 +86,6 @@ abstract class SubstitutionHandler {
           end: end,
           endDur: endDur,
           location: sub.location,
-          dryVariationId: ProgressionBank.getDryVariationId(sub.location),
         ),
       );
     }

@@ -1,8 +1,9 @@
+import 'package:collection/collection.dart';
+
 import '../modals/identifiable.dart';
 import '../modals/progression/degree_progression.dart';
 import '../modals/progression/progression.dart';
 import '../modals/theory_base/degree/degree_chord.dart';
-import '../state/variation_group.dart';
 import 'progression_bank_entry.dart';
 
 part 'progression_bank_inversions.dart';
@@ -31,9 +32,6 @@ abstract class ProgressionBank {
   /// different group then if it's in any other place (for tonicization).
   static Map<int, List<int>> _groupedBank = {};
 
-  /// Key - [DegreeProgression.variationId], value - list of entry progression ids.
-  static Map<int, SavedVariationGroup> _variationsBank = {};
-
   static final int _tonicID = DegreeChord.majorTonicTriad.weakID;
 
   static final int tonicizationID = Identifiable.hash2(_tonicID, true.hashCode);
@@ -44,8 +42,6 @@ abstract class ProgressionBank {
   static Map<String, Map<String, ProgressionBankEntry>> get bank => _bank;
 
   static Map<int, List<int>> get groupedBank => _groupedBank;
-
-  static Map<int, SavedVariationGroup> get variationBank => _variationsBank;
 
   /// Returns all saved progressions that have a
   /// [DegreeChord.majorTonicTriad] as their last chord.
@@ -71,7 +67,6 @@ abstract class ProgressionBank {
     _bank = {defaultPackageName: {}, builtInPackageName: {}};
     _substitutionsIDBank = {};
     _groupedBank = {};
-    _variationsBank = {};
     for (MapEntry<String, DegreeProgression> mapEntry in _builtInBank.entries) {
       ProgressionBankEntry entry = ProgressionBankEntry(
         usedInSubstitutions: true,
@@ -103,10 +98,6 @@ abstract class ProgressionBank {
         for (MapEntry<String, dynamic> entry in json['groupedBank'].entries)
           int.parse(entry.key): entry.value.cast<int>(),
       };
-      _variationsBank = {
-        for (MapEntry<String, dynamic> entry in json['variationsBank'].entries)
-          int.parse(entry.key): SavedVariationGroup.fromJson(entry.value),
-      };
     } else {
       // If not, migrate it...
       migrator(json);
@@ -128,12 +119,11 @@ abstract class ProgressionBank {
   static void migrator(Map<String, dynamic> json) {
     switch (_version) {
       case 'beta':
-        // Since these packages always exist...
+      // Since these packages always exist...
         _bank = {defaultPackageName: {}, builtInPackageName: {}};
         // We also initialize this here.
         _substitutionsIDBank = {};
         _groupedBank = {};
-        _variationsBank = {};
         for (MapEntry<String, dynamic> entry in json['bank'].entries) {
           // If built in, put in built in package...
           String package =
@@ -198,7 +188,6 @@ abstract class ProgressionBank {
         bank: _bank,
         substitutionsIDBank: _substitutionsIDBank,
         groupedBank: _groupedBank,
-        variationBank: _variationsBank,
       );
 
   static Map<String, dynamic> toJson() => {
@@ -221,11 +210,6 @@ abstract class ProgressionBank {
           for (MapEntry<int, List<int>> entry in _groupedBank.entries)
             entry.key.toString(): entry.value
         },
-        'variationsBank': {
-          for (MapEntry<int, SavedVariationGroup> entry
-              in _variationsBank.entries)
-            entry.key.toString(): entry.value.toJson(),
-        }
       };
 
   static Map<String, dynamic> exportPackages(
@@ -381,10 +365,6 @@ abstract class ProgressionBank {
       _substitutionsIDBank[id] = location;
     }
     if (addToGroups) {
-      SavedVariationGroup vg = _variationsBank.putIfAbsent(
-          entry.variationId!, () => SavedVariationGroup(entry));
-      vg.ids.add(id);
-
       for (int i = 0; i < progression.length; i++) {
         DegreeChord? chord = progression[i];
         final Map<int, DegreeChord> addedChords = {};
@@ -408,12 +388,6 @@ abstract class ProgressionBank {
     id ??= progression.id;
     _substitutionsIDBank.remove(id);
     for (int i = 0; i < progression.length; i++) {
-      SavedVariationGroup vg = _variationsBank[entry.variationId]!;
-      vg.ids.remove(id);
-      if (vg.ids.isEmpty) {
-        _variationsBank.remove(entry.variationId);
-      }
-
       DegreeChord? chord = progression[i];
       final Map<int, DegreeChord> addedChords = {};
       if (chord != null) {
@@ -542,14 +516,6 @@ abstract class ProgressionBank {
     return null;
   }
 
-  static int? getDryVariationId(EntryLocation location) {
-    final varId = getAtLocation(location)?.variationId;
-    if (varId != null) {
-      return _variationsBank[varId]?.dryVariationId;
-    }
-    return null;
-  }
-
   static final Map<String, DegreeProgression> _builtInBank = {
     'Cadential 6-4': DegreeProgression.fromList(['V^5', 'I']),
     'Deceptive Cadence': DegreeProgression.fromList(['V', 'vi']),
@@ -640,23 +606,37 @@ class ProgressionBankComputePass {
   final Map<String, Map<String, ProgressionBankEntry>> bank;
   final Map<int, EntryLocation> substitutionsIDBank;
   final Map<int, List<int>> groupedBank;
-  final Map<int, SavedVariationGroup> variationBank;
 
   const ProgressionBankComputePass({
     required this.version,
     required this.bank,
     required this.substitutionsIDBank,
     required this.groupedBank,
-    required this.variationBank,
   });
+
+  @override
+  bool operator ==(Object other) {
+    const eq = MapEquality();
+    return other is ProgressionBankComputePass &&
+        version == other.version &&
+        const DeepCollectionEquality().equals(bank, other.bank) &&
+        eq.equals(substitutionsIDBank, other.substitutionsIDBank) &&
+        eq.equals(groupedBank, other.groupedBank);
+  }
+
+  @override
+  int get hashCode =>
+      version.hashCode ^
+      bank.hashCode ^
+      substitutionsIDBank.hashCode ^
+      groupedBank.hashCode;
 
   @override
   String toString() {
     return 'ProgressionBankComputePass{'
         'version: $version, bank: $bank, '
         'substitutionsIDBank: $substitutionsIDBank, '
-        'groupedBank: $groupedBank, '
-        'variationBank: $variationBank}';
+        'groupedBank: $groupedBank}';
   }
 }
 

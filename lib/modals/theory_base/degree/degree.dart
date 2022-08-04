@@ -169,8 +169,7 @@ class Degree implements Identifiable {
   /// Example: I.from(V) => P4, V.from(I) => P5.
   Interval from(Degree other, {bool enforceNumber = true}) {
     var number = ((degree - other.degree) % 7) + 1;
-    var semitones =
-        (_semitonesFromTonicInMajor - other._semitonesFromTonicInMajor) % 12;
+    var semitones = semitonesFrom(other);
     if (number == 1 && semitones == 11) number = 8;
     return Interval.fromSemitones(
       semitones,
@@ -186,12 +185,14 @@ class Degree implements Identifiable {
     }
   }
 
-  int get _semitonesFromTonicInMajor {
+  int semitonesFrom(Degree other) =>
+      (semitonesFromTonicInMajor - other.semitonesFromTonicInMajor) % 12;
+
+  int get semitonesFromTonicInMajor {
     int semitones =
         ScalePatternExtension.majorKey.intervals[_degree].semitones +
             _accidentals;
-    if (semitones < 0) return 12 + semitones;
-    return semitones;
+    return semitones % 12;
   }
 
   @override

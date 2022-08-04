@@ -120,9 +120,9 @@ class AbsoluteDurations implements Identifiable {
   String toString() {
     String output = '[';
     for (int i = 0; i < length - 1; i++) {
-      output += '${this[i]}(${real(i)}), ';
+      output += '${this[i]}, ';
     }
-    if (isNotEmpty) output += '$last($realLast)';
+    if (isNotEmpty) output += '$last';
     return '$output]';
   }
 }

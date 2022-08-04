@@ -1,5 +1,6 @@
 import 'package:harmony_theory/modals/progression/degree_progression.dart';
 import 'package:harmony_theory/modals/substitution_match.dart';
+import 'package:harmony_theory/modals/variation_id.dart';
 import 'package:test/test.dart';
 
 main() {
@@ -64,11 +65,9 @@ main() {
     test('.dryVariationId', () {
       _expectVariations(
         const [
-          'I, V, I',
-          'vi, III, vi',
-          'viidim, #IV, viidim',
+          'I 4, III 2, V^5, III, vi 2, V 2, I 4',
+          'I 4, III 2, V^3, III, vi 2, V 2, I 4',
         ],
-        dry: true,
       );
       _expectVariations(
         const [
@@ -78,7 +77,6 @@ main() {
           'viidim, IV, viidim',
           'viidim, V, viidim',
         ],
-        dry: true,
         fails: true,
       );
       _expectVariations(
@@ -86,7 +84,6 @@ main() {
           'I, V, I',
           'I, V, I 2',
         ],
-        dry: true,
         fails: true,
       );
       _expectVariations(
@@ -94,19 +91,27 @@ main() {
           'V, I',
           'V, I 2',
         ],
-        dry: true,
         fails: true,
       );
-    });
-    test('.variationId', () {
       _expectVariations(const [
         'I, V, I',
         'idim, Vaug, i',
+      ]);
+      _expectVariations(const [
+        'V^5, I',
+        'V, I',
       ]);
       _expectVariations(
         const [
           'I, V, I',
           'I, V, I 2',
+        ],
+        fails: true,
+      );
+      _expectVariations(
+        const [
+          'I 4, III 4, vi, ii^3/V, V/V, V, I 4',
+          'I 4, III 4, vi 2, V/V, V, I 4',
         ],
         fails: true,
       );
@@ -123,14 +128,9 @@ main() {
   });
 }
 
-_expectVariations(List<String> lst, {bool dry = false, fails = false}) {
-  var ids = lst.map((e) {
-    DegreeProgression p = DegreeProgression.parse(e);
-    if (dry) {
-      return p.dryVariationId;
-    }
-    return p.variationId();
-  });
+_expectVariations(List<String> lst, {fails = false}) {
+  Iterable<DryVariationId> ids =
+      lst.map((e) => DegreeProgression.parse(e).dryVariationId);
   var every = everyElement(equals(ids.first));
   if (fails) every = isNot(every);
   return expect(ids, every);

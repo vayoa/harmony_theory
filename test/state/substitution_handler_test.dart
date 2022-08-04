@@ -1,7 +1,9 @@
 import 'package:harmony_theory/modals/pitch_chord.dart';
 import 'package:harmony_theory/modals/progression/chord_progression.dart';
 import 'package:harmony_theory/modals/progression/degree_progression.dart';
+import 'package:harmony_theory/modals/substitution.dart';
 import 'package:harmony_theory/modals/theory_base/pitch_scale.dart';
+import 'package:harmony_theory/modals/variation_id.dart';
 import 'package:harmony_theory/modals/weights/keep_harmonic_function_weight.dart';
 import 'package:harmony_theory/modals/weights/weight.dart';
 import 'package:harmony_theory/state/progression_bank.dart';
@@ -53,6 +55,34 @@ main() {
         greaterThan: 26,
         expectingToContain: _highResults,
       );
+    });
+  });
+
+  group('variation groups', () {
+    setUp(() {
+      ProgressionBank.initializeBuiltIn();
+    });
+
+    test('correct variations', () {
+      List<MapEntry<SubVariationId, Substitution>> subs =
+          SubstitutionHandler.getRatedSubstitutions(
+        DegreeProgression.parse('I 4, III 4, vi 2, V 2, I 4'),
+      )
+              .map((e) =>
+                  [for (var sub in e.members) MapEntry(e.subVariationId, sub)])
+              .expand((e) => e)
+              .toList();
+
+      for (int i = 0; i < subs.length; i++) {
+        DryVariationId variation = subs[i].value.substitutedBase.dryVariationId;
+        for (int j = i + 1; j < subs.length; j++) {
+          if (variation == subs[j].value.substitutedBase.dryVariationId) {
+            expect(subs[i].key, equals(subs[j].key));
+          } else {
+            expect(subs[i].key, isNot(equals(subs[j].key)));
+          }
+        }
+      }
     });
   });
 }
