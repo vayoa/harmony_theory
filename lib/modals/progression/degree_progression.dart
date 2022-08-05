@@ -453,11 +453,10 @@ class DegreeProgression extends Progression<DegreeChord> {
             changedStart: changedStart,
             changedEnd: changedEnd,
             location: location,
+            variationId: subVariation,
           );
 
-          substitutions
-              .putIfAbsent(subVariation ?? SubVariationId.empty(), () => [])
-              .add(subToAdd);
+          substitutions.putIfAbsent(subVariation, () => []).add(subToAdd);
         }
       } catch (e) {
         if (e is! NonValidDuration) rethrow;
