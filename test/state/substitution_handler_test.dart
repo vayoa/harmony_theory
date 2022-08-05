@@ -64,20 +64,42 @@ main() {
     });
 
     test('correct variations', () {
-      List<MapEntry<SubVariationId, Substitution>> subs =
-          SubstitutionHandler.getRatedSubstitutions(
+      ProgressionBank.initializeBuiltIn();
+
+      final ratedSubstitutions = SubstitutionHandler.getRatedSubstitutions(
         DegreeProgression.parse('I 4, III 4, vi 2, V 2, I 4'),
-      )
-              .map((e) =>
-                  [for (var sub in e.members) MapEntry(e.subVariationId, sub)])
-              .expand((e) => e)
-              .toList();
+        keepAmount: KeepHarmonicFunctionAmount.med,
+      );
+
+      List<MapEntry<SubVariationId, Substitution>> subs = ratedSubstitutions
+          .map((e) =>
+              [for (var sub in e.members) MapEntry(e.subVariationId, sub)])
+          .expand((e) => e)
+          .toList();
 
       for (int i = 0; i < subs.length; i++) {
         DryVariationId variation = subs[i].value.substitutedBase.dryVariationId;
         for (int j = i + 1; j < subs.length; j++) {
           if (variation == subs[j].value.substitutedBase.dryVariationId) {
             expect(subs[i].key, equals(subs[j].key));
+            expect(
+              subs[i].key,
+              equals(
+                SubVariationId(
+                  progression: subs[i].value.substitutedBase,
+                  startChange: 0.0,
+                ),
+              ),
+            );
+            expect(
+              subs[j].key,
+              equals(
+                SubVariationId(
+                  progression: subs[j].value.substitutedBase,
+                  startChange: 0.0,
+                ),
+              ),
+            );
           } else {
             expect(subs[i].key, isNot(equals(subs[j].key)));
           }

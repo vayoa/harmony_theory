@@ -1,3 +1,5 @@
+import 'package:harmony_theory/modals/variation_id.dart';
+
 import '../state/progression_bank.dart';
 import '../state/substitution_handler.dart';
 import 'progression/degree_progression.dart';
@@ -15,6 +17,7 @@ class Substitution {
   final SubstitutionMatch match;
   final double changedStart;
   final double changedEnd;
+  final SubVariationId variationId;
 
   double get rating => score.score;
 
@@ -26,6 +29,7 @@ class Substitution {
     required this.changedStart,
     required this.changedEnd,
     required this.match,
+    required this.variationId,
     SubstitutionScore? score,
   }) : score = score ?? SubstitutionScore.empty();
 
@@ -38,6 +42,7 @@ class Substitution {
     double? changedEnd,
     SubstitutionScore? score,
     SubstitutionMatch? match,
+    SubVariationId? variationId,
   }) =>
       Substitution(
         location: location ?? this.location,
@@ -48,6 +53,7 @@ class Substitution {
         changedStart: changedStart ?? this.changedStart,
         changedEnd: changedEnd ?? this.changedEnd,
         match: match ?? this.match,
+        variationId: variationId ?? this.variationId,
       );
 
   /// Returns and sets the substitution's [score] based on the relevant
@@ -60,8 +66,7 @@ class Substitution {
   /// will use [base] as the latter.
   ///
   /// If [sound] is null, will default to [Sound.both].
-  SubstitutionScore? scoreWith(
-    List<Weight> weights, {
+  SubstitutionScore? scoreWith(List<Weight> weights, {
     bool keepHarmonicFunction = false,
     Sound? sound,
     DegreeProgression? harmonicFunctionBase,
@@ -112,9 +117,9 @@ class Substitution {
   String toString({PitchScale? scale, bool detailed = false}) {
     return '-- "$location" $originalSubstitution --\n'
         '$substitutedBase${scale == null ? ': ' : ' ->\n'
-            '${substitutedBase.inScale(scale)}:'} '
+        '${substitutedBase.inScale(scale)}:'} '
         '${rating.toStringAsFixed(3)}\nbase: $base${scale == null ? '' : ' ->\n'
-            '${base.inScale(scale)}'}.\n'
+        '${base.inScale(scale)}'}.\n'
         '${score.toString(detailed)}\n'
         'Details: $match Changed Range: $changedStart - $changedEnd.';
   }

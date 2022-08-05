@@ -71,6 +71,14 @@ main() {
       );
       _expectVariations(
         const [
+          'I 4, III 2, VII, III, vi 2, V 2, I 4',
+          'I 4, III 2, VII^5, III, vi 2, V 2, I 4',
+          'I 4, III 2, VII^3, III, vi 2, V 2, I 4',
+          'I 4, III 2, vii7b5, III7, vi 2, V 2, I 4',
+        ],
+      );
+      _expectVariations(
+        const [
           'I, V, I',
           'vi, III',
           'I, V, II',
