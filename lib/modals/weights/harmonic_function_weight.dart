@@ -98,7 +98,7 @@ class HarmonicFunctionWeight extends Weight {
     },
     'ii': {
       -1: ['IV'],
-      1: ['iii', 'vi', 'viidim'],
+      1: ['iii', 'III', 'vi', 'viidim'],
       3: ['V'],
     },
     'iidim': {
@@ -108,7 +108,7 @@ class HarmonicFunctionWeight extends Weight {
     'iii': {
       -3: ['I', 'viidim'],
       -1: ['V'],
-      1: ['ii'],
+      1: ['ii', 'vi'],
       2: ['IV'],
     },
     'III': {
@@ -132,11 +132,10 @@ class HarmonicFunctionWeight extends Weight {
       3: ['I'],
     },
     'vi': {
-      1: ['IV', 'iii', 'V', 'I'],
+      1: ['IV', 'iii', 'V'],
       2: ['ii'],
     },
     'vi^5': {
-      // TODO: Make sure with yuval that this is ok...
       3: ['III'],
     },
     'viidim': {
