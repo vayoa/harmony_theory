@@ -53,7 +53,7 @@ class OvertakingWeight extends Weight {
         final prev = positions[weak];
         if (prev != null) {
           final out = InScaleWeight.evaluateChromatics(chord!).out;
-          final dur = max(0, maxDistance - (prev - position));
+          final dur = max(0, maxDistance - (position - prev));
           score += outToMult(out) * dur;
         }
 

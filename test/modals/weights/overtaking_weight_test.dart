@@ -7,16 +7,23 @@ import 'package:test/test.dart';
 const OvertakingWeight weight = OvertakingWeight();
 
 main() {
-  test('.score()', () {
-    _scoredLess(
-      "Em, F#m, B, Em, F 4, G 4",
-      "Em, F#m, B, Am, F 4, G 4",
-    );
-    // AY: Should this be less?
-    _scoredLess(
-      "Em, F#m, B, Em, F 4, G 4",
-      "Em 2, F#m, B, Em 2, F 2, G 4",
-    );
+  group('.score()', () {
+    test('specific', () {
+      final p = _parse("C 4, E 4, Am 4, C 4");
+      expect(weight.score(progression: p, base: p).score, equals(1.0));
+    });
+
+    test('hierarchy', () {
+      _scoredLess(
+        "Em, F#m, B, Em, F 4, G 4",
+        "Em, F#m, B, Am, F 4, G 4",
+      );
+      // AY: Should this be less?
+      _scoredLess(
+        "Em, F#m, B, Em, F 4, G 4",
+        "Em 2, F#m, B, Em 2, F 2, G 4",
+      );
+    });
   });
 }
 
