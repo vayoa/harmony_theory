@@ -27,6 +27,37 @@ class InScaleWeight extends Weight {
     Degree.parse('bIV'),
   ];
 
+  static EvaluationResult evaluateChromatics(DegreeChord chord,
+      [String? details]) {
+    int outCount = 0;
+    for (Degree degree in chord.degrees) {
+      if (degree.accidentals != 0) {
+        // Since flats is bigger than sharps by one...
+        if (flats.last == degree) {
+          outCount++;
+          if (details != null) {
+            details +=
+                'Subtracting 1 point for a $degree in $chord. Subtracted '
+                'Points: $outCount.\n';
+          }
+        } else {
+          for (int i = 0; i < sharps.length; i++) {
+            if (sharps[i] == degree || flats[i] == degree) {
+              outCount++;
+              if (details != null) {
+                details +=
+                    'Subtracting 1 point for a $degree in $chord. Subtracted '
+                    'Points: $outCount.\n';
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+    return EvaluationResult(outCount, details ?? "");
+  }
+
   /// Based on chord degrees. Any degrees in the progression that are in
   /// [sharps] or [flats] subtract a point from the score.
   /// The final score is (1.0 - (outPoints / degreeCount)).
@@ -40,29 +71,10 @@ class InScaleWeight extends Weight {
     String details = '';
     for (DegreeChord? chord in progression.values) {
       if (chord != null) {
-        List<Degree> degrees = chord.degrees;
-        count += degrees.length;
-        for (Degree degree in degrees) {
-          if (degree.accidentals != 0) {
-            // Since flats is bigger than sharps by one...
-            if (flats.last == degree) {
-              outCount++;
-              details +=
-                  'Subtracting 1 point for a $degree in $chord. Subtracted '
-                  'Points: $outCount.\n';
-            } else {
-              for (int i = 0; i < sharps.length; i++) {
-                if (sharps[i] == degree || flats[i] == degree) {
-                  outCount++;
-                  details +=
-                      'Subtracting 1 point for a $degree in $chord. Subtracted '
-                      'Points: $outCount.\n';
-                  break;
-                }
-              }
-            }
-          }
-        }
+        count += chord.degreesLength;
+        final s = evaluateChromatics(chord, details);
+        outCount += s.out;
+        details += s.details;
       }
     }
     return Score(
@@ -71,4 +83,11 @@ class InScaleWeight extends Weight {
           '${details}Out of $count max points, this progression got ${count - outCount} points.',
     );
   }
+}
+
+class EvaluationResult {
+  final int out;
+  final String details;
+
+  const EvaluationResult(this.out, this.details);
 }

@@ -1,3 +1,7 @@
+import 'dart:math';
+
+import 'package:harmony_theory/modals/weights/in_scale_weight.dart';
+
 import '../../state/progression_bank.dart';
 import '../progression/degree_progression.dart';
 import '../theory_base/degree/degree_chord.dart';
@@ -13,47 +17,57 @@ class OvertakingWeight extends Weight {
           weightDescription: WeightDescription.technical,
         );
 
-  static const double overtaking = 1 / 3;
+  static const int maxOut = 4;
+  static const int maxMeasureDistance = 2;
 
-  /// Acts only on progressions longer than 1 bar (returns 1.0 otherwise).
-  /// If [progression] has a chord that takes up [overtaking] or more
-  /// of the whole progression's duration, returns 0, otherwise returns 1.
+  /// Deducts points based on how close equal chords are to each other
+  /// (with a chord in between).
+  ///
+  /// Deducts more points based on how many chromatic notes there are in the chord
+  /// ([outToMult]).
+  ///
+  /// The max distance in which we score is [maxMeasureDistance].
+  ///
   /// Chords are deemed equal using [DegreeChord.weakEqual].
+  // TODO: Add details...
   @override
   Score score({
     required DegreeProgression progression,
     required DegreeProgression base,
     EntryLocation? location,
   }) {
-    if (progression.duration < progression.timeSignature.decimal) {
-      return Score(
-          score: 1.0,
-          details: 'The progression is smaller than a measure,'
-              ' so it is not checked.');
-    }
-    final Map<int, double> chordDurations = {};
+    final maxDistance = progression.timeSignature.decimal * maxMeasureDistance;
+
+    String details = "";
+    int? last;
+    Map<int, double> positions = {};
+    double score = 0.0;
+
     for (int i = 0; i < progression.length; i++) {
-      if (progression.values[i] != null) {
-        final int hash = progression.values[i]!.weakHash;
-        final double duration = progression.durations[i];
-        if (chordDurations.containsKey(hash)) {
-          // Dart stuff...
-          chordDurations[hash] = chordDurations[hash]! + duration;
-        } else {
-          chordDurations[hash] = duration;
+      DegreeChord? chord = progression[i];
+      double position = progression.durations.position(i);
+
+      int? weak = chord?.weakHash;
+
+      if (weak != null && weak != last) {
+        final prev = positions[weak];
+        if (prev != null) {
+          final out = InScaleWeight.evaluateChromatics(chord!).out;
+          final dur = max(0, maxDistance - (prev - position));
+          score += outToMult(out) * dur;
         }
-        if (chordDurations[hash]! / progression.duration >= overtaking) {
-          return Score(
-              score: 0.0,
-              details: 'The chord ${progression.values[i]!} is overall present'
-                  ' ${chordDurations[hash]! / progression.duration} (${chordDurations[hash]!})'
-                  ' and is overtaking ( >= $overtaking).');
-        }
+
+        positions[weak] = position + progression.durations[i];
       }
+      last = weak;
     }
-    return Score(
-        score: 1.0,
-        details: 'No chords are overtaking'
-            ' ( >= $overtaking).');
+
+    double maxScore = outToMult(maxOut) *
+        ((progression.duration ~/ progression.timeSignature.step) ~/ 2) *
+        maxDistance;
+
+    return Score(score: 1.0 - (score / maxScore), details: details);
   }
+
+  int outToMult(int out) => out + 1;
 }

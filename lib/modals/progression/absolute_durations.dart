@@ -70,6 +70,8 @@ class AbsoluteDurations implements Identifiable {
 
   double real(int index) => _real[index];
 
+  double position(int index) => _real[index] - this[index];
+
   void setReal(int index, double duration) => _real[index] = duration;
 
   void add(double duration) {
