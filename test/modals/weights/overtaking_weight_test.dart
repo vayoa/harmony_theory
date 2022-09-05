@@ -9,8 +9,8 @@ const OvertakingWeight weight = OvertakingWeight();
 main() {
   group('.score()', () {
     test('specific', () {
-      final p = _parse("C 4, E 4, Am 4, C 4");
-      expect(weight.score(progression: p, base: p).score, equals(1.0));
+      _specific("C 4, E 4, Am 4, C 4", equals(1.0));
+      _specific("F 4, E/B, B, E 2, Am 4, C 4", lessThan(0.85));
     });
 
     test('hierarchy', () {
@@ -34,6 +34,11 @@ _scoredLess(String in1, String in2) {
     weight.score(progression: p1, base: p1).score,
     lessThan(weight.score(progression: p2, base: p2).score),
   );
+}
+
+_specific(String input, dynamic matcher) {
+  final p = _parse(input);
+  return expect(weight.score(base: p, progression: p).score, matcher);
 }
 
 _parse(String input) {

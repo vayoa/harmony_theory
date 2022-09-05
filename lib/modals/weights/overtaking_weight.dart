@@ -18,6 +18,7 @@ class OvertakingWeight extends Weight {
         );
 
   static const int maxOut = 4;
+  static const double outEffect = 0.25;
   static const int maxMeasureDistance = 2;
 
   /// Deducts points based on how close equal chords are to each other
@@ -42,6 +43,7 @@ class OvertakingWeight extends Weight {
     int? last;
     Map<int, double> positions = {};
     double score = 0.0;
+    int repeats = 0;
 
     for (int i = 0; i < progression.length; i++) {
       DegreeChord? chord = progression[i];
@@ -54,6 +56,7 @@ class OvertakingWeight extends Weight {
         if (prev != null) {
           final out = InScaleWeight.evaluateChromatics(chord!).out;
           final dur = max(0, maxDistance - (position - prev));
+          repeats++;
           score += outToMult(out) * dur;
         }
 
@@ -63,11 +66,11 @@ class OvertakingWeight extends Weight {
     }
 
     double maxScore = outToMult(maxOut) *
-        ((progression.duration ~/ progression.timeSignature.step) ~/ 2) *
-        maxDistance;
+        repeats *
+        (maxDistance - progression.timeSignature.step);
 
     return Score(score: 1.0 - (score / maxScore), details: details);
   }
 
-  int outToMult(int out) => out + 1;
+  double outToMult(int out) => 1 + (out * outEffect);
 }
