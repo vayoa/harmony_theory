@@ -19,7 +19,7 @@ class OvertakingWeight extends Weight {
 
   static const int maxOut = 4;
   static const double outEffect = 0.25;
-  static const int maxMeasureDistance = 2;
+  static const int maxMeasureDistance = 4;
 
   /// Deducts points based on how close equal chords are to each other
   /// (with a chord in between).

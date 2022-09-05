@@ -10,7 +10,8 @@ main() {
   group('.score()', () {
     test('specific', () {
       _specific("C 4, E 4, Am 4, C 4", equals(1.0));
-      _specific("F 4, E/B, B, E 2, Am 4, C 4", lessThan(0.85));
+      _specific("F 4, E/B, B, E 2, Am 4, C 4", lessThan(0.8));
+      _specific("F 2, C, F, E 4, Am 4, C 4", lessThan(0.8));
     });
 
     test('hierarchy', () {
