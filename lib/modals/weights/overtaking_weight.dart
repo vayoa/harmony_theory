@@ -29,7 +29,7 @@ class OvertakingWeight extends Weight {
   ///
   /// The max distance in which we score is [maxMeasureDistance].
   ///
-  /// Chords are deemed equal using [DegreeChord.weakEqual].
+  /// Chords are deemed equal using [DegreeChord.weakHashNoBass].
   // TODO: Add details...
   @override
   Score score({
@@ -49,7 +49,7 @@ class OvertakingWeight extends Weight {
       DegreeChord? chord = progression[i];
       double position = progression.durations.position(i);
 
-      int? weak = chord?.weakHash;
+      int? weak = chord?.weakHashNoBass;
 
       if (weak != null && weak != last) {
         final prev = positions[weak];

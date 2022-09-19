@@ -9,7 +9,9 @@ main() {
   group('.score()', () {
     test('specific', () {
       weight.specific("C 4, E 4, Am 4, C 4", 1.0);
-      weight.specific("F 4, E/B, B, E 2, Am 4, C 4", lessThan(0.8));
+      // Inversions aren't considered equal chords to their root equivalent
+      // in this weight...
+      weight.specific("F 4, E/B, B, E 2, Am 4, C 4", 1.0);
       weight.specific("F 2, C, F, E 4, Am 4, C 4", lessThan(0.8));
     });
 

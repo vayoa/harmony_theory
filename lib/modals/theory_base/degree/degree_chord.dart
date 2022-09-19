@@ -547,6 +547,20 @@ class DegreeChord extends GenericChord<Degree> implements Identifiable {
     );
   }
 
+  int get weakHashNoBass {
+    List<Interval> intervals = pattern.intervals.sublist(1, 3);
+    if (pattern.intervals.length >= 4) {
+      if (!root.add(pattern.intervals[3]).isDiatonic) {
+        intervals.add(pattern.intervals[3]);
+      }
+    }
+    return Object.hash(
+      root,
+      bass,
+      Object.hashAll(intervals),
+    );
+  }
+
   @override
   int get id => Identifiable.hashAllInts([
         root.id,
