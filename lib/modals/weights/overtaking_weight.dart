@@ -65,6 +65,10 @@ class OvertakingWeight extends Weight {
       last = weak;
     }
 
+    if (repeats == 0) {
+      return Score(score: 1.0, details: "No repeats were found.");
+    }
+
     double maxScore = outToMult(maxOut) *
         repeats *
         (maxDistance - progression.timeSignature.step);
