@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import '../../state/progression_bank.dart';
 import '../progression/degree_progression.dart';
+import '../substitution_context.dart';
 import 'weight.dart';
 
 class ClimacticEndingWeight extends Weight {
@@ -30,7 +30,7 @@ class ClimacticEndingWeight extends Weight {
   Score score({
     required DegreeProgression progression,
     required DegreeProgression base,
-    EntryLocation? location,
+    SubstitutionContext? subContext,
   }) {
     if (progression.duration < 3.0) {
       return Score(

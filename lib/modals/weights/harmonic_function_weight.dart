@@ -1,7 +1,7 @@
 import 'package:tonic/tonic.dart';
 
 import '../../extensions/interval_extension.dart';
-import '../../state/progression_bank.dart';
+import '../../modals/substitution_context.dart';
 import '../analysis_tools/pair_map.dart';
 import '../progression/degree_progression.dart';
 import '../theory_base/degree/degree_chord.dart';
@@ -28,7 +28,7 @@ class HarmonicFunctionWeight extends Weight {
   Score score({
     required DegreeProgression progression,
     required DegreeProgression base,
-    EntryLocation? location,
+    SubstitutionContext? subContext,
   }) {
     int score = 0, count = 0;
     String details = '';

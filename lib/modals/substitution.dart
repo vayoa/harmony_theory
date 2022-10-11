@@ -1,58 +1,42 @@
+import 'package:harmony_theory/modals/substitution_context.dart';
 import 'package:harmony_theory/modals/variation_id.dart';
 
-import '../state/progression_bank.dart';
 import '../state/substitution_handler.dart';
 import 'progression/degree_progression.dart';
-import 'substitution_match.dart';
 import 'theory_base/pitch_scale.dart';
 import 'weights/keep_harmonic_function_weight.dart';
 import 'weights/weight.dart';
 
 class Substitution {
-  final EntryLocation? location;
   final DegreeProgression substitutedBase;
-  final DegreeProgression originalSubstitution;
   final DegreeProgression base;
   SubstitutionScore score;
-  final SubstitutionMatch match;
-  final double changedStart;
-  final double changedEnd;
+  final SubstitutionContext subContext;
   final SubVariationId variationId;
 
   double get rating => score.score;
 
   Substitution({
-    required this.location,
     required this.substitutedBase,
-    required this.originalSubstitution,
     required this.base,
-    required this.changedStart,
-    required this.changedEnd,
-    required this.match,
+    required this.subContext,
     required this.variationId,
     SubstitutionScore? score,
   }) : score = score ?? SubstitutionScore.empty();
 
   Substitution copyWith({
-    EntryLocation? location,
     DegreeProgression? substitutedBase,
     DegreeProgression? originalSubstitution,
     DegreeProgression? base,
-    double? changedStart,
-    double? changedEnd,
     SubstitutionScore? score,
-    SubstitutionMatch? match,
+    SubstitutionContext? subContext,
     SubVariationId? variationId,
   }) =>
       Substitution(
-        location: location ?? this.location,
         substitutedBase: substitutedBase ?? this.substitutedBase,
-        originalSubstitution: originalSubstitution ?? this.originalSubstitution,
         base: base ?? this.base,
         score: score ?? this.score,
-        changedStart: changedStart ?? this.changedStart,
-        changedEnd: changedEnd ?? this.changedEnd,
-        match: match ?? this.match,
+        subContext: subContext ?? this.subContext,
         variationId: variationId ?? this.variationId,
       );
 
@@ -66,7 +50,8 @@ class Substitution {
   /// will use [base] as the latter.
   ///
   /// If [sound] is null, will default to [Sound.both].
-  SubstitutionScore? scoreWith(List<Weight> weights, {
+  SubstitutionScore? scoreWith(
+    List<Weight> weights, {
     bool keepHarmonicFunction = false,
     Sound? sound,
     DegreeProgression? harmonicFunctionBase,
@@ -115,13 +100,14 @@ class Substitution {
 
   @override
   String toString({PitchScale? scale, bool detailed = false}) {
-    return '-- "$location" $originalSubstitution --\n'
+    return '-- "${subContext.location}" ${subContext.originalSubstitution} --\n'
         '$substitutedBase${scale == null ? ': ' : ' ->\n'
-        '${substitutedBase.inScale(scale)}:'} '
+            '${substitutedBase.inScale(scale)}:'} '
         '${rating.toStringAsFixed(3)}\nbase: $base${scale == null ? '' : ' ->\n'
-        '${base.inScale(scale)}'}.\n'
+            '${base.inScale(scale)}'}.\n'
         '${score.toString(detailed)}\n'
-        'Details: $match Changed Range: $changedStart - $changedEnd.';
+        'Details: ${subContext.match} '
+        'Insert Range: ${subContext.insertStart} - ${subContext.insertEnd}.';
   }
 
   int compareTo(Substitution other) => score.compareTo(other.score);

@@ -1,7 +1,7 @@
-import '../../state/progression_bank.dart';
 import '../progression/degree_progression.dart';
 import '../progression/progression.dart';
 import '../substitution.dart';
+import '../substitution_context.dart';
 
 /// A particular [ScoreGiver] that scores a [Progression] within a range of
 /// 0 - 1, that is later multiplied by it's [importance].
@@ -41,16 +41,21 @@ abstract class Weight {
   Score score({
     required DegreeProgression progression,
     required DegreeProgression base,
-    EntryLocation? location,
+    // TODO: Have a way for some weights to enforce requiring subContext.
+    SubstitutionContext? subContext,
   });
 
-  /// Returns the [progression]'s score after scaling it based on [importance].
-  Score scaledScore(
-          {required Substitution substitution, DegreeProgression? base}) =>
+  /// Returns the [substitution]'s score after scaling it based on [importance].
+  ///
+  /// [base] is an optional substitution's base progression override.
+  Score scaledScore({
+    required Substitution substitution,
+    DegreeProgression? base,
+  }) =>
       score(
         progression: substitution.substitutedBase,
         base: base ?? substitution.base,
-        location: substitution.location,
+        subContext: substitution.subContext,
       ).scale(importance);
 }
 

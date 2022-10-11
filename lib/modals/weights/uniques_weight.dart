@@ -1,4 +1,4 @@
-import '../../state/progression_bank.dart';
+import '../../modals/substitution_context.dart';
 import '../progression/degree_progression.dart';
 import 'weight.dart';
 
@@ -16,7 +16,7 @@ class UniquesWeight extends Weight {
   Score score({
     required DegreeProgression progression,
     required DegreeProgression base,
-    EntryLocation? location,
+    SubstitutionContext? subContext,
   }) {
     int unique = progression.values.toSet().length;
     return Score(

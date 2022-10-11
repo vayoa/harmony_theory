@@ -1,4 +1,4 @@
-import '../../state/progression_bank.dart';
+import '../../modals/substitution_context.dart';
 import '../progression/degree_progression.dart';
 import '../theory_base/degree/degree.dart';
 import '../theory_base/degree/degree_chord.dart';
@@ -65,7 +65,7 @@ class InScaleWeight extends Weight {
   Score score({
     required DegreeProgression progression,
     required DegreeProgression base,
-    EntryLocation? location,
+    SubstitutionContext? subContext,
   }) {
     int count = 0, outCount = 0;
     String details = '';

@@ -1,3 +1,5 @@
+import 'package:harmony_theory/modals/weights/position_weight.dart';
+
 import '../extensions/utilities.dart';
 import '../modals/progression/degree_progression.dart';
 import '../modals/substitution.dart';
@@ -30,11 +32,12 @@ abstract class SubstitutionHandler {
     const UserSavedWeight(),
     const ComplexWeight(),
     const BassMovementWeight(),
+    const PositionWeight(),
   ]..sort(
-      (Weight w1, Weight w2) => -1 * w1.importance.compareTo(w2.importance));
+          (Weight w1, Weight w2) => -1 * w1.importance.compareTo(w2.importance));
 
   static const KeepHarmonicFunctionWeight keepHarmonicFunction =
-      KeepHarmonicFunctionWeight();
+  KeepHarmonicFunctionWeight();
 
   static KeepHarmonicFunctionAmount keepAmount = KeepHarmonicFunctionAmount.med;
 
@@ -42,8 +45,7 @@ abstract class SubstitutionHandler {
     for (Weight weight in weights) weight.name: weight
   };
 
-  static List<VariationGroup> _getPossibleSubstitutions(
-    DegreeProgression base, {
+  static List<VariationGroup> _getPossibleSubstitutions(DegreeProgression base, {
     int start = 0,
     double startDur = 0.0,
     int? end,
@@ -55,7 +57,7 @@ abstract class SubstitutionHandler {
       DegreeChord? chord = base[i];
       if (chord != null) {
         List<PackagedProgression>? progressions =
-            ProgressionBank.getByGroup(chord: chord, withTonicization: false);
+        ProgressionBank.getByGroup(chord: chord, withTonicization: false);
         if (progressions != null && progressions.isNotEmpty) {
           for (PackagedProgression packagedProg in progressions) {
             Utilities.mergeMaps(
@@ -94,8 +96,7 @@ abstract class SubstitutionHandler {
         .toList();
   }
 
-  static List<VariationGroup> getRatedSubstitutions(
-    DegreeProgression base, {
+  static List<VariationGroup> getRatedSubstitutions(DegreeProgression base, {
     Sound? sound,
     KeepHarmonicFunctionAmount? keepAmount,
     DegreeProgression? harmonicFunctionBase,

@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:harmony_theory/modals/substitution_context.dart';
+
 import '../../extensions/utilities.dart';
 import '../../modals/variation_id.dart';
 import '../../state/progression_bank.dart';
@@ -446,13 +448,17 @@ class DegreeProgression extends Progression<DegreeChord> {
               SubVariationId(progression: substitution, startChange: 0.0);
 
           final Substitution subToAdd = Substitution(
-            originalSubstitution: sub,
             substitutedBase: substitution,
             base: this,
-            match: match,
-            changedStart: changedStart,
-            changedEnd: changedEnd,
-            location: location,
+            subContext: SubstitutionContext(
+              originalSubstitution: sub,
+              match: match,
+              insertStart: changedStart,
+              insertEnd: changedEnd,
+              location: location,
+              variationStart: startVariation!,
+              variationEnd: endVariation,
+            ),
             variationId: subVariation,
           );
 

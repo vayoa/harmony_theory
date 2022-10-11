@@ -1,8 +1,7 @@
 import 'dart:math';
 
-import 'package:harmony_theory/modals/weights/in_scale_weight.dart';
-
-import '../../state/progression_bank.dart';
+import '../../modals/substitution_context.dart';
+import '../../modals/weights/in_scale_weight.dart';
 import '../progression/degree_progression.dart';
 import '../theory_base/degree/degree_chord.dart';
 import 'weight.dart';
@@ -35,7 +34,7 @@ class OvertakingWeight extends Weight {
   Score score({
     required DegreeProgression progression,
     required DegreeProgression base,
-    EntryLocation? location,
+    SubstitutionContext? subContext,
   }) {
     final maxDistance = progression.timeSignature.decimal * maxMeasureDistance;
 

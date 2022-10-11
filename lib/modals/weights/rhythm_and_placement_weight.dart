@@ -1,4 +1,4 @@
-import '../../state/progression_bank.dart';
+import '../../modals/substitution_context.dart';
 import '../progression/degree_progression.dart';
 import 'weight.dart';
 
@@ -37,7 +37,7 @@ class RhythmAndPlacementWeight extends Weight {
   Score score({
     required DegreeProgression progression,
     required DegreeProgression base,
-    EntryLocation? location,
+    SubstitutionContext? subContext,
   }) {
     String details = '';
     int points = 0;
@@ -79,6 +79,6 @@ class RhythmAndPlacementWeight extends Weight {
     }
     return Score(
         score: 1.0 - (points / (progression.length * maxPoints)),
-        details: details);
+        details: details.isEmpty ? 'No bad points were given.' : details);
   }
 }

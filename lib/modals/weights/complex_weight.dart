@@ -1,4 +1,4 @@
-import '../../state/progression_bank.dart';
+import '../../modals/substitution_context.dart';
 import '../progression/degree_progression.dart';
 import 'weight.dart';
 
@@ -18,7 +18,7 @@ class ComplexWeight extends Weight {
   Score score({
     required DegreeProgression progression,
     required DegreeProgression base,
-    EntryLocation? location,
+    SubstitutionContext? subContext,
   }) {
     int pc = _countChords(progression), bc = _countChords(base);
     final int max = (bc * maxRatio).round();

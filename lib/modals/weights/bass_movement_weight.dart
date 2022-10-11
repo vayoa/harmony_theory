@@ -1,8 +1,8 @@
 import 'package:tonic/tonic.dart';
 
 import '../../modals/progression/degree_progression.dart';
+import '../../modals/substitution_context.dart';
 import '../../modals/weights/weight.dart';
-import '../../state/progression_bank.dart';
 import '../theory_base/degree/degree_chord.dart';
 
 class BassMovementWeight extends Weight {
@@ -22,7 +22,7 @@ class BassMovementWeight extends Weight {
   Score score({
     required DegreeProgression progression,
     required DegreeProgression base,
-    EntryLocation? location,
+    SubstitutionContext? subContext,
   }) {
     int bad = 0;
     String details = '';
@@ -33,8 +33,12 @@ class BassMovementWeight extends Weight {
           next != null &&
           (chord.hasDifferentBass && chord.isInversion)) {
         Interval toNext = next.bass.from(chord.bass);
-        if (toNext != Interval.P1 || toNext.number != 2 || toNext.number != 7) {
+        if (toNext.number != 1 && toNext.number != 2 && toNext.number != 7) {
           bad++;
+          details += "\nFound $chord - $next where the basses "
+              "(${chord.bass} - ${next.bass} => $toNext) aren't "
+              "a semitone apart (or the same note)."
+              "\nBad Points: $bad";
         }
       }
     }

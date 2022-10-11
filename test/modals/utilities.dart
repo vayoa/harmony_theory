@@ -27,16 +27,22 @@ extension WeightTests on Weight {
   scoredLess(String in1, String in2, {bool fails = false}) {
     final p1 = TestUtils.parse(in1);
     final p2 = TestUtils.parse(in2);
-    var e = lessThan(score(progression: p2, base: p2).score);
+    final r1 = score(progression: p2, base: p2);
+    final r2 = score(progression: p1, base: p1);
+    var e = lessThan(r1.score);
     if (fails) e = isNot(e);
     return expect(
-      score(progression: p1, base: p1).score,
+      r2.score,
       e,
+      reason: "P1 Details:\n$r1"
+          "\n-------------------------------------------"
+          "\nP2 Details:\n$r2",
     );
   }
 
   specific(String input, dynamic matcher) {
     final p = TestUtils.parse(input);
-    return expect(score(base: p, progression: p).score, matcher);
+    final r = score(base: p, progression: p);
+    return expect(r.score, matcher, reason: 'Score Details:\n${r.details}');
   }
 }

@@ -1,4 +1,4 @@
-import '../../state/progression_bank.dart';
+import '../../modals/substitution_context.dart';
 import '../progression/degree_progression.dart';
 import '../theory_base/degree/degree_chord.dart';
 import 'weight.dart';
@@ -31,7 +31,7 @@ class ImportantChordsWeight extends Weight {
   Score score({
     required DegreeProgression progression,
     required DegreeProgression base,
-    EntryLocation? location,
+    SubstitutionContext? subContext,
   }) {
     int points = 0, max = 0;
     String details = '';
