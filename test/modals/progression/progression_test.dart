@@ -64,7 +64,25 @@ main() {
       });
     });
   });
+  group('methods', () {
+    test('.deleteRange', () {
+      var p = _parse('A 4, B 4');
+      _errorlessEqual(_parse('A 2, B 2'), p.deleteRange(0.5, 1.5));
+      p = _parse('A 2, B 2, C 4');
+      _errorlessEqual(_parse('A 2, C 2'), p.deleteRange(0.5, 1.5));
+      p = _parse('A 2, B 2, C 4');
+      _errorlessEqual(_parse('A 2, B, C 2'), p.deleteRange(0.75, 1.5));
+      p = _parse('A 2, B 2, C 2');
+      _errorlessEqual(_parse('A 2, B, C '), p.deleteRange(0.75, 1.25));
+      p = _parse('E 4, A 2, B 2, C 2, E 2');
+      _errorlessEqual(
+          _parse('E 4, A 2, B, C, E 2 '), p.deleteRange(1.75, 2.25));
+    });
+  });
 }
+
+Progression<String> _parse(String input) =>
+    Progression<String>.parse(input: input, parser: (input) => input);
 
 _errorlessEqual<T>(Progression<T> p1, Progression<T> p2) {
   // Check that splitToMeasures doesn't throw an error.
