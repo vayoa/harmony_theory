@@ -77,6 +77,10 @@ main() {
       p = _parse('E 4, A 2, B 2, C 2, E 2');
       _errorlessEqual(
           _parse('E 4, A 2, B, C, E 2 '), p.deleteRange(1.75, 2.25));
+      p = _parse(
+          'vi 2, II 2, vii° 2, III, III7, VI7 2, II 2, V 2, III, III7, vi 4');
+      _errorlessEqual(_parse('III, III7, VI7 2, II 2, V 2, III, III7, vi 4'),
+          p.deleteRange(0, 1.5));
     });
   });
 }

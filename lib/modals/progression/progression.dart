@@ -185,8 +185,8 @@ class Progression<T> implements Identifiable {
     }
   }
 
-  Progression deleteRange(double start, double end) {
-    Progression prog = Progression.empty(timeSignature: _timeSignature);
+  Progression<T> deleteRange(double start, double end) {
+    Progression<T> prog = Progression.empty(timeSignature: _timeSignature);
     for (int i = 0; i < length; i++) {
       final pos = durations.position(i);
       final dur = durations.real(i);
