@@ -67,20 +67,23 @@ main() {
   group('methods', () {
     test('.deleteRange', () {
       var p = _parse('A 4, B 4');
-      _errorlessEqual(_parse('A 2, B 2'), p.deleteRange(0.5, 1.5));
+      _errorlessEqual(p.deleteRange(0.5, 1.5), _parse('A 2, B 2'));
       p = _parse('A 2, B 2, C 4');
-      _errorlessEqual(_parse('A 2, C 2'), p.deleteRange(0.5, 1.5));
+      _errorlessEqual(p.deleteRange(0.5, 1.5), _parse('A 2, C 2'));
       p = _parse('A 2, B 2, C 4');
-      _errorlessEqual(_parse('A 2, B, C 2'), p.deleteRange(0.75, 1.5));
+      _errorlessEqual(p.deleteRange(0.75, 1.5), _parse('A 2, B, C 2'));
       p = _parse('A 2, B 2, C 2');
-      _errorlessEqual(_parse('A 2, B, C '), p.deleteRange(0.75, 1.25));
+      _errorlessEqual(p.deleteRange(0.75, 1.25), _parse('A 2, B, C '));
       p = _parse('E 4, A 2, B 2, C 2, E 2');
       _errorlessEqual(
-          _parse('E 4, A 2, B, C, E 2 '), p.deleteRange(1.75, 2.25));
+          p.deleteRange(1.75, 2.25), _parse('E 4, A 2, B, C, E 2 '));
       p = _parse(
           'vi 2, II 2, vii° 2, III, III7, VI7 2, II 2, V 2, III, III7, vi 4');
-      _errorlessEqual(_parse('III, III7, VI7 2, II 2, V 2, III, III7, vi 4'),
-          p.deleteRange(0, 1.5));
+      _errorlessEqual(p.deleteRange(0, 1.5),
+          _parse('III, III7, VI7 2, II 2, V 2, III, III7, vi 4'));
+      p = _parse('// 20');
+      _errorlessEqual(p.deleteRange(3, 5), _parse('// 12'));
+      _errorlessEqual(p.deleteRange(3, 4.5), _parse('// 14'));
     });
   });
 }

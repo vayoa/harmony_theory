@@ -185,19 +185,22 @@ class Progression<T> implements Identifiable {
     }
   }
 
+  // TODO: Optimize (use constructors maybe...)
   Progression<T> deleteRange(double start, double end) {
     Progression<T> prog = Progression.empty(timeSignature: _timeSignature);
     for (int i = 0; i < length; i++) {
       final pos = durations.position(i);
-      final dur = durations.real(i);
-      if (pos >= start && pos <= end) {
-        if (dur > end) prog.add(this[i], dur - end);
-      } else {
-        prog.add(
-          this[i],
-          pos < start && dur > start ? dur - start : durations[i],
-        );
+      final real = durations.real(i);
+      double dur = durations[i];
+      // If we're inside the range
+      if (real > start && pos < end) {
+        // Mark the ranges to remove...
+        double startDur = max(pos, start), endDur = min(real, end);
+        // The duration is everything but the ranges to remove...
+        dur = (startDur - pos) + (real - endDur);
       }
+
+      if (dur != 0) prog.add(this[i], dur);
     }
     return prog;
   }
