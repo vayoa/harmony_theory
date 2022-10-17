@@ -1,5 +1,6 @@
 import 'package:harmony_theory/modals/progression/exceptions.dart';
 import 'package:harmony_theory/modals/progression/progression.dart';
+import 'package:harmony_theory/modals/progression/time_signature.dart';
 import 'package:test/test.dart';
 
 main() {
@@ -61,6 +62,28 @@ main() {
             [0.5, 0.5, 0.25, 0.5, 0.25],
           ),
         );
+        _errorlessEqual(
+          _parse('A 2, B M, M'),
+          Progression<String>(
+            ['A', 'B', null],
+            [0.5, 1.0, 1.0],
+          ),
+        );
+        _errorlessEqual(
+          _parse('A h, B M, M'),
+          Progression<String>(
+            ['A', 'B', null],
+            [0.5, 1.0, 1.0],
+          ),
+        );
+        _errorlessEqual(
+          Progression<String>(
+            ['A', 'B', null],
+            [0.5, 0.75, 0.75],
+            timeSignature: const TimeSignature(3, 4),
+          ),
+          _parse('A 2, B M, M', false),
+        );
       });
     });
   });
@@ -88,8 +111,14 @@ main() {
   });
 }
 
-Progression<String> _parse(String input) =>
-    Progression<String>.parse(input: input, parser: (input) => input);
+Progression<String> _parse(String input, [bool fourByFour = true]) =>
+    Progression<String>.parse(
+      input: input,
+      parser: (input) => input,
+      timeSignature: fourByFour
+          ? const TimeSignature.evenTime()
+          : const TimeSignature(3, 4),
+    );
 
 _errorlessEqual<T>(Progression<T> p1, Progression<T> p2) {
   // Check that splitToMeasures doesn't throw an error.

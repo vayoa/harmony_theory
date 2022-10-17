@@ -171,7 +171,8 @@ class Progression<T> implements Identifiable {
     TimeSignature timeSignature = const TimeSignature.evenTime(),
   })  : _timeSignature = timeSignature,
         _hasNull = false {
-    var result = progressionParser(input: input, parser: parser);
+    var result = progressionParser(
+        input: input, parser: parser, timeSignature: timeSignature);
     _values = result[0];
     _durations = result[1];
     _hasNull = result[2];
@@ -218,12 +219,9 @@ class Progression<T> implements Identifiable {
     double duration = 0.0;
     for (int i = 0; i < inputs.length; i++) {
       if (inputs[i].isNotEmpty) {
-        List<String> parts = inputs[i].trim().split(r' ');
+        List<String> parts = _splitInputParts(inputs[i]);
         String input = parts[0];
-        int addTimes = 1;
-        if (parts.length == 2) {
-          addTimes = max(addTimes, int.tryParse(parts[1]) ?? addTimes);
-        }
+        int addTimes = _parseTimes(parts, timeSignature);
         double dur = step + ((addTimes - 1) * step);
         duration += dur;
 
@@ -241,6 +239,27 @@ class Progression<T> implements Identifiable {
       }
     }
     return [values, AbsoluteDurations(durations), hasNull];
+  }
+
+  static int _parseTimes(List<String> parts, TimeSignature sig) {
+    int addTimes = 1;
+    if (parts.length == 2) {
+      String lower = parts[1].toLowerCase().trim();
+      int parsed = int.tryParse(lower) ??
+          (lower == 'm'
+              ? sig.numerator
+              : lower == 'h'
+                  ? sig.numerator ~/ 2
+                  : addTimes);
+      addTimes = max(addTimes, parsed);
+    }
+    return addTimes;
+  }
+
+  static List<String> _splitInputParts(String input) {
+    final lower = input.toLowerCase().trim();
+    if (lower == 'm' || lower == 'h') return ['', lower];
+    return input.trim().split(r' ');
   }
 
   static T? valueParser<T>(String input, Parser<T> parser) {
