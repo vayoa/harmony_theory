@@ -1,4 +1,4 @@
-import 'package:harmony_theory/modals/weights/setback_weight.dart';
+import 'package:harmony_theory/modals/weights/overtaking_weight.dart';
 import 'package:test/test.dart';
 
 import '../utilities.dart';

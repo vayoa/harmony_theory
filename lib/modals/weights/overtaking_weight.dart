@@ -9,9 +9,9 @@ import 'weight.dart';
 class OvertakingWeight extends Weight {
   const OvertakingWeight()
       : super(
-          name: 'Setback',
-          description: "Prefers substitutions to not tonicize from a "
-              "chord to that same chord. ",
+          name: 'Overtaking',
+          description: "Prefers progressions to not repeat similar chords with "
+              "other chords in between.",
           importance: 4,
           weightDescription: WeightDescription.technical,
         );
@@ -56,10 +56,12 @@ class OvertakingWeight extends Weight {
           final out = InScaleWeight.evaluateChromatics(chord!).out;
           final dur = max(0, maxDistance - (position - prev));
           repeats++;
-          score += outToMult(out) * dur;
+          final add = outToMult(out) * dur;
+          score += add;
           details +=
-              "Found repeat number $repeats ending at $chord ($position). "
-              "Bad score is now: $score. \n";
+              "Found repeat number $repeats ending at $chord ($position), "
+              "duration of $dur in between. "
+              "Bad score is now: $score (${add >= 0 ? '+' : ''}$add).\n";
         }
 
         positions[weak] = position + progression.durations[i];
