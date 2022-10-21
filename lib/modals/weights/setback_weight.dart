@@ -9,9 +9,9 @@ import 'weight.dart';
 class OvertakingWeight extends Weight {
   const OvertakingWeight()
       : super(
-          name: 'Overtaking',
-          description: "Prefers progressions that don't have one chord "
-              "overtaking the rest (in duration terms).",
+          name: 'Setback',
+          description: "Prefers substitutions to not tonicize from a "
+              "chord to that same chord. ",
           importance: 4,
           weightDescription: WeightDescription.technical,
         );
@@ -57,6 +57,9 @@ class OvertakingWeight extends Weight {
           final dur = max(0, maxDistance - (position - prev));
           repeats++;
           score += outToMult(out) * dur;
+          details +=
+              "Found repeat number $repeats ending at $chord ($position). "
+              "Bad score is now: $score. \n";
         }
 
         positions[weak] = position + progression.durations[i];
@@ -71,6 +74,8 @@ class OvertakingWeight extends Weight {
     double maxScore = outToMult(maxOut) *
         repeats *
         (maxDistance - progression.timeSignature.step);
+
+    details += 'Out of max $maxScore bad score, bad score is $score.';
 
     return Score(score: 1.0 - (score / maxScore), details: details);
   }

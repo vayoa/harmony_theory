@@ -6,7 +6,7 @@ class PositionWeight extends Weight {
   const PositionWeight()
       : super(
           name: "Position",
-          description: "Prefers progressions to mostly start on strong beats.",
+          description: "Prefers substitutions to mostly start on strong beats.",
           importance: 3,
           weightDescription: WeightDescription.technical,
         );
