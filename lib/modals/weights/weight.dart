@@ -63,14 +63,12 @@ class Score {
   final double score;
   final String details;
 
-  Score({required this.score, required String details})
-      : details = '$details\n'
-            'Final Score: $score';
+  Score({required this.score, required this.details});
 
   Score scale(int importance) {
     return Score(
       score: score * importance,
-      details: '$details, scaled: ${score * importance}',
+      details: details,
     );
   }
 

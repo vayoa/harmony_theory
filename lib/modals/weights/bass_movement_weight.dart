@@ -44,7 +44,7 @@ class BassMovementWeight extends Weight {
     }
     return Score(
       score: 1.0 - (bad / (progression.length - 1)),
-      details: details,
+      details: details.isEmpty ? "No inversions were found." : details,
     );
   }
 }
