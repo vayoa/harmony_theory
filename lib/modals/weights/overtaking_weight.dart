@@ -63,6 +63,11 @@ class OvertakingWeight extends Weight {
                 "Found repeat number $repeats ending at $chord ($position), "
                 "duration of $dur in between. "
                 "Bad score is now: $score (${add >= 0 ? '+' : ''}$add).\n";
+          } else {
+            details +=
+                "Found a repeat  ending at $chord ($position), but it's more "
+                "than maximum $maxDistance distant apart, so no "
+                "bad score is added.\n";
           }
         }
 
