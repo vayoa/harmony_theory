@@ -55,13 +55,15 @@ class OvertakingWeight extends Weight {
         if (prev != null) {
           final out = InScaleWeight.evaluateChromatics(chord!).out;
           final dur = max(0, maxDistance - (position - prev));
-          repeats++;
-          final add = outToMult(out) * dur;
-          score += add;
-          details +=
-              "Found repeat number $repeats ending at $chord ($position), "
-              "duration of $dur in between. "
-              "Bad score is now: $score (${add >= 0 ? '+' : ''}$add).\n";
+          if (dur > 0) {
+            repeats++;
+            final add = outToMult(out) * dur;
+            score += add;
+            details +=
+                "Found repeat number $repeats ending at $chord ($position), "
+                "duration of $dur in between. "
+                "Bad score is now: $score (${add >= 0 ? '+' : ''}$add).\n";
+          }
         }
 
         positions[weak] = position + progression.durations[i];
