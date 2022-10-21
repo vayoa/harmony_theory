@@ -182,7 +182,13 @@ class ImportantChordsWeight extends Weight {
     if (max != 0) {
       finalScore -= (points / max);
     }
-    return Score(score: finalScore, details: details);
+    return Score(
+      score: finalScore,
+      details: details.isEmpty
+          ? 'All chords are placed in their relevant places, '
+              'so no points are deducted.'
+          : details,
+    );
   }
 
   /* TODO: Ask yuval if this is correct, make sure to go through the PairMap
