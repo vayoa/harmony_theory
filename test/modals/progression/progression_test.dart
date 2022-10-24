@@ -1,4 +1,3 @@
-import 'package:harmony_theory/modals/progression/exceptions.dart';
 import 'package:harmony_theory/modals/progression/progression.dart';
 import 'package:harmony_theory/modals/progression/time_signature.dart';
 import 'package:test/test.dart';
@@ -12,12 +11,12 @@ main() {
         expect(
           () => Progression<int>.parse(
               input: '1 3, 2 2, 3 2, 4, 5 2', parser: parser),
-          throwsA(isA<NonValidDuration>()),
+          returnsNormally,
         );
         expect(
-          () => Progression<int>.parse(
+              () => Progression<int>.parse(
               input: '1, 2 2, 3 4, 4, 5 2', parser: parser),
-          throwsA(isA<NonValidDuration>()),
+          returnsNormally,
         );
       });
       test('valid', () {

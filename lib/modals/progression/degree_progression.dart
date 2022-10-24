@@ -13,7 +13,6 @@ import '../theory_base/degree/tonicized_degree_chord.dart';
 import '../theory_base/pitch_scale.dart';
 import 'absolute_durations.dart';
 import 'chord_progression.dart';
-import 'exceptions.dart';
 import 'progression.dart';
 import 'time_signature.dart';
 
@@ -197,7 +196,6 @@ class DegreeProgression extends Progression<DegreeChord> {
       }
       realBaseDuration -= minus;
       final double maxDur = realBaseDuration;
-      final double before = durations.real(baseChordPos) - realBaseDuration;
 
       for (var subChordPos = 0; subChordPos < sub.length; subChordPos++) {
         // If the two chords are equal.
@@ -211,10 +209,7 @@ class DegreeProgression extends Progression<DegreeChord> {
           for (int i = 1; i <= maxDur ~/ step; i++) {
             final double dur = i * step;
             double offset = 0;
-            while (timeSignature.validDuration(dur) &&
-                offset + dur <= maxDur &&
-                timeSignature.validDurationPos(
-                    dur, before + offset + startDur)) {
+            while (offset + dur <= maxDur) {
               // We now check if there's enough space for this progression to
               // substitute in place for the current chord.
               // For this to be true there needs to be enough duration to cover the
@@ -334,138 +329,132 @@ class DegreeProgression extends Progression<DegreeChord> {
     for (SubstitutionMatch match in matches) {
       int baseChord = match.baseIndex;
       int chord = match.subIndex;
-      try {
-        final DegreeProgression relativeMatch =
-            SubstitutionMatch.getSubstitution(
-                progression: sub,
-                type: match.type,
-                addSeventh: match.withSeventh,
-                ratio: match.ratio,
-                tonic: this[match.baseIndex]);
-        // The duration from the beginning of sub to matching chord in sub.
-        double d1 = -1 * relativeMatch.sumDurations(0, chord);
-        // First index that could be changed.
-        int left = baseChord;
-        // If d1 is 0, left is baseChord
-        if (d1 != 0) {
-          left = getPlayingIndex(d1 + match.baseOffset, from: baseChord);
+      final DegreeProgression relativeMatch = SubstitutionMatch.getSubstitution(
+          progression: sub,
+          type: match.type,
+          addSeventh: match.withSeventh,
+          ratio: match.ratio,
+          tonic: this[match.baseIndex]);
+      // The duration from the beginning of sub to matching chord in sub.
+      double d1 = -1 * relativeMatch.sumDurations(0, chord);
+      // First index that could be changed.
+      int left = baseChord;
+      // If d1 is 0, left is baseChord
+      if (d1 != 0) {
+        left = getPlayingIndex(d1 + match.baseOffset, from: baseChord);
+      }
+      // The duration from the matching chord in sub to the end of sub, without
+      // the duration of the matching chord itself.
+      double d2 = relativeMatch.sumDurations(chord);
+      // Last index to change...
+      int right =
+          getPlayingIndex(d2 + match.baseOffset - halfStep, from: baseChord);
+      DegreeProgression substitution =
+          DegreeProgression.fromProgression(sublist(0, left));
+      double bd1 = -1 * sumDurations(left, baseChord) - match.baseOffset;
+      double bd2 = sumDurations(baseChord, right + 1) - match.baseOffset;
+      if (bd1 != d1) {
+        try {
+          substitution.add(this[left], d1 - bd1);
+        } catch (e) {
+          rethrow;
         }
-        // The duration from the matching chord in sub to the end of sub, without
-        // the duration of the matching chord itself.
-        double d2 = relativeMatch.sumDurations(chord);
-        // Last index to change...
-        int right =
-            getPlayingIndex(d2 + match.baseOffset - halfStep, from: baseChord);
-        DegreeProgression substitution =
-            DegreeProgression.fromProgression(sublist(0, left));
-        double bd1 = -1 * sumDurations(left, baseChord) - match.baseOffset;
-        double bd2 = sumDurations(baseChord, right + 1) - match.baseOffset;
-        if (bd1 != d1) {
-          try {
-            substitution.add(this[left], d1 - bd1);
-          } catch (e) {
-            rethrow;
-          }
-        }
-        substitution.addAll(fillWith(substitution.duration, relativeMatch));
-        if (bd2 != d2) {
-          substitution.add(this[right], bd2 - d2);
-        }
-        if (right + 1 != length) {
-          substitution.addAll(sublist(right + 1));
-        }
-        // Calculate the new first + last changed indexes (could be changed
-        // after overlaps etc...).
-        final double durToBaseChord =
-            durations.real(baseChord) - durations[baseChord];
-        final double changedStart = durToBaseChord + d1 + match.baseOffset;
-        int firstChanged = substitution.getPlayingIndex(changedStart);
-        final double changedEnd = durToBaseChord + d2 + match.baseOffset;
-        int lastChanged = substitution.getPlayingIndex(changedEnd - halfStep);
-        bool different = false;
-        // Determines whether it's a different variation than base.
-        bool isVariation = false;
-        double? startVariation;
-        double endVariation = changedEnd;
-        int subStartVariation = firstChanged;
-        int subEndVariation = lastChanged;
+      }
+      substitution.addAll(fillWith(substitution.duration, relativeMatch));
+      if (bd2 != d2) {
+        substitution.add(this[right], bd2 - d2);
+      }
+      if (right + 1 != length) {
+        substitution.addAll(sublist(right + 1));
+      }
+      // Calculate the new first + last changed indexes (could be changed
+      // after overlaps etc...).
+      final double durToBaseChord =
+          durations.real(baseChord) - durations[baseChord];
+      final double changedStart = durToBaseChord + d1 + match.baseOffset;
+      int firstChanged = substitution.getPlayingIndex(changedStart);
+      final double changedEnd = durToBaseChord + d2 + match.baseOffset;
+      int lastChanged = substitution.getPlayingIndex(changedEnd - halfStep);
+      bool different = false;
+      // Determines whether it's a different variation than base.
+      bool isVariation = false;
+      double? startVariation;
+      double endVariation = changedEnd;
+      int subStartVariation = firstChanged;
+      int subEndVariation = lastChanged;
 
-        Utilities.twoProgressionsIterator(
-          this,
-          substitution,
-          startP1At: left,
-          startP2At: firstChanged,
-          iterate: (thisI, subI) {
-            if (subI > lastChanged) return true;
+      Utilities.twoProgressionsIterator(
+        this,
+        substitution,
+        startP1At: left,
+        startP2At: firstChanged,
+        iterate: (thisI, subI) {
+          if (subI > lastChanged) return true;
 
-            if (this[thisI]?.root != substitution[subI]?.root) {
-              isVariation = true;
-              if (startVariation == null) {
-                subStartVariation = subI;
-                startVariation = max(
-                  durations.real(thisI) - durations[thisI],
-                  substitution.durations.real(subI) -
-                      substitution.durations[subI],
-                );
-              }
-
-              subEndVariation = subI;
-              endVariation = min(
-                durations.real(thisI),
-                substitution.durations.real(subI),
+          if (this[thisI]?.root != substitution[subI]?.root) {
+            isVariation = true;
+            if (startVariation == null) {
+              subStartVariation = subI;
+              startVariation = max(
+                durations.real(thisI) - durations[thisI],
+                substitution.durations.real(subI) -
+                    substitution.durations[subI],
               );
             }
 
-            if (!different) {
-              different = this[thisI] != substitution[subI] ||
-                  durations.real(thisI) != substitution.durations.real(subI);
-            }
-            return false;
-          },
-        );
-        startVariation ??= changedStart;
-
-        if (different) {
-          SubVariationId? subVariation;
-          final subDurs = substitution.durations;
-
-          if (isVariation) {
-            subVariation = SubVariationId(
-              progression: substitution,
-              startChange: startVariation!,
-              startDur: startVariation! -
-                  (subDurs.real(subStartVariation) -
-                      subDurs[subStartVariation]),
-              start: subStartVariation,
-              endDur: endVariation -
-                  (subDurs.real(subEndVariation) - subDurs[subEndVariation]),
-              end: subEndVariation + 1,
+            subEndVariation = subI;
+            endVariation = min(
+              durations.real(thisI),
+              substitution.durations.real(subI),
             );
           }
 
-          // TDC: Try to make your optimizations (above) work...
-          subVariation =
-              SubVariationId(progression: substitution, startChange: 0.0);
+          if (!different) {
+            different = this[thisI] != substitution[subI] ||
+                durations.real(thisI) != substitution.durations.real(subI);
+          }
+          return false;
+        },
+      );
+      startVariation ??= changedStart;
 
-          final Substitution subToAdd = Substitution(
-            substitutedBase: substitution,
-            base: this,
-            subContext: SubstitutionContext(
-              originalSubstitution: sub,
-              match: match,
-              insertStart: changedStart,
-              insertEnd: changedEnd,
-              location: location,
-              variationStart: startVariation!,
-              variationEnd: endVariation,
-            ),
-            variationId: subVariation,
+      if (different) {
+        SubVariationId? subVariation;
+        final subDurs = substitution.durations;
+
+        if (isVariation) {
+          subVariation = SubVariationId(
+            progression: substitution,
+            startChange: startVariation!,
+            startDur: startVariation! -
+                (subDurs.real(subStartVariation) - subDurs[subStartVariation]),
+            start: subStartVariation,
+            endDur: endVariation -
+                (subDurs.real(subEndVariation) - subDurs[subEndVariation]),
+            end: subEndVariation + 1,
           );
-
-          substitutions.putIfAbsent(subVariation, () => []).add(subToAdd);
         }
-      } catch (e) {
-        if (e is! NonValidDuration) rethrow;
+
+        // TDC: Try to make your optimizations (above) work...
+        subVariation =
+            SubVariationId(progression: substitution, startChange: 0.0);
+
+        final Substitution subToAdd = Substitution(
+          substitutedBase: substitution,
+          base: this,
+          subContext: SubstitutionContext(
+            originalSubstitution: sub,
+            match: match,
+            insertStart: changedStart,
+            insertEnd: changedEnd,
+            location: location,
+            variationStart: startVariation!,
+            variationEnd: endVariation,
+          ),
+          variationId: subVariation,
+        );
+
+        substitutions.putIfAbsent(subVariation, () => []).add(subToAdd);
       }
     }
     return substitutions;

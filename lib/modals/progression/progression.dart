@@ -571,34 +571,8 @@ class Progression<T> implements Identifiable {
     required double overallDuration,
   }) {
     assert(overallDuration >= 0);
-    double decimal = _timeSignature.decimal;
     if (duration < 0) {
       throw NonPositiveDuration(value, duration);
-    } else if ((overallDuration % decimal) + duration <= decimal) {
-      assertDurationValid(value: value, duration: duration);
-    } else {
-      // The duration the current measure has left before being full.
-      double left = decimal - (overallDuration % decimal);
-      // If left is decimal it's in fact 0.0 (since we have the whole measure left...).
-      if (left != decimal && duration >= left) {
-        assertDurationValid(value: value, duration: left);
-      }
-      // The duration that's left after the cut...
-      double end = (overallDuration + duration) % decimal;
-      // Since if this is true the rest is valid...
-      if (end != 0) {
-        assertDurationValid(value: value, duration: end);
-      }
-    }
-  }
-
-  void assertDurationValid({
-    required T? value,
-    required double duration,
-  }) {
-    if (value != null && !_timeSignature.validDuration(duration)) {
-      throw NonValidDuration(
-          value: value, duration: duration, timeSignature: _timeSignature);
     }
   }
 }
